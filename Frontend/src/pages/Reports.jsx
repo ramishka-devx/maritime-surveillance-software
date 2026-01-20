@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './Reports.css';
 
 const Reports = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
@@ -90,27 +89,29 @@ const Reports = () => {
   ];
 
   return (
-    <div className="reports-page">
-      <div className="reports-header">
+    <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e] p-8">
+      {/* Header */}
+      <div className="flex justify-between items-start mb-8">
         <div>
-          <h1>Reports & Analytics</h1>
-          <p className="reports-subtitle">Generate and manage surveillance reports</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Reports & Analytics</h1>
+          <p className="text-gray-400">Generate and manage surveillance reports</p>
         </div>
-        <button className="btn-primary">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <button className="flex items-center gap-2 bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg">
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Export All
         </button>
       </div>
 
-      <div className="report-stats">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statistics.map((stat, index) => (
-          <div key={index} className="report-stat-card">
-            <p className="stat-label">{stat.label}</p>
-            <div className="stat-value-row">
-              <h3 className="stat-value">{stat.value}</h3>
-              <span className={`stat-change ${stat.change.startsWith('+') ? 'positive' : stat.change.startsWith('-') ? 'negative' : 'neutral'}`}>
+          <div key={index} className="bg-[#1a2942] border border-gray-700 rounded-lg p-5 hover:shadow-lg transition-shadow duration-200">
+            <p className="text-gray-400 text-sm mb-2">{stat.label}</p>
+            <div className="flex justify-between items-end">
+              <h3 className="text-2xl font-bold text-white">{stat.value}</h3>
+              <span className={`text-sm font-semibold ${stat.change.startsWith('+') ? 'text-green-400' : stat.change.startsWith('-') ? 'text-red-400' : 'text-gray-400'}`}>
                 {stat.change}
               </span>
             </div>
@@ -118,48 +119,48 @@ const Reports = () => {
         ))}
       </div>
 
-      <div className="report-types-section">
-        <h2>Generate New Report</h2>
-        <div className="report-types-grid">
+      {/* Generate New Report Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-white mb-4">Generate New Report</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {reportTypes.map((report) => (
-            <div key={report.id} className="report-type-card" style={{ '--card-color': report.color }}>
-              <div className="report-type-icon">{report.icon}</div>
-              <div className="report-type-content">
-                <h3>{report.title}</h3>
-                <p>{report.description}</p>
-                <div className="report-type-footer">
-                  <span className="report-count">{report.count} records</span>
-                  <button className="generate-btn">
-                    Generate
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
+            <div key={report.id} className="bg-[#1a2942] border-l-4 border-gray-600 rounded-lg p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1" style={{ borderLeftColor: report.color }}>
+              <div className="text-4xl mb-3">{report.icon}</div>
+              <h3 className="text-lg font-bold text-white mb-2">{report.title}</h3>
+              <p className="text-gray-400 text-sm mb-4">{report.description}</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-300">{report.count} records</span>
+                <button className="flex items-center gap-1 text-[#f28c1b] hover:text-orange-300 font-semibold transition-colors duration-200">
+                  Generate
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="recent-reports-section">
-        <div className="section-header">
-          <h2>Recent Reports</h2>
-          <div className="period-selector">
+      {/* Recent Reports Section */}
+      <div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+          <h2 className="text-2xl font-bold text-white">Recent Reports</h2>
+          <div className="flex gap-2">
             <button 
-              className={selectedPeriod === 'week' ? 'period-btn active' : 'period-btn'}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${selectedPeriod === 'week' ? 'bg-[#f28c1b] text-white' : 'bg-[#1a2942] text-gray-400 hover:bg-[#253659]'}`}
               onClick={() => setSelectedPeriod('week')}
             >
               This Week
             </button>
             <button 
-              className={selectedPeriod === 'month' ? 'period-btn active' : 'period-btn'}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${selectedPeriod === 'month' ? 'bg-[#f28c1b] text-white' : 'bg-[#1a2942] text-gray-400 hover:bg-[#253659]'}`}
               onClick={() => setSelectedPeriod('month')}
             >
               This Month
             </button>
             <button 
-              className={selectedPeriod === 'year' ? 'period-btn active' : 'period-btn'}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${selectedPeriod === 'year' ? 'bg-[#f28c1b] text-white' : 'bg-[#1a2942] text-gray-400 hover:bg-[#253659]'}`}
               onClick={() => setSelectedPeriod('year')}
             >
               This Year
@@ -167,53 +168,50 @@ const Reports = () => {
           </div>
         </div>
 
-        <div className="reports-table">
-          <div className="table-header">
-            <div className="table-col">Report Name</div>
-            <div className="table-col">Type</div>
-            <div className="table-col">Date</div>
-            <div className="table-col">Size</div>
-            <div className="table-col">Actions</div>
+        {/* Reports Table */}
+        <div className="bg-[#1a2942] border border-gray-700 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 bg-[#0b1220] p-4 border-b border-gray-700">
+            <div className="col-span-4 text-gray-400 font-semibold text-sm">Report Name</div>
+            <div className="col-span-2 text-gray-400 font-semibold text-sm">Type</div>
+            <div className="col-span-2 text-gray-400 font-semibold text-sm">Date</div>
+            <div className="col-span-2 text-gray-400 font-semibold text-sm">Size</div>
+            <div className="col-span-2 text-gray-400 font-semibold text-sm">Actions</div>
           </div>
           {recentReports.map((report) => (
-            <div key={report.id} className="table-row">
-              <div className="table-col">
-                <div className="report-name">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <div key={report.id} className="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 hover:bg-[#253659] transition-colors duration-200 last:border-b-0">
+              <div className="col-span-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-white text-sm">{report.title}</span>
+              </div>
+              <div className="col-span-2">
+                <span className="bg-[#243b78] text-[#88b0ff] px-2 py-1 rounded text-xs font-medium">{report.type}</span>
+              </div>
+              <div className="col-span-2 text-gray-400 text-sm">{report.date}</div>
+              <div className="col-span-2 text-gray-400 text-sm">{report.size}</div>
+              <div className="col-span-2 flex gap-2">
+                <button className="p-1.5 text-gray-400 hover:text-[#f28c1b] transition-colors duration-200" title="View">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  {report.title}
-                </div>
-              </div>
-              <div className="table-col">
-                <span className="report-type-badge">{report.type}</span>
-              </div>
-              <div className="table-col">{report.date}</div>
-              <div className="table-col">{report.size}</div>
-              <div className="table-col">
-                <div className="table-actions">
-                  <button className="action-btn" title="View">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                  <button className="action-btn" title="Download">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                  <button className="action-btn" title="Share">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
+                </button>
+                <button className="p-1.5 text-gray-400 hover:text-[#f28c1b] transition-colors duration-200" title="Download">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button className="p-1.5 text-gray-400 hover:text-[#f28c1b] transition-colors duration-200" title="Share">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
             </div>
           ))}

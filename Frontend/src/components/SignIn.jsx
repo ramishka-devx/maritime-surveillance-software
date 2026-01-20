@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SignIn.css';
-import SerenGuardLogo from '../images/SerenGuard.png'; // Import the logo
+import SerenGuardLogo from '../images/SerenGuard.png';
 
 const SignIn = ({ onLogin, onRegister }) => {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('login'); // login | signup
+  const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -39,13 +38,11 @@ const SignIn = ({ onLogin, onRegister }) => {
       if (result?.error) {
         setError(result.error);
       } else {
-        // Redirect to dashboard after successful login
         navigate('/');
       }
       return;
     }
 
-    // Sign up flow
     if (!fullName || !email || !username || !password || !confirmPassword) {
       setError('Please fill out all fields to create an account');
       return;
@@ -65,7 +62,6 @@ const SignIn = ({ onLogin, onRegister }) => {
     if (result?.error) {
       setError(result.error);
     } else {
-      // After successful signup, switch to login mode for user to sign in
       setMessage('Account created! Switching to sign in...');
       setTimeout(() => {
         setMode('login');
@@ -80,52 +76,60 @@ const SignIn = ({ onLogin, onRegister }) => {
   };
 
   return (
-    <div className="signin-container">
-      <div className="signin-card">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm bg-gradient-to-br from-[#243b78] to-[#1a2d5a] rounded-2xl p-10 shadow-2xl">
         {/* Logo Header */}
-        <div className="signin-header">
-          <div className="logo-container">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
             <img 
               src={SerenGuardLogo} 
               alt="SerenGuard Logo" 
-              className="logo-image"
+              className="w-14 h-14"
             />
           </div>
-          <h1 className="signin-title">Secure Access Portal</h1>
+          <h1 className="text-2xl font-bold text-white">Secure Access Portal</h1>
         </div>
 
         {/* Toggle Buttons */}
-        <div className="auth-toggle">
+        <div className="flex gap-2 bg-[#1e2e5a] rounded-xl p-1 mb-6">
           <button
             type="button"
-            className={mode === 'login' ? 'toggle-btn active' : 'toggle-btn'}
             onClick={() => {
               setMode('login');
               resetMessages();
             }}
+            className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
+              mode === 'login'
+                ? 'bg-[#243b78] text-white shadow-lg'
+                : 'bg-transparent text-[#9aa8c7] hover:text-white'
+            }`}
           >
             Sign In
           </button>
           <button
             type="button"
-            className={mode === 'signup' ? 'toggle-btn active' : 'toggle-btn'}
             onClick={() => {
               setMode('signup');
               resetMessages();
             }}
+            className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
+              mode === 'signup'
+                ? 'bg-[#243b78] text-white shadow-lg'
+                : 'bg-transparent text-[#9aa8c7] hover:text-white'
+            }`}
           >
             Sign Up
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="signin-form">
-          {error && <div className="error-message">{error}</div>}
-          {message && <div className="success-message">{message}</div>}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {error && <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg text-sm font-semibold">{error}</div>}
+          {message && <div className="bg-green-100 text-green-700 px-4 py-3 rounded-lg text-sm font-semibold">{message}</div>}
           
           {mode === 'signup' && (
             <>
-              <div className="form-group">
-                <label htmlFor="fullName">Full Name</label>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="fullName" className="text-xs font-semibold text-[#9aa8c7] uppercase">Full Name</label>
                 <input
                   type="text"
                   id="fullName"
@@ -136,11 +140,12 @@ const SignIn = ({ onLogin, onRegister }) => {
                   }}
                   placeholder="Enter your full name"
                   autoComplete="name"
+                  className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="email" className="text-xs font-semibold text-[#9aa8c7] uppercase">Email</label>
                 <input
                   type="email"
                   id="email"
@@ -151,11 +156,12 @@ const SignIn = ({ onLogin, onRegister }) => {
                   }}
                   placeholder="you@serenguard.com"
                   autoComplete="email"
+                  className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="role">Role</label>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="role" className="text-xs font-semibold text-[#9aa8c7] uppercase">Role</label>
                 <select
                   id="role"
                   value={role}
@@ -163,6 +169,7 @@ const SignIn = ({ onLogin, onRegister }) => {
                     setRole(e.target.value);
                     resetMessages();
                   }}
+                  className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
                 >
                   <option>Operator</option>
                   <option>Supervisor</option>
@@ -173,9 +180,8 @@ const SignIn = ({ onLogin, onRegister }) => {
             </>
           )}
 
-          {/* Username Field */}
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="username" className="text-xs font-semibold text-[#9aa8c7] uppercase">Username</label>
             <input
               type="text"
               id="username"
@@ -186,12 +192,12 @@ const SignIn = ({ onLogin, onRegister }) => {
               }}
               placeholder="Enter your username"
               autoComplete="username"
+              className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
             />
           </div>
 
-          {/* Password Field */}
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="text-xs font-semibold text-[#9aa8c7] uppercase">Password</label>
             <input
               type="password"
               id="password"
@@ -202,13 +208,13 @@ const SignIn = ({ onLogin, onRegister }) => {
               }}
               placeholder="Enter your password"
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
             />
           </div>
 
-          {/* Role Field (for Login mode) */}
           {mode === 'login' && (
-            <div className="form-group">
-              <label htmlFor="role">Role</label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="role" className="text-xs font-semibold text-[#9aa8c7] uppercase">Role</label>
               <select
                 id="role"
                 value={role}
@@ -216,6 +222,7 @@ const SignIn = ({ onLogin, onRegister }) => {
                   setRole(e.target.value);
                   resetMessages();
                 }}
+                className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
               >
                 <option>Operator</option>
                 <option>Supervisor</option>
@@ -225,10 +232,9 @@ const SignIn = ({ onLogin, onRegister }) => {
             </div>
           )}
 
-          {/* Confirm Password (for Signup mode) */}
           {mode === 'signup' && (
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="confirmPassword" className="text-xs font-semibold text-[#9aa8c7] uppercase">Confirm Password</label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -239,18 +245,20 @@ const SignIn = ({ onLogin, onRegister }) => {
                 }}
                 placeholder="Re-enter your password"
                 autoComplete="new-password"
+                className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
               />
             </div>
           )}
 
-          {/* Submit Button */}
-          <button type="submit" className="signin-button">
+          <button 
+            type="submit" 
+            className="mt-2 py-3 bg-[#f28c1b] text-white font-bold rounded-lg hover:bg-[#d97706] transition-all duration-300 transform hover:-translate-y-0.5"
+          >
             {mode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
 
-          {/* Footer Message */}
-          <div className="signin-footer">
-            <p className="security-note">
+          <div className="mt-4 pt-4 border-t border-[#3556a8]">
+            <p className="text-xs text-[#9aa8c7] text-center leading-relaxed">
               Authorized personnel only. All access is monitored and logged.
             </p>
           </div>

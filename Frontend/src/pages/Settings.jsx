@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './Settings.css';
 
 const Settings = ({ user }) => {
   const [activeTab, setActiveTab] = useState('general');
@@ -17,81 +16,48 @@ const Settings = ({ user }) => {
   };
 
   return (
-    <div className="settings-page">
-      <div className="settings-header">
-        <h1>Settings</h1>
-        <p className="settings-subtitle">Manage your account and system preferences</p>
+    <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e]">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#0b1220] to-[#111b2e] p-8 border-b border-gray-700">
+        <h1 className="text-4xl font-bold text-white mb-2">Settings</h1>
+        <p className="text-gray-400">Manage your account and system preferences</p>
       </div>
 
-      <div className="settings-container">
-        <div className="settings-sidebar">
-          <button 
-            className={activeTab === 'general' ? 'settings-tab active' : 'settings-tab'}
-            onClick={() => setActiveTab('general')}
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 1v6m0 6v6m5.656-16.656l-1.414 1.414M7.758 16.242l-1.414 1.414M1 12h6m6 0h6m-16.656 5.656l1.414-1.414M16.242 7.758l1.414-1.414" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            General
-          </button>
-
-          <button 
-            className={activeTab === 'profile' ? 'settings-tab active' : 'settings-tab'}
-            onClick={() => setActiveTab('profile')}
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            Profile
-          </button>
-
-          <button 
-            className={activeTab === 'notifications' ? 'settings-tab active' : 'settings-tab'}
-            onClick={() => setActiveTab('notifications')}
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Notifications
-          </button>
-
-          <button 
-            className={activeTab === 'security' ? 'settings-tab active' : 'settings-tab'}
-            onClick={() => setActiveTab('security')}
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Security
-          </button>
-
-          <button 
-            className={activeTab === 'system' ? 'settings-tab active' : 'settings-tab'}
-            onClick={() => setActiveTab('system')}
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
-              <line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            System
-          </button>
+      <div className="flex flex-col md:flex-row">
+        {/* Sidebar */}
+        <div className="md:w-64 bg-[#1a2942] border-r border-gray-700 p-4">
+          {[
+            { id: 'general', label: 'General', icon: '⚙️' },
+            { id: 'profile', label: 'Profile', icon: '👤' },
+            { id: 'notifications', label: 'Notifications', icon: '🔔' },
+            { id: 'security', label: 'Security', icon: '🔒' },
+            { id: 'system', label: 'System', icon: '💻' },
+          ].map((tab) => (
+            <button 
+              key={tab.id}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all duration-200 mb-2 ${
+                activeTab === tab.id 
+                  ? 'bg-[#f28c1b] text-white' 
+                  : 'text-gray-400 hover:bg-[#243b78] hover:text-white'
+              }`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span className="text-lg">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <div className="settings-content">
+        {/* Content */}
+        <div className="flex-1 p-8">
           {activeTab === 'general' && (
-            <div className="settings-section">
-              <h2>General Settings</h2>
-              
-              <div className="setting-card">
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Language</h3>
-                    <p>Select your preferred language</p>
-                  </div>
-                  <select className="setting-select">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">General Settings</h2>
+              <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-6">
+                <div>
+                  <label className="block text-white font-semibold mb-2">Language</label>
+                  <p className="text-gray-400 text-sm mb-3">Select your preferred language</p>
+                  <select className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-[#f28c1b] focus:outline-none transition-colors">
                     <option>English (US)</option>
                     <option>Spanish</option>
                     <option>French</option>
@@ -99,12 +65,10 @@ const Settings = ({ user }) => {
                   </select>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Time Zone</h3>
-                    <p>Set your local time zone</p>
-                  </div>
-                  <select className="setting-select">
+                <div>
+                  <label className="block text-white font-semibold mb-2">Time Zone</label>
+                  <p className="text-gray-400 text-sm mb-3">Set your local time zone</p>
+                  <select className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-[#f28c1b] focus:outline-none transition-colors">
                     <option>UTC-8 (Pacific)</option>
                     <option>UTC-5 (Eastern)</option>
                     <option>UTC+0 (London)</option>
@@ -112,12 +76,10 @@ const Settings = ({ user }) => {
                   </select>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Date Format</h3>
-                    <p>Choose your preferred date format</p>
-                  </div>
-                  <select className="setting-select">
+                <div>
+                  <label className="block text-white font-semibold mb-2">Date Format</label>
+                  <p className="text-gray-400 text-sm mb-3">Choose your preferred date format</p>
+                  <select className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-[#f28c1b] focus:outline-none transition-colors">
                     <option>MM/DD/YYYY</option>
                     <option>DD/MM/YYYY</option>
                     <option>YYYY-MM-DD</option>
@@ -128,223 +90,231 @@ const Settings = ({ user }) => {
           )}
 
           {activeTab === 'profile' && (
-            <div className="settings-section">
-              <h2>Profile Settings</h2>
-              
-              <div className="setting-card">
-                <div className="profile-avatar-section">
-                  <div className="profile-avatar-large">
-                    <span>{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">Profile Settings</h2>
+              <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-6">
+                <div className="flex flex-col items-center gap-4 pb-6 border-b border-gray-700">
+                  <div className="w-24 h-24 bg-gradient-to-br from-[#f28c1b] to-[#d97a0a] rounded-full flex items-center justify-center">
+                    <span className="text-3xl font-bold text-white">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
                   </div>
-                  <button className="btn-primary">Change Avatar</button>
+                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Change Avatar</button>
                 </div>
 
-                <div className="setting-item">
-                  <label className="setting-label">Full Name</label>
+                <div>
+                  <label className="block text-white font-semibold mb-2">Full Name</label>
                   <input 
                     type="text" 
-                    className="setting-input" 
+                    className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:border-[#f28c1b] focus:outline-none transition-colors" 
                     defaultValue={user?.name || ''} 
                     placeholder="Enter your full name"
                   />
                 </div>
 
-                <div className="setting-item">
-                  <label className="setting-label">Email Address</label>
+                <div>
+                  <label className="block text-white font-semibold mb-2">Email Address</label>
                   <input 
                     type="email" 
-                    className="setting-input" 
+                    className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:border-[#f28c1b] focus:outline-none transition-colors" 
                     defaultValue={user?.email || ''} 
                     placeholder="Enter your email"
                   />
                 </div>
 
-                <div className="setting-item">
-                  <label className="setting-label">Phone Number</label>
+                <div>
+                  <label className="block text-white font-semibold mb-2">Phone Number</label>
                   <input 
                     type="tel" 
-                    className="setting-input" 
+                    className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:border-[#f28c1b] focus:outline-none transition-colors" 
                     placeholder="+1 (555) 000-0000"
                   />
                 </div>
 
-                <div className="setting-item">
-                  <label className="setting-label">Organization</label>
+                <div>
+                  <label className="block text-white font-semibold mb-2">Organization</label>
                   <input 
                     type="text" 
-                    className="setting-input" 
+                    className="w-full bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:border-[#f28c1b] focus:outline-none transition-colors" 
                     placeholder="SerenGuard Maritime Security"
                   />
                 </div>
 
-                <button className="btn-primary">Save Changes</button>
+                <button className="w-full bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors mt-4">Save Changes</button>
               </div>
             </div>
           )}
 
           {activeTab === 'notifications' && (
-            <div className="settings-section">
-              <h2>Notification Preferences</h2>
-              
-              <div className="setting-card">
-                <h3 className="section-title">Notification Channels</h3>
-                
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Email Notifications</h3>
-                    <p>Receive notifications via email</p>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">Notification Preferences</h2>
+              <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">Notification Channels</h3>
+                  
+                  <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                    <div>
+                      <h4 className="text-white font-semibold">Email Notifications</h4>
+                      <p className="text-gray-400 text-sm">Receive notifications via email</p>
+                    </div>
+                    <label className="relative inline-block w-12 h-6">
+                      <input 
+                        type="checkbox" 
+                        checked={notifications.email}
+                        onChange={() => handleNotificationChange('email')}
+                        className="opacity-0 w-0 h-0 peer"
+                      />
+                      <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
+                    </label>
                   </div>
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={notifications.email}
-                      onChange={() => handleNotificationChange('email')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
+
+                  <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                    <div>
+                      <h4 className="text-white font-semibold">Push Notifications</h4>
+                      <p className="text-gray-400 text-sm">Receive push notifications in browser</p>
+                    </div>
+                    <label className="relative inline-block w-12 h-6">
+                      <input 
+                        type="checkbox" 
+                        checked={notifications.push}
+                        onChange={() => handleNotificationChange('push')}
+                        className="opacity-0 w-0 h-0 peer"
+                      />
+                      <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
+                    </label>
+                  </div>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Push Notifications</h3>
-                    <p>Receive push notifications in browser</p>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">Alert Types</h3>
+                  
+                  <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                    <div>
+                      <h4 className="text-white font-semibold">Critical Alerts</h4>
+                      <p className="text-gray-400 text-sm">High-priority security incidents</p>
+                    </div>
+                    <label className="relative inline-block w-12 h-6">
+                      <input 
+                        type="checkbox" 
+                        checked={notifications.criticalAlerts}
+                        onChange={() => handleNotificationChange('criticalAlerts')}
+                        className="opacity-0 w-0 h-0 peer"
+                      />
+                      <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
+                    </label>
                   </div>
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={notifications.push}
-                      onChange={() => handleNotificationChange('push')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
+
+                  <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                    <div>
+                      <h4 className="text-white font-semibold">Warning Alerts</h4>
+                      <p className="text-gray-400 text-sm">Medium-priority warnings</p>
+                    </div>
+                    <label className="relative inline-block w-12 h-6">
+                      <input 
+                        type="checkbox" 
+                        checked={notifications.warningAlerts}
+                        onChange={() => handleNotificationChange('warningAlerts')}
+                        className="opacity-0 w-0 h-0 peer"
+                      />
+                      <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <h4 className="text-white font-semibold">Info Alerts</h4>
+                      <p className="text-gray-400 text-sm">Low-priority information updates</p>
+                    </div>
+                    <label className="relative inline-block w-12 h-6">
+                      <input 
+                        type="checkbox" 
+                        checked={notifications.infoAlerts}
+                        onChange={() => handleNotificationChange('infoAlerts')}
+                        className="opacity-0 w-0 h-0 peer"
+                      />
+                      <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
+                    </label>
+                  </div>
                 </div>
 
-                <h3 className="section-title">Alert Types</h3>
-
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Critical Alerts</h3>
-                    <p>High-priority security incidents</p>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">Reports</h3>
+                  
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <h4 className="text-white font-semibold">Weekly Reports</h4>
+                      <p className="text-gray-400 text-sm">Receive weekly summary reports</p>
+                    </div>
+                    <label className="relative inline-block w-12 h-6">
+                      <input 
+                        type="checkbox" 
+                        checked={notifications.weeklyReports}
+                        onChange={() => handleNotificationChange('weeklyReports')}
+                        className="opacity-0 w-0 h-0 peer"
+                      />
+                      <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
+                    </label>
                   </div>
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={notifications.criticalAlerts}
-                      onChange={() => handleNotificationChange('criticalAlerts')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                </div>
-
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Warning Alerts</h3>
-                    <p>Medium-priority warnings</p>
-                  </div>
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={notifications.warningAlerts}
-                      onChange={() => handleNotificationChange('warningAlerts')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                </div>
-
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Info Alerts</h3>
-                    <p>Low-priority information updates</p>
-                  </div>
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={notifications.infoAlerts}
-                      onChange={() => handleNotificationChange('infoAlerts')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                </div>
-
-                <h3 className="section-title">Reports</h3>
-
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Weekly Reports</h3>
-                    <p>Receive weekly summary reports</p>
-                  </div>
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={notifications.weeklyReports}
-                      onChange={() => handleNotificationChange('weeklyReports')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === 'security' && (
-            <div className="settings-section">
-              <h2>Security Settings</h2>
-              
-              <div className="setting-card">
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Change Password</h3>
-                    <p>Update your account password</p>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">Security Settings</h2>
+              <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-4">
+                <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                  <div>
+                    <h4 className="text-white font-semibold">Change Password</h4>
+                    <p className="text-gray-400 text-sm">Update your account password</p>
                   </div>
-                  <button className="btn-primary">Change</button>
+                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Change</button>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Two-Factor Authentication</h3>
-                    <p>Add an extra layer of security</p>
+                <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                  <div>
+                    <h4 className="text-white font-semibold">Two-Factor Authentication</h4>
+                    <p className="text-gray-400 text-sm">Add an extra layer of security</p>
                   </div>
-                  <button className="btn-primary">Enable</button>
+                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Enable</button>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Active Sessions</h3>
-                    <p>Manage your active login sessions</p>
+                <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                  <div>
+                    <h4 className="text-white font-semibold">Active Sessions</h4>
+                    <p className="text-gray-400 text-sm">Manage your active login sessions</p>
                   </div>
-                  <button className="btn-primary">View</button>
+                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">View</button>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Login History</h3>
-                    <p>Review your recent login activity</p>
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <h4 className="text-white font-semibold">Login History</h4>
+                    <p className="text-gray-400 text-sm">Review your recent login activity</p>
                   </div>
-                  <button className="btn-primary">View History</button>
+                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">View History</button>
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === 'system' && (
-            <div className="settings-section">
-              <h2>System Settings</h2>
-              
-              <div className="setting-card">
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Monitoring Zones</h3>
-                    <p>Configure surveillance zones</p>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">System Settings</h2>
+              <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-4">
+                <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                  <div>
+                    <h4 className="text-white font-semibold">Monitoring Zones</h4>
+                    <p className="text-gray-400 text-sm">Configure surveillance zones</p>
                   </div>
-                  <span className="setting-badge">15 Active</span>
+                  <span className="bg-[#243b78] text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">15 Active</span>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Data Retention</h3>
-                    <p>Set data storage duration</p>
+                <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                  <div>
+                    <h4 className="text-white font-semibold">Data Retention</h4>
+                    <p className="text-gray-400 text-sm">Set data storage duration</p>
                   </div>
-                  <select className="setting-select">
+                  <select className="bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-[#f28c1b] focus:outline-none transition-colors">
                     <option>30 Days</option>
                     <option>90 Days</option>
                     <option>180 Days</option>
@@ -352,23 +322,23 @@ const Settings = ({ user }) => {
                   </select>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>Auto-Backup</h3>
-                    <p>Automatic system backups</p>
+                <div className="flex items-center justify-between py-3 border-b border-gray-700">
+                  <div>
+                    <h4 className="text-white font-semibold">Auto-Backup</h4>
+                    <p className="text-gray-400 text-sm">Automatic system backups</p>
                   </div>
-                  <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
-                    <span className="toggle-slider"></span>
+                  <label className="relative inline-block w-12 h-6">
+                    <input type="checkbox" defaultChecked className="opacity-0 w-0 h-0 peer" />
+                    <span className="absolute cursor-pointer inset-0 bg-gray-600 rounded-full peer-checked:bg-[#f28c1b] transition-colors after:absolute after:content-[''] after:h-5 after:w-5 after:left-0.5 after:top-0.5 after:bg-white after:rounded-full peer-checked:after:translate-x-6 after:transition-transform"></span>
                   </label>
                 </div>
 
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <h3>System Version</h3>
-                    <p>SerenGuard v1.0.0</p>
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <h4 className="text-white font-semibold">System Version</h4>
+                    <p className="text-gray-400 text-sm">SerenGuard v1.0.0</p>
                   </div>
-                  <button className="btn-primary">Check Updates</button>
+                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Check Updates</button>
                 </div>
               </div>
             </div>
