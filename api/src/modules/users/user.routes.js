@@ -1,7 +1,15 @@
 import { Router } from 'express';
 import { UserController } from './user.controller.js';
 import { validate } from '../../middleware/validateRequest.js';
-import { registerSchema, loginSchema, updateSchema, updateStatusSchema, updateRoleSchema } from './user.validation.js';
+import {
+	registerSchema,
+	loginSchema,
+	updateSchema,
+	updateStatusSchema,
+	updateRoleSchema,
+	userPermissionListSchema,
+	userPermissionMutateSchema,
+} from './user.validation.js';
 import { authMiddleware } from '../../middleware/authMiddleware.js';
 import { permissionMiddleware } from '../../middleware/permissionMiddleware.js';
 import { activityLogger } from '../../middleware/activityLogger.js';
@@ -53,6 +61,33 @@ router.put('/:user_id/status', authMiddleware, permissionMiddleware('user.status
  *     summary: Update user role
  */
 router.put('/:user_id/role', authMiddleware, permissionMiddleware('user.role.update'), activityLogger('user.role.update'), validate(updateRoleSchema), UserController.updateRole);
+
+// Per-user permission overrides (Super Admin manages operator accounts)
+router.get(
+	'/:user_id/permissions',
+	authMiddleware,
+	permissionMiddleware('permission.list'),
+	validate(userPermissionListSchema),
+	UserController.listUserPermissions
+);
+
+router.post(
+	'/:user_id/permissions/assign',
+	authMiddleware,
+	permissionMiddleware('permission.assign'),
+	activityLogger('permission.assign'),
+	validate(userPermissionMutateSchema),
+	UserController.assignUserPermission
+);
+
+router.post(
+	'/:user_id/permissions/revoke',
+	authMiddleware,
+	permissionMiddleware('permission.revoke'),
+	activityLogger('permission.revoke'),
+	validate(userPermissionMutateSchema),
+	UserController.revokeUserPermission
+);
 
 // router.delete('/:user_id', authMiddleware, permissionMiddleware('user.delete'), activityLogger('user.delete'), UserController.remove);
 

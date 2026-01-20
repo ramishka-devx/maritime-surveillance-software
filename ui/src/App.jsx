@@ -3,8 +3,7 @@ import { RequireAuth } from './auth/RequireAuth.jsx';
 import { useAuth } from './auth/AuthContext.jsx';
 import { AppShell } from './components/AppShell.jsx';
 import { DashboardPage } from './pages/DashboardPage.jsx';
-import { LoginPage } from './pages/LoginPage.jsx';
-import { SignupPage } from './pages/SignupPage.jsx';
+import AuthPage from './pages/AuthPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 
 function PublicOnly({ children }) {
@@ -30,7 +29,7 @@ export default function App() {
         path="/login"
         element={
           <PublicOnly>
-            <LoginPage />
+            <AuthPage />
           </PublicOnly>
         }
       />
@@ -38,7 +37,7 @@ export default function App() {
         path="/signup"
         element={
           <PublicOnly>
-            <SignupPage />
+            <AuthPage />
           </PublicOnly>
         }
       />

@@ -43,10 +43,17 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function login({ email, password }) {
+  async function signup({ first_name, last_name, username, email, password }) {
+    await apiRequest('/api/users/register', {
+      method: 'POST',
+      body: { first_name, last_name, username, email, password },
+    });
+  }
+
+  async function loginWithIdentifier({ identifier, password }) {
     const data = await apiRequest('/api/users/login', {
       method: 'POST',
-      body: { email, password },
+      body: { identifier, password },
     });
 
     const nextToken = data?.token;
@@ -57,13 +64,6 @@ export function AuthProvider({ children }) {
     await loadProfile(nextToken);
   }
 
-  async function signup({ first_name, last_name, email, password, role, admin_registration_secret }) {
-    await apiRequest('/api/users/register', {
-      method: 'POST',
-      body: { first_name, last_name, email, password, role, admin_registration_secret },
-    });
-  }
-
   function logout() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
@@ -71,7 +71,15 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ token, user, isLoading, login, signup, logout, refresh: () => loadProfile() }),
+    () => ({
+      token,
+      user,
+      isLoading,
+      login: loginWithIdentifier,
+      signup,
+      logout,
+      refresh: () => loadProfile(),
+    }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [token, user, isLoading]
   );

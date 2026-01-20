@@ -19,12 +19,25 @@ export function permissionMiddleware(requiredPermission) {
       }
 
       const sql = `SELECT 1
-        FROM users u
-        JOIN roles r ON u.role_id = r.role_id
-        JOIN role_permissions rp ON rp.role_id = r.role_id
-        JOIN permissions p ON p.permission_id = rp.permission_id
-        WHERE u.user_id = ? AND p.name = ? LIMIT 1`;
-      const rows = await query(sql, [userId, requiredPermission]);
+        FROM permissions p
+        WHERE p.name = ?
+          AND (
+            EXISTS (
+              SELECT 1
+              FROM users u
+              JOIN role_permissions rp ON rp.role_id = u.role_id
+              WHERE u.user_id = ? AND rp.permission_id = p.permission_id
+              LIMIT 1
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM user_permissions up
+              WHERE up.user_id = ? AND up.permission_id = p.permission_id
+              LIMIT 1
+            )
+          )
+        LIMIT 1`;
+      const rows = await query(sql, [requiredPermission, userId, userId]);
       if (rows.length === 0) return next(forbidden(`Insufficient permission: ${requiredPermission}`));
       next();
     } catch (e) {

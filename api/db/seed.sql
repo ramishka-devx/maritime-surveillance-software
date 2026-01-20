@@ -11,13 +11,14 @@ ON DUPLICATE KEY UPDATE name = VALUES(name);
 -- Passwords (dev only):
 -- super_admin: Admin123!
 -- operator: Operator123!
-INSERT INTO users (user_id, first_name, last_name, email, password_hash, role_id, status)
+INSERT INTO users (user_id, first_name, last_name, username, email, password_hash, role_id, status)
 VALUES
-	(1, 'Super', 'Admin', 'admin@seranguard.local', '$2b$10$yR7bMcnL4WyS9gpf6jbftO52vwUTEfCnaYqwlKzwPhhpOnWOTtyWm', 1, 'verified'),
-	(2, 'Ops', 'Operator', 'operator@seranguard.local', '$2b$10$QkGq8adQcoVRKMfLnvfG0OFk39BPyZ98yaoZrrvZ6BjlQqLF3DIgi', 2, 'verified')
+	(1, 'Super', 'Admin', 'admin', 'admin@seranguard.local', '$2b$10$yR7bMcnL4WyS9gpf6jbftO52vwUTEfCnaYqwlKzwPhhpOnWOTtyWm', 1, 'verified'),
+	(2, 'Ops', 'Operator', 'operator', 'operator@seranguard.local', '$2b$10$QkGq8adQcoVRKMfLnvfG0OFk39BPyZ98yaoZrrvZ6BjlQqLF3DIgi', 2, 'verified')
 ON DUPLICATE KEY UPDATE
 	first_name = VALUES(first_name),
 	last_name = VALUES(last_name),
+	username = VALUES(username),
 	password_hash = VALUES(password_hash),
 	role_id = VALUES(role_id),
 	status = VALUES(status);

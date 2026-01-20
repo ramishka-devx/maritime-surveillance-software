@@ -77,5 +77,35 @@ export const UserController = {
     } catch (e) {
       next(e);
     }
+  },
+  async listUserPermissions(req, res, next) {
+    try {
+      const data = await UserService.listPermissionsForUser(Number(req.params.user_id));
+      return success(res, data);
+    } catch (e) {
+      next(e);
+    }
+  },
+  async assignUserPermission(req, res, next) {
+    try {
+      const data = await UserService.assignPermissionToUser(
+        Number(req.params.user_id),
+        Number(req.body.permission_id)
+      );
+      return success(res, data, 'Permission granted');
+    } catch (e) {
+      next(e);
+    }
+  },
+  async revokeUserPermission(req, res, next) {
+    try {
+      const data = await UserService.revokePermissionFromUser(
+        Number(req.params.user_id),
+        Number(req.body.permission_id)
+      );
+      return success(res, data, 'Permission revoked');
+    } catch (e) {
+      next(e);
+    }
   }
 };

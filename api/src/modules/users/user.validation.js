@@ -18,6 +18,18 @@ export const registerSchema = Joi.object({
         'string.max': 'Last name cannot exceed 50 characters.',
         'any.required': 'Last name is required.'
       }),
+    username: Joi.string()
+      .min(3)
+      .max(50)
+      .pattern(/^[a-zA-Z0-9._-]+$/)
+      .required()
+      .messages({
+        'string.base': 'Username must be a text value.',
+        'string.min': 'Username must be at least 3 characters long.',
+        'string.max': 'Username cannot exceed 50 characters.',
+        'string.pattern.base': 'Username can only contain letters, numbers, dot, underscore, and dash.',
+        'any.required': 'Username is required.'
+      }),
     email: Joi.string()
       .email({ tlds: { allow: false } })
       .max(100)
@@ -38,24 +50,20 @@ export const registerSchema = Joi.object({
         'string.max': 'Password cannot exceed 128 characters.',
         'any.required': 'Password is required.'
       }),
-    role: Joi.string()
-      .valid('operator', 'super_admin')
-      .optional(),
-    admin_registration_secret: Joi.string()
-      .max(200)
-      .optional(),
+    role: Joi.any().forbidden(),
+    admin_registration_secret: Joi.any().forbidden(),
   })
 });
 
 export const loginSchema = Joi.object({
   body: Joi.object({
-    email: Joi.string()
-      .email({ tlds: { allow: false } })
+    identifier: Joi.string()
+      .min(1)
+      .max(100)
       .required()
       .messages({
-        'string.base': 'Email must be a text value.',
-        'string.email': 'Please provide a valid email address.',
-        'any.required': 'Email is required.'
+        'string.base': 'Username/email must be a text value.',
+        'any.required': 'Username/email is required.'
       }),
     password: Joi.string()
       .required()
@@ -63,9 +71,7 @@ export const loginSchema = Joi.object({
         'string.base': 'Password must be a text value.',
         'any.required': 'Password is required.'
       }),
-    role: Joi.string()
-      .valid('operator', 'super_admin')
-      .optional(),
+    role: Joi.any().forbidden(),
   })
 });
 
@@ -144,5 +150,32 @@ export const updateRoleSchema = Joi.object({
         'number.integer': 'Role ID must be an integer.',
         'any.required': 'Role ID is required.'
       })
+  })
+});
+
+export const userPermissionListSchema = Joi.object({
+  params: Joi.object({
+    user_id: Joi.number().integer().required().messages({
+      'number.base': 'User ID must be a number.',
+      'number.integer': 'User ID must be an integer.',
+      'any.required': 'User ID is required.'
+    })
+  })
+});
+
+export const userPermissionMutateSchema = Joi.object({
+  params: Joi.object({
+    user_id: Joi.number().integer().required().messages({
+      'number.base': 'User ID must be a number.',
+      'number.integer': 'User ID must be an integer.',
+      'any.required': 'User ID is required.'
+    })
+  }),
+  body: Joi.object({
+    permission_id: Joi.number().integer().required().messages({
+      'number.base': 'Permission ID must be a number.',
+      'number.integer': 'Permission ID must be an integer.',
+      'any.required': 'Permission ID is required.'
+    })
   })
 });

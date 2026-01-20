@@ -1,7 +1,7 @@
 import { UserModel, hashPassword, comparePassword } from './user.model.js';
 import { badRequest, unauthorized, notFound } from '../../utils/errorHandler.js';
 import { signToken } from '../../utils/jwtHelper.js';
-import { env } from '../../config/env.js';
+import { query } from '../../config/db.config.js';
 
 function normalizeRole(role) {
   return String(role || '').trim().toLowerCase();
@@ -9,34 +9,34 @@ function normalizeRole(role) {
 
 function roleToId(role) {
   const r = normalizeRole(role);
-  if (!r || r === 'operator') return 2;
+  if (!r) return null;
+  if (r === 'operator') return 2;
   if (r === 'super_admin') return 1;
   return null;
 }
 
 export const UserService = {
-  async register({ first_name, last_name, email, password, role, admin_registration_secret }) {
-    const exists = await UserModel.findByEmail(email);
-    if (exists) throw badRequest('Email already in use');
+  async register({ first_name, last_name, username, email, password, role, admin_registration_secret }) {
+    if (normalizeRole(role) === 'super_admin') {
+      throw unauthorized('Super Admin accounts cannot be self-registered');
+    }
+
+    const emailExists = await UserModel.findByEmail(email);
+    if (emailExists) throw badRequest('Email already in use');
+
+    const usernameExists = await UserModel.findByUsername(username);
+    if (usernameExists) throw badRequest('Username already in use');
+
     const password_hash = await hashPassword(password);
 
-    const desiredRoleId = roleToId(role);
-    if (!desiredRoleId) throw badRequest('Invalid role');
-
-    let status;
-    if (desiredRoleId === 1) {
-      if (!env.admin.registrationSecret) {
-        throw unauthorized('Super Admin self-registration is disabled');
-      }
-      if (String(admin_registration_secret || '') !== String(env.admin.registrationSecret)) {
-        throw unauthorized('Invalid Super Admin registration secret');
-      }
-      status = 'verified';
-    }
+    const desiredRoleId = 2; // operator
+    void admin_registration_secret;
+    const status = 'verified';
 
     const user = await UserModel.create({
       first_name,
       last_name,
+      username,
       email,
       password_hash,
       role_id: desiredRoleId,
@@ -44,8 +44,8 @@ export const UserService = {
     });
     return user;
   },
-  async login({ email, password, role }) {
-    const user = await UserModel.findByEmail(email);
+  async login({ identifier, password, role }) {
+    const user = await UserModel.findByIdentifier(identifier);
     if (!user) throw unauthorized('Invalid credentials');
 
     const requestedRoleId = roleToId(role);
@@ -86,5 +86,32 @@ export const UserService = {
     const user = await UserModel.findById(user_id);
     if (!user) throw notFound('User not found');
     return UserModel.updateRole(user_id, role_id);
+  },
+  async listPermissionsForUser(target_user_id) {
+    const target = await UserModel.findById(target_user_id);
+    if (!target) throw notFound('User not found');
+    if (Number(target.role_id) === 1) throw badRequest('Cannot manage permissions for Super Admin');
+    return UserModel.listPermissionsWithAssignment(target_user_id);
+  },
+  async assignPermissionToUser(target_user_id, permission_id) {
+    if (!Number.isInteger(permission_id)) throw badRequest('Invalid permission id');
+    const target = await UserModel.findById(target_user_id);
+    if (!target) throw notFound('User not found');
+    if (Number(target.role_id) === 1) throw badRequest('Cannot manage permissions for Super Admin');
+
+    const perm = await query('SELECT permission_id FROM permissions WHERE permission_id = ? LIMIT 1', [permission_id]);
+    if (!perm.length) throw badRequest('Permission not found');
+
+    await UserModel.assignUserPermission(target_user_id, permission_id);
+    return { user_id: target_user_id, permission_id };
+  },
+  async revokePermissionFromUser(target_user_id, permission_id) {
+    if (!Number.isInteger(permission_id)) throw badRequest('Invalid permission id');
+    const target = await UserModel.findById(target_user_id);
+    if (!target) throw notFound('User not found');
+    if (Number(target.role_id) === 1) throw badRequest('Cannot manage permissions for Super Admin');
+
+    await UserModel.revokeUserPermission(target_user_id, permission_id);
+    return { user_id: target_user_id, permission_id };
   }
 };

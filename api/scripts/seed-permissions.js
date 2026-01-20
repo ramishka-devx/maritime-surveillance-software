@@ -1,4 +1,4 @@
-import { query } from '../src/config/db.config.js';
+import { pool, query } from '../src/config/db.config.js';
 
 // Maritime Surveillance permissions
 const permissions = [
@@ -86,7 +86,13 @@ async function seedPermissions() {
 
   } catch (error) {
     console.error('Error seeding permissions:', error);
-    process.exit(1);
+    process.exitCode = 1;
+  } finally {
+    try {
+      await pool.end();
+    } catch {
+      // ignore
+    }
   }
 }
 

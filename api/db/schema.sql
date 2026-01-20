@@ -13,6 +13,8 @@ DROP TABLE IF EXISTS vessels;
 DROP TABLE IF EXISTS activities;
 DROP TABLE IF EXISTS notifications;
 
+DROP TABLE IF EXISTS user_permissions;
+
 DROP TABLE IF EXISTS role_permissions;
 DROP TABLE IF EXISTS permissions;
 DROP TABLE IF EXISTS users;
@@ -44,10 +46,21 @@ CREATE TABLE role_permissions (
   CONSTRAINT fk_rp_permission FOREIGN KEY (permission_id) REFERENCES permissions(permission_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE user_permissions (
+  user_id INT NOT NULL,
+  permission_id INT NOT NULL,
+  assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, permission_id),
+  KEY idx_up_permission (permission_id),
+  CONSTRAINT fk_up_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_up_permission FOREIGN KEY (permission_id) REFERENCES permissions(permission_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE users (
   user_id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(50) NOT NULL,
   last_name VARCHAR(50) NOT NULL,
+  username VARCHAR(50) NOT NULL,
   email VARCHAR(100) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   role_id INT NOT NULL,
@@ -56,11 +69,11 @@ CREATE TABLE users (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id),
+  UNIQUE KEY uq_users_username (username),
   UNIQUE KEY uq_users_email (email),
   KEY idx_users_role (role_id),
   CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE vessels (
   vessel_id INT NOT NULL AUTO_INCREMENT,
   mmsi VARCHAR(9) NOT NULL,

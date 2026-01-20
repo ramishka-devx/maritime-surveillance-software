@@ -3,27 +3,37 @@ import bcrypt from 'bcrypt';
 import { badRequest } from '../../utils/errorHandler.js';
 
 export const UserModel = {
-  async create({ first_name, last_name, email, password_hash, role_id, status }) {
+  async create({ first_name, last_name, username, email, password_hash, role_id, status }) {
     const withStatus = status !== undefined && status !== null;
     const sql = withStatus
-      ? `INSERT INTO users (first_name, last_name, email, password_hash, role_id, status, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`
-      : `INSERT INTO users (first_name, last_name, email, password_hash, role_id, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, NOW(), NOW())`;
+      ? `INSERT INTO users (first_name, last_name, username, email, password_hash, role_id, status, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`
+      : `INSERT INTO users (first_name, last_name, username, email, password_hash, role_id, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`;
 
     const params = withStatus
-      ? [first_name, last_name, email, password_hash, role_id, status]
-      : [first_name, last_name, email, password_hash, role_id];
+      ? [first_name, last_name, username, email, password_hash, role_id, status]
+      : [first_name, last_name, username, email, password_hash, role_id];
 
     const result = await query(sql, params);
-    return { user_id: result.insertId, first_name, last_name, email, role_id };
+    return { user_id: result.insertId, first_name, last_name, username, email, role_id };
   },
   async findByEmail(email) {
     const rows = await query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
     return rows[0];
   },
+  async findByUsername(username) {
+    const rows = await query('SELECT * FROM users WHERE username = ? LIMIT 1', [username]);
+    return rows[0];
+  },
+  async findByIdentifier(identifier) {
+    const raw = String(identifier || '').trim();
+    if (!raw) return null;
+    if (raw.includes('@')) return this.findByEmail(raw);
+    return this.findByUsername(raw);
+  },
   async findById(user_id) {
-    const rows = await query('SELECT u.user_id, u.first_name, u.last_name, u.email, u.role_id, u.status, r.name as role, u.profileImg, u.created_at, u.updated_at FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.user_id = ? LIMIT 1', [user_id]);
+    const rows = await query('SELECT u.user_id, u.first_name, u.last_name, u.username, u.email, u.role_id, u.status, r.name as role, u.profileImg, u.created_at, u.updated_at FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.user_id = ? LIMIT 1', [user_id]);
     return rows[0];
   },
   async list({ page = 1, limit = 10 }) {
@@ -78,6 +88,30 @@ export const UserModel = {
     }
     await query('UPDATE users SET role_id = ?, updated_at = NOW() WHERE user_id = ?', [role_id, user_id]);
     return this.findById(user_id);
+  },
+  async listPermissionsWithAssignment(user_id) {
+    return query(
+      `SELECT
+        p.permission_id,
+        p.name,
+        p.description,
+        CASE WHEN up.permission_id IS NULL THEN 0 ELSE 1 END AS assigned
+      FROM permissions p
+      LEFT JOIN user_permissions up
+        ON up.permission_id = p.permission_id
+       AND up.user_id = ?
+      ORDER BY p.name`,
+      [user_id]
+    );
+  },
+  async assignUserPermission(user_id, permission_id) {
+    await query(
+      'INSERT IGNORE INTO user_permissions (user_id, permission_id, assigned_at) VALUES (?, ?, NOW())',
+      [user_id, permission_id]
+    );
+  },
+  async revokeUserPermission(user_id, permission_id) {
+    await query('DELETE FROM user_permissions WHERE user_id = ? AND permission_id = ?', [user_id, permission_id]);
   }
 };
 

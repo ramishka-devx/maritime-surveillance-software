@@ -8,9 +8,11 @@ export function normalizeRole(role) {
 }
 
 export function isOperator(user) {
-  return normalizeRole(user?.role) === Roles.OPERATOR;
+  if (normalizeRole(user?.role) === Roles.OPERATOR) return true;
+  return Number(user?.role_id) === 2;
 }
 
 export function isSuperAdmin(user) {
-  return normalizeRole(user?.role) === Roles.SUPER_ADMIN;
+  if (normalizeRole(user?.role) === Roles.SUPER_ADMIN) return true;
+  return Number(user?.role_id) === 1;
 }
