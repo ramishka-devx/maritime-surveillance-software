@@ -1,0 +1,249 @@
+/* ================================
+   CSS VARIABLES – SerenGuard THEME
+================================== */
+:root {
+  --bg-page: #cfd7eb;
+  --card-bg: #243b78;
+  --card-bg-dark: #1e3266;
+
+  --accent-orange: #f28c1b;
+  --accent-orange-hover: #e07c10;
+
+  --text-white: #090909;
+  --text-muted: #090909;
+  --text-placeholder: #030303;
+
+  --input-bg: #3b4a6b;
+  --input-border: rgba(255, 255, 255, 0.15);
+
+  --error-bg: #7f1d1d;
+  --error-text: #fecaca;
+
+  --success-bg: #064e3b;
+  --success-text: #010c05;
+}
+
+/* ================================
+   RESET
+================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ================================
+   PAGE BACKGROUND
+================================== */
+body {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: var(--bg-page);
+}
+
+/* ================================
+   MAIN CONTAINER
+================================== */
+.signin-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================================
+   CARD
+================================== */
+.signin-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(
+    180deg,
+    var(--card-bg),
+    var(--card-bg-dark)
+  );
+  padding: 42px 38px;
+  border-radius: 14px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* ================================
+   HEADER / LOGO
+================================== */
+.signin-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.logo-image {
+  height: 52px;
+  width: auto;
+}
+
+.signin-title {
+  color: var(--text-white);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* ================================
+   TOGGLE BUTTONS
+================================== */
+.auth-toggle {
+  display: flex;
+  background-color: #1e2e5a;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 26px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.toggle-btn.active {
+  background-color: var(--card-bg);
+  color: var(--text-white);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* ================================
+   FORM
+================================== */
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ================================
+   INPUTS & SELECT
+================================== */
+.form-group input,
+.form-group select {
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--text-white);
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 0 3px rgba(242, 140, 27, 0.35);
+}
+
+/* ================================
+   SELECT ARROW
+================================== */
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 36px;
+}
+
+/* ================================
+   ERROR & SUCCESS
+================================== */
+.error-message {
+  background-color: var(--error-bg);
+  color: var(--error-text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.success-message {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* ================================
+   SIGN IN BUTTON
+================================== */
+.signin-button {
+  margin-top: 8px;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--accent-orange);
+  color: var(--text-white);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.signin-button:hover {
+  background-color: var(--accent-orange-hover);
+  transform: translateY(-1px);
+}
+
+.signin-button:active {
+  transform: translateY(0);
+}
+
+/* ================================
+   FOOTER
+================================== */
+.signin-footer {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.security-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 12px;
+}
+
+/* ================================
+   RESPONSIVE
+================================== */
+@media (max-width: 480px) {
+  .signin-card {
+    padding: 32px 26px;
+  }
+}
