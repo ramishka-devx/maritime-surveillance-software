@@ -33,7 +33,11 @@ export const AlertModel = {
   },
 
   async list({ page = 1, limit = 10, status, severity, vessel_id } = {}) {
-    const offset = (page - 1) * limit;
+    const pageNum = Number.isFinite(Number(page)) ? Number(page) : 1;
+    const limitNum = Number.isFinite(Number(limit)) ? Number(limit) : 10;
+    const safePage = pageNum > 0 ? Math.floor(pageNum) : 1;
+    const safeLimit = limitNum > 0 ? Math.floor(limitNum) : 10;
+    const offset = (safePage - 1) * safeLimit;
 
     const where = [];
     const params = [];
@@ -65,7 +69,7 @@ export const AlertModel = {
       ${whereClause}
       ORDER BY a.created_at DESC
       LIMIT ? OFFSET ?`,
-      [...params, Number(limit), Number(offset)]
+      [...params, safeLimit, offset]
     );
 
     const [{ count }] = await query(

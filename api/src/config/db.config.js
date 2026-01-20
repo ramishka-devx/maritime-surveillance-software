@@ -23,16 +23,8 @@ function sleep(ms) {
 let initPromise;
 
 export async function initDbConnection() {
-  const target = `${env.db.host}:${env.db.port}`;
+  const target = `${env.db.host}`;
   const maxAttempts = Math.max(1, Number(env.db.connectRetries) + 1);
-
-  const nonRetriableCodes = new Set([
-    'ER_ACCESS_DENIED_ERROR',
-    'ER_DBACCESS_DENIED_ERROR',
-    'ER_HOST_NOT_PRIVILEGED',
-    'ER_ACCOUNT_HAS_BEEN_LOCKED',
-    'ER_PASSWORD_EXPIRED',
-  ]);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -43,33 +35,11 @@ export async function initDbConnection() {
       return true;
     } catch (err) {
       const message = err?.message || String(err);
-      const code = err?.code;
-
-      if (code && nonRetriableCodes.has(code)) {
-        logger.error(
-          {
-            err,
-            code,
-            dbHost: env.db.host,
-            dbPort: env.db.port,
-            dbName: env.db.database,
-            failFast: env.db.failFast,
-          },
-          `MySQL connection failed (non-retriable: ${code}): ${message}`
-        );
-
-        if (env.db.failFast) {
-          throw err;
-        }
-
-        return false;
-      }
 
       if (attempt >= maxAttempts) {
         logger.error(
           {
             err,
-            code,
             dbHost: env.db.host,
             dbPort: env.db.port,
             dbName: env.db.database,
@@ -88,7 +58,6 @@ export async function initDbConnection() {
       logger.warn(
         {
           err,
-          code,
           attempt,
           remaining: maxAttempts - attempt,
           dbHost: env.db.host,
@@ -112,6 +81,7 @@ export function startDbConnectionCheck() {
 }
 
 export async function query(sql, params) {
-  const [rows] = await pool.execute(sql, params);
+  const safeParams = params ?? [];
+  const [rows] = await pool.query(sql, safeParams);
   return rows;
 }
