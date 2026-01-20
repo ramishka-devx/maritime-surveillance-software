@@ -1,0 +1,58 @@
+🟩 Fishing activity.
+Fishing vessels don’t move like commuters. They slow down, zig-zag, loop, or crawl along contours. Trawlers make long, steady sweeps; longliners pause, drift, then move again. Speed oscillating between roughly 1–5 knots with frequent course changes is the tell.
+
+🟩 Illegal, unreported, or unregulated fishing (IUU).
+This is fishing’s shadow twin. Look for boats that fish near the EEZ boundary, switch AIS off and on, spoof IDs, or loiter suspiciously close to protected zones. The gaps in the data are often more interesting than the data itself.
+
+🟩 Cargo transit and trade lanes.
+Merchant ships behave like clockwork philosophers. Long straight paths, stable speeds, predictable port-to-port routes. You can infer trade intensity, congestion, and even seasonal economic pulses by counting and clustering these flows.
+
+🟩 Port operations.
+Anchoring, queuing, berthing, and departure cycles are very visible in AIS. Dense clouds of slow or stationary vessels near ports tell you about delays, bottlenecks, and port efficiency—sometimes better than official statistics.
+
+🟩 Smuggling and suspicious behavior.
+Ships that loiter offshore, meet another vessel briefly (ship-to-ship transfer), then split. Or vessels that wander without an obvious commercial reason. This doesn’t prove crime, but it raises a very scientific eyebrow.
+
+🟩 Search and rescue or emergency response.
+Sudden convergence of multiple vessels, erratic high-speed movements, or coast-guard style patrol patterns can indicate SAR operations. The sea is vast; urgency leaves a geometric fingerprint.
+
+🟩 Naval and coast guard patrols.
+Regular back-and-forth paths, border-hugging routes, and persistent coverage zones. Some navies broadcast AIS, some don’t—but when they do, their movements are disciplined and repetitive.
+
+🟩 Environmental monitoring opportunities.
+Heavy traffic corridors correlate with noise pollution, oil spill risk, and ecological stress. AIS becomes an indirect sensor for environmental impact.
+
+🟩 Weather avoidance and storm response.
+When vessels collectively bend away from a region, nature is usually the author. Route deviations and mass slowdowns often trace storms more clearly than weather maps.
+
+🟩 Speed-Based Anomalies
+
+
+
+
+SOG is the speedometer.
+COG is the compass trail.
+
+
+SHIP STATUS
+================================================================
+• Unknown value — AIS didn’t specify status (often unreliable).
+• Moored — Tied to dock or buoy, not moving.
+• At anchor — Anchored, drifting slightly but not traveling.
+• Under way using engine — Normal powered movement.
+• Constrained by her draught — Too deep to maneuver freely.
+• Under way sailing — Moving using wind, not engine.
+• Restricted maneuverability — Limited movement due to work or condition.
+• Engaged in fishing — Actively fishing, slow and irregular movement.
+• Power-driven pushing ahead / towing alongside — Tugging or pushing another vessel.
+• Power-driven towing astern — Towing something behind.
+• Reserved for future amendment (HSC/WIG) — Placeholder, usually meaningless.
+• Not under command — Unable to maneuver (failure or emergency).
+
+
+
+references :
+- https://www.navcen.uscg.gov/ais-class-a-reports#:~:text=Navigational%20status%204%200%20%3D,carrying%20DG%2C%20HS%2C%20or%20MP
+
+- isolation forest algorithm
+- https://www.digitalocean.com/community/tutorials/anomaly-detection-isolation-forest#prerequisites
