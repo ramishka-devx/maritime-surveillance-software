@@ -1,0 +1,41 @@
+{
+  "name": "machine-cure-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "lint": "eslint \"src/**/*.js\"",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "db:schema": "node scripts/run-sql.js db/schema.sql",
+    "db:seed": "node scripts/run-sql.js db/seed.sql",
+    "db:seed-permissions": "node scripts/seed-permissions.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "mysql2": "^3.11.3",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.6",
+    "pino": "^9.3.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "nodemon": "^3.1.7",
+    "pino-pretty": "^11.2.2",
+    "prettier": "^3.3.3"
+  }
+}

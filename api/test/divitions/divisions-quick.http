@@ -1,0 +1,54 @@
+### Quick Division API Tests
+### Simple and fast tests for division endpoints
+
+@baseUrl = http://localhost:3000
+@token = paste-your-jwt-token-here
+
+### Get Auth Token First
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "password"
+}
+
+###
+
+### Create Division
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Test Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### List Divisions
+GET {{baseUrl}}/api/divisions
+Authorization: Bearer {{token}}
+
+###
+
+### Update Division (change ID as needed)
+PUT {{baseUrl}}/api/divisions/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Updated Test Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### Delete Division (change ID as needed)
+DELETE {{baseUrl}}/api/divisions/1
+Authorization: Bearer {{token}}
+
+###
