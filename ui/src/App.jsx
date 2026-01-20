@@ -1,35 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { RequireAuth } from './auth/RequireAuth.jsx';
+import { useAuth } from './auth/AuthContext.jsx';
+import { AppShell } from './components/AppShell.jsx';
+import { DashboardPage } from './pages/DashboardPage.jsx';
+import { LoginPage } from './pages/LoginPage.jsx';
+import { SignupPage } from './pages/SignupPage.jsx';
+import { NotFoundPage } from './pages/NotFoundPage.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
+function PublicOnly({ children }) {
+  const { token, isLoading } = useAuth();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen grid place-items-center text-sm text-slate-600">
+        Loading…
+      </div>
+    );
+  }
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  if (token) return <Navigate to="/dashboard" replace />;
+  return children;
 }
 
-export default App
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      <Route
+        path="/login"
+        element={
+          <PublicOnly>
+            <LoginPage />
+          </PublicOnly>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <PublicOnly>
+            <SignupPage />
+          </PublicOnly>
+        }
+      />
+
+      <Route element={<RequireAuth />}>
+        <Route element={<AppShell />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}

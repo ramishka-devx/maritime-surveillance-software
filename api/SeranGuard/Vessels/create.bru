@@ -1,0 +1,33 @@
+meta {
+  name: Vessels - Create
+  type: http
+  seq: 11
+}
+
+post {
+  url: http://localhost:3000/api/vessels
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body {
+  {
+    "mmsi": "111222333",
+    "name": "Test Vessel",
+    "imo": "IMO1234567",
+    "callsign": "TSTV",
+    "flag": "LK",
+    "type": "cargo",
+    "status": "active"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -3,10 +3,19 @@ import bcrypt from 'bcrypt';
 import { badRequest } from '../../utils/errorHandler.js';
 
 export const UserModel = {
-  async create({ first_name, last_name, email, password_hash, role_id }) {
-    const sql = `INSERT INTO users (first_name, last_name, email, password_hash, role_id, created_at, updated_at)
+  async create({ first_name, last_name, email, password_hash, role_id, status }) {
+    const withStatus = status !== undefined && status !== null;
+    const sql = withStatus
+      ? `INSERT INTO users (first_name, last_name, email, password_hash, role_id, status, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`
+      : `INSERT INTO users (first_name, last_name, email, password_hash, role_id, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, NOW(), NOW())`;
-    const result = await query(sql, [first_name, last_name, email, password_hash, role_id]);
+
+    const params = withStatus
+      ? [first_name, last_name, email, password_hash, role_id, status]
+      : [first_name, last_name, email, password_hash, role_id];
+
+    const result = await query(sql, params);
     return { user_id: result.insertId, first_name, last_name, email, role_id };
   },
   async findByEmail(email) {
@@ -57,7 +66,7 @@ export const UserModel = {
         COUNT(*) AS total,
         SUM(CASE WHEN status = 'verified' THEN 1 ELSE 0 END) AS verified,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
-        SUM(CASE WHEN status = 'deleted' THEN 1 ELSE 0 END) AS deleted
+        SUM(CASE WHEN status = 'disabled' THEN 1 ELSE 0 END) AS disabled
       FROM users`
     );
     return row;

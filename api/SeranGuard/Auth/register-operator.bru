@@ -1,0 +1,29 @@
+meta {
+  name: Register (operator)
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:5000/api/users/register
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body {
+  {
+    "first_name": "New",
+    "last_name": "Operator",
+    "email": "new-operator@seranguard.local",
+    "password": "Operator123!"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

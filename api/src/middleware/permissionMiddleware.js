@@ -5,8 +5,8 @@ import { env } from '../config/env.js';
 export function permissionMiddleware(requiredPermission) {
   return async function (req, res, next) {
     try {
-      // Bypass permission checks in development environment
-      if (env.nodeEnv === 'development') {
+      // Optional bypass for local dev only (explicit opt-in)
+      if (env.nodeEnv === 'development' && env.permissionsBypass) {
         return next();
       }
 

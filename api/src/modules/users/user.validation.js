@@ -19,7 +19,7 @@ export const registerSchema = Joi.object({
         'any.required': 'Last name is required.'
       }),
     email: Joi.string()
-      .email()
+      .email({ tlds: { allow: false } })
       .max(100)
       .required()
       .messages({
@@ -38,13 +38,19 @@ export const registerSchema = Joi.object({
         'string.max': 'Password cannot exceed 128 characters.',
         'any.required': 'Password is required.'
       }),
+    role: Joi.string()
+      .valid('operator', 'super_admin')
+      .optional(),
+    admin_registration_secret: Joi.string()
+      .max(200)
+      .optional(),
   })
 });
 
 export const loginSchema = Joi.object({
   body: Joi.object({
     email: Joi.string()
-      .email()
+      .email({ tlds: { allow: false } })
       .required()
       .messages({
         'string.base': 'Email must be a text value.',
@@ -56,7 +62,10 @@ export const loginSchema = Joi.object({
       .messages({
         'string.base': 'Password must be a text value.',
         'any.required': 'Password is required.'
-      })
+      }),
+    role: Joi.string()
+      .valid('operator', 'super_admin')
+      .optional(),
   })
 });
 
@@ -106,10 +115,10 @@ export const updateStatusSchema = Joi.object({
   }),
   body: Joi.object({
     status: Joi.string()
-      .valid('pending', 'verified', 'deleted')
+      .valid('pending', 'verified', 'disabled')
       .required()
       .messages({
-        'any.only': 'Status must be one of: pending, verified, deleted.',
+        'any.only': 'Status must be one of: pending, verified, disabled.',
         'any.required': 'Status is required.'
       })
   })
