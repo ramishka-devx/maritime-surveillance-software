@@ -1,0 +1,63 @@
+meta {
+  name: Remove Role from User
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/users/:user_id/roles/remove
+  body: json
+  auth: bearer
+}
+
+params:path {
+  user_id: 15
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "role_id": 5
+  }
+}
+
+docs {
+  # Remove Role from User
+  
+  Removes a role from a user's role set.
+  
+  ## Permission Required
+  - `users.roles.revoke`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | role_id | integer | Yes | The role ID to remove |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Role removed from user",
+    "data": {
+      "user_id": 15,
+      "roles": [
+        { "role_id": 4, "name": "operator" }
+      ]
+    }
+  }
+  ```
+  
+  ## Notes
+  - Removing a role that's not assigned is idempotent (no error)
+  - Cannot remove the last role from a user (must have at least one)
+  - Cannot remove your own super_admin role
+}

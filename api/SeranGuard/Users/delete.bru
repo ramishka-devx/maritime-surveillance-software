@@ -1,0 +1,48 @@
+meta {
+  name: Delete User
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/users/:user_id
+  body: none
+  auth: bearer
+}
+
+params:path {
+  user_id: 15
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # Delete User
+  
+  Permanently deletes a user account.
+  
+  ## Permission Required
+  - `users.delete`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID to delete |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "User deleted"
+  }
+  ```
+  
+  ## ⚠️ Warning
+  - This action is irreversible
+  - All user roles and permissions are removed (CASCADE)
+  - User's activity logs are preserved for audit
+  - Cannot delete your own account
+  - Consider using `is_active: false` for soft-disable
+}

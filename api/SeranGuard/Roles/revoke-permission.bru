@@ -1,0 +1,57 @@
+meta {
+  name: Revoke Permission from Role
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/roles/:role_id/permissions/revoke
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 2
+}
+
+body:json {
+  {
+    "permission_id": 5
+  }
+}
+
+docs {
+  # Revoke Permission from Role
+  
+  Removes a permission from a role.
+  
+  ## Permission Required
+  - `roles.permissions.revoke`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | permission_id | integer | Yes | The permission ID to revoke |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Permission revoked from role",
+    "data": {
+      "role_id": 2,
+      "permission_id": 5,
+      "message": "Permission revoked"
+    }
+  }
+  ```
+}

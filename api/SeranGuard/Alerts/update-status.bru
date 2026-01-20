@@ -5,7 +5,7 @@ meta {
 }
 
 put {
-  url: http://localhost:3000/api/alerts/1/status
+  url: {{baseUrl}}/api/alerts/1/status
   body: json
   auth: inherit
 }
@@ -15,7 +15,7 @@ headers {
   Authorization: Bearer {{token}}
 }
 
-body {
+body:json {
   {
     "status": "acknowledged"
   }

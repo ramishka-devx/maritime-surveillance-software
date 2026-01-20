@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:5000/api/users/register
+  url: {{baseUrl}}/api/users/register
   body: json
   auth: none
 }
@@ -14,8 +14,8 @@ headers {
   content-type: application/json
 }
 
-body {
-  {
+body:json {
+  { "username" :"ttwda",
     "first_name": "New",
     "last_name": "Operator",
     "email": "new-operator@seranguard.local",

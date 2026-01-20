@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:5000/api/users/login
+  url: {{baseUrl}}/api/users/login
   body: json
   auth: none
 }
@@ -14,7 +14,7 @@ headers {
   content-type: application/json
 }
 
-body {
+body:json {
   {
     "identifier": "admin@seranguard.local",
     "password": "Admin123!"
@@ -22,7 +22,54 @@ body {
 }
 
 script:post-response {
-  bru.setVar("token", res.body.data.token);
+  // this function is executed after the response arrives
+  function onResponse(res) {
+    // res.body is the parsed JSON (if response is JSON)
+    const data = res.body;
+    
+    // e.g., your API returned:
+    // { success: true, message: "Logged in", data: { token: "...", user: { role: "..." } } }
+    if (data && data.success && data.data && data.data.token) {
+      const token = data.data.token;
+      const user = data.data.user;
+      
+      // Store general token
+      bru.setEnvVar("authToken", token, { persist: true });
+      
+      // Store role-specific token based on user role
+      if (user && user.role) {
+        const role = user.role.toLowerCase();
+        let tokenName;
+        
+        switch(role) {
+          case 'super_admin':
+          case 'admin':
+            tokenName = "admin_jwt_token";
+            break;
+          case 'teacher':
+            tokenName = "teacher_jwt_token";
+            break;
+          case 'student':
+            tokenName = "student_jwt_token";
+            break;
+          default:
+            tokenName = `${role}_jwt_token`;
+        }
+        
+        bru.setEnvVar(tokenName, token, { persist: true });
+        console.log(`✅ Tokens set - General: jwt_token, Role-specific: ${tokenName}`);
+        console.log(`👤 User role: ${user.role}, Email: ${user.email || 'N/A'}`);
+      } else {
+        console.log("✅ jwt_token set (role not detected):", token.substring(0, 20) + "...");
+      }
+    } else {
+      console.error("❌ Token not found in response:", data);
+    }
+  }
+  
+  // call it
+  onResponse(res);
+  
 }
 
 settings {

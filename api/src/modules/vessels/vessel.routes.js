@@ -8,10 +8,49 @@ import { listSchema, getByIdSchema, createSchema, updateSchema, deleteSchema } f
 
 const router = Router();
 
-router.get('/', authMiddleware, permissionMiddleware('vessel.list'), validate(listSchema), VesselController.list);
-router.get('/:vessel_id', authMiddleware, permissionMiddleware('vessel.view'), validate(getByIdSchema), VesselController.getById);
-router.post('/', authMiddleware, permissionMiddleware('vessel.create'), activityLogger('vessel.create'), validate(createSchema), VesselController.create);
-router.put('/:vessel_id', authMiddleware, permissionMiddleware('vessel.update'), activityLogger('vessel.update'), validate(updateSchema), VesselController.update);
-router.delete('/:vessel_id', authMiddleware, permissionMiddleware('vessel.delete'), activityLogger('vessel.delete'), validate(deleteSchema), VesselController.remove);
+/**
+ * @openapi
+ * /api/vessels:
+ *   get:
+ *     summary: List all vessels
+ *     tags: [Vessels]
+ */
+router.get('/', authMiddleware, permissionMiddleware('vessels.list'), validate(listSchema), VesselController.list);
+
+/**
+ * @openapi
+ * /api/vessels/{vessel_id}:
+ *   get:
+ *     summary: Get vessel by ID
+ *     tags: [Vessels]
+ */
+router.get('/:vessel_id', authMiddleware, permissionMiddleware('vessels.view'), validate(getByIdSchema), VesselController.getById);
+
+/**
+ * @openapi
+ * /api/vessels:
+ *   post:
+ *     summary: Create a new vessel
+ *     tags: [Vessels]
+ */
+router.post('/', authMiddleware, permissionMiddleware('vessels.create'), activityLogger('vessels.create'), validate(createSchema), VesselController.create);
+
+/**
+ * @openapi
+ * /api/vessels/{vessel_id}:
+ *   put:
+ *     summary: Update a vessel
+ *     tags: [Vessels]
+ */
+router.put('/:vessel_id', authMiddleware, permissionMiddleware('vessels.update'), activityLogger('vessels.update'), validate(updateSchema), VesselController.update);
+
+/**
+ * @openapi
+ * /api/vessels/{vessel_id}:
+ *   delete:
+ *     summary: Delete a vessel
+ *     tags: [Vessels]
+ */
+router.delete('/:vessel_id', authMiddleware, permissionMiddleware('vessels.delete'), activityLogger('vessels.delete'), validate(deleteSchema), VesselController.remove);
 
 export default router;

@@ -1,0 +1,63 @@
+meta {
+  name: Update Role
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/roles/:role_id
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 6
+}
+
+body:json {
+  {
+    "name": "senior_supervisor",
+    "description": "Senior team supervisor with full monitoring access"
+  }
+}
+
+docs {
+  # Update Role
+  
+  Updates an existing role's information.
+  
+  ## Permission Required
+  - `roles.update`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID to update |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | No | New role name |
+  | description | string | No | New role description |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Role updated successfully",
+    "data": {
+      "role_id": 6,
+      "name": "senior_supervisor",
+      "description": "Senior team supervisor with full monitoring access"
+    }
+  }
+  ```
+  
+  ## Notes
+  - System roles cannot be renamed
+  - Role names must remain unique
+}

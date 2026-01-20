@@ -13,46 +13,81 @@ const router = Router();
 // All notification routes require authentication
 router.use(authMiddleware);
 
-// List notifications for current user
+/**
+ * @openapi
+ * /api/notifications:
+ *   get:
+ *     summary: List notifications for current user
+ *     tags: [Notifications]
+ */
 router.get('/',
-  authMiddleware,
-  permissionMiddleware('notification.list'),
+  permissionMiddleware('notifications.view'),
   validate(listSchema),
   NotificationController.list
 );
 
-// Get notification by ID (only if belongs to user)
+/**
+ * @openapi
+ * /api/notifications/unread/count:
+ *   get:
+ *     summary: Get unread notification count
+ *     tags: [Notifications]
+ */
+router.get('/unread/count',
+  permissionMiddleware('notifications.view'),
+  NotificationController.getUnreadCount
+);
+
+/**
+ * @openapi
+ * /api/notifications/read-all:
+ *   put:
+ *     summary: Mark all notifications as read
+ *     tags: [Notifications]
+ */
+router.put('/read-all',
+  permissionMiddleware('notifications.view'),
+  NotificationController.markAllAsRead
+);
+
+/**
+ * @openapi
+ * /api/notifications/{notification_id}:
+ *   get:
+ *     summary: Get notification by ID
+ *     tags: [Notifications]
+ */
 router.get('/:notification_id',
-  permissionMiddleware('notification.view'),
+  permissionMiddleware('notifications.view'),
   validate(getByIdSchema),
   NotificationController.getById
 );
 
-// Mark notification as read
+/**
+ * @openapi
+ * /api/notifications/{notification_id}/read:
+ *   put:
+ *     summary: Mark notification as read
+ *     tags: [Notifications]
+ */
 router.put('/:notification_id/read',
-  permissionMiddleware('notification.read'),
+  permissionMiddleware('notifications.view'),
   validate(markAsReadSchema),
-  activityLogger('notification.read'),
+  activityLogger('notifications.read'),
   NotificationController.markAsRead
 );
 
-// Mark all notifications as read
-router.put('/read-all',
-  permissionMiddleware('notification.read'),
-  NotificationController.markAllAsRead
-);
-
-// Get unread count
-router.get('/unread/count',
-  permissionMiddleware('notification.list'),
-  NotificationController.getUnreadCount
-);
-
-// Delete notification
+/**
+ * @openapi
+ * /api/notifications/{notification_id}:
+ *   delete:
+ *     summary: Delete a notification
+ *     tags: [Notifications]
+ */
 router.delete('/:notification_id',
-  permissionMiddleware('notification.delete'),
+  permissionMiddleware('notifications.delete'),
   validate(deleteSchema),
-  activityLogger('notification.delete'),
+  activityLogger('notifications.delete'),
   NotificationController.remove
 );
 

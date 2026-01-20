@@ -1,0 +1,56 @@
+meta {
+  name: List Permissions by Module
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/permissions/by-module
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # List Permissions Grouped by Module
+  
+  Returns all permissions grouped by their module.
+  Useful for building permission management UIs with categorized sections.
+  
+  ## Permission Required
+  - `permissions.list`
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "users": [
+        {
+          "permission_id": 1,
+          "name": "users.list",
+          "description": "View list of all users"
+        },
+        {
+          "permission_id": 2,
+          "name": "users.view",
+          "description": "View user details"
+        }
+      ],
+      "vessels": [
+        {
+          "permission_id": 10,
+          "name": "vessels.list",
+          "description": "View vessel list"
+        }
+      ],
+      "map": [...],
+      "alerts": [...],
+      "analytics": [...]
+    }
+  }
+  ```
+}

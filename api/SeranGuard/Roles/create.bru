@@ -1,0 +1,57 @@
+meta {
+  name: Create Role
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "name": "supervisor",
+    "description": "Team supervisor with elevated monitoring access"
+  }
+}
+
+docs {
+  # Create Role
+  
+  Creates a new role in the system.
+  
+  ## Permission Required
+  - `roles.create`
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | Yes | Unique role name (2-50 chars) |
+  | description | string | No | Role description |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Role created successfully",
+    "data": {
+      "role_id": 6,
+      "name": "supervisor",
+      "description": "Team supervisor with elevated monitoring access",
+      "is_system": 0,
+      "is_active": 1
+    }
+  }
+  ```
+  
+  ## Notes
+  - Role names must be unique
+  - New roles are created with `is_system: 0` (can be deleted)
+  - After creating a role, assign permissions using the permission assignment endpoints
+}

@@ -179,3 +179,50 @@ export const userPermissionMutateSchema = Joi.object({
     })
   })
 });
+
+export const userRoleMutateSchema = Joi.object({
+  params: Joi.object({
+    user_id: Joi.number().integer().positive().required().messages({
+      'number.base': 'User ID must be a number.',
+      'number.integer': 'User ID must be an integer.',
+      'number.positive': 'User ID must be positive.',
+      'any.required': 'User ID is required.'
+    })
+  }),
+  body: Joi.object({
+    role_id: Joi.number().integer().positive().required().messages({
+      'number.base': 'Role ID must be a number.',
+      'number.integer': 'Role ID must be an integer.',
+      'number.positive': 'Role ID must be positive.',
+      'any.required': 'Role ID is required.'
+    })
+  })
+});
+
+export const userRoleSyncSchema = Joi.object({
+  params: Joi.object({
+    user_id: Joi.number().integer().positive().required().messages({
+      'number.base': 'User ID must be a number.',
+      'number.integer': 'User ID must be an integer.',
+      'number.positive': 'User ID must be positive.',
+      'any.required': 'User ID is required.'
+    })
+  }),
+  body: Joi.object({
+    role_ids: Joi.array()
+      .items(
+        Joi.number().integer().positive().messages({
+          'number.base': 'Each role ID must be a number.',
+          'number.integer': 'Each role ID must be an integer.',
+          'number.positive': 'Each role ID must be positive.'
+        })
+      )
+      .min(1)
+      .required()
+      .messages({
+        'array.base': 'Role IDs must be an array.',
+        'array.min': 'At least one role is required.',
+        'any.required': 'Role IDs are required.'
+      })
+  })
+});

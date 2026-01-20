@@ -1,0 +1,70 @@
+meta {
+  name: Get Permission Roles
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/permissions/:permission_id/roles
+  body: none
+  auth: bearer
+}
+
+params:path {
+  permission_id: 1
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # Get Roles with Permission
+  
+  Returns all roles that have been assigned a specific permission.
+  
+  ## Permission Required
+  - `permissions.view`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | permission_id | integer | The permission ID |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "permission": {
+        "permission_id": 1,
+        "name": "users.list",
+        "module": "users"
+      },
+      "roles": [
+        {
+          "role_id": 1,
+          "name": "super_admin",
+          "description": "Full system access"
+        },
+        {
+          "role_id": 2,
+          "name": "admin",
+          "description": "Administrative access"
+        },
+        {
+          "role_id": 3,
+          "name": "analyst",
+          "description": "Analytics and reporting access"
+        }
+      ],
+      "role_count": 3
+    }
+  }
+  ```
+  
+  ## Use Cases
+  - Audit which roles have a specific capability
+  - Understand permission distribution across roles
+  - Plan permission changes by seeing affected roles
+}

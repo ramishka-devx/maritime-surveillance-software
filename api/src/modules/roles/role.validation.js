@@ -100,3 +100,63 @@ export const deleteSchema = Joi.object({
       })
   })
 });
+
+export const rolePermissionMutateSchema = Joi.object({
+  params: Joi.object({
+    role_id: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .messages({
+        'number.base': 'Role ID must be a number.',
+        'number.integer': 'Role ID must be an integer.',
+        'number.positive': 'Role ID must be positive.',
+        'any.required': 'Role ID is required.'
+      })
+  }),
+  body: Joi.object({
+    permission_id: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .messages({
+        'number.base': 'Permission ID must be a number.',
+        'number.integer': 'Permission ID must be an integer.',
+        'number.positive': 'Permission ID must be positive.',
+        'any.required': 'Permission ID is required.'
+      })
+  })
+});
+
+export const rolePermissionSyncSchema = Joi.object({
+  params: Joi.object({
+    role_id: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .messages({
+        'number.base': 'Role ID must be a number.',
+        'number.integer': 'Role ID must be an integer.',
+        'number.positive': 'Role ID must be positive.',
+        'any.required': 'Role ID is required.'
+      })
+  }),
+  body: Joi.object({
+    permission_ids: Joi.array()
+      .items(
+        Joi.number()
+          .integer()
+          .positive()
+          .messages({
+            'number.base': 'Each permission ID must be a number.',
+            'number.integer': 'Each permission ID must be an integer.',
+            'number.positive': 'Each permission ID must be positive.'
+          })
+      )
+      .required()
+      .messages({
+        'array.base': 'Permission IDs must be an array.',
+        'any.required': 'Permission IDs are required.'
+      })
+  })
+});

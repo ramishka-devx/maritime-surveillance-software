@@ -107,5 +107,74 @@ export const UserController = {
     } catch (e) {
       next(e);
     }
+  },
+
+  // ==========================================
+  // Multi-Role Management
+  // ==========================================
+
+  async getUserRoles(req, res, next) {
+    try {
+      const roles = await UserService.getUserRoles(Number(req.params.user_id));
+      return success(res, roles);
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async assignRole(req, res, next) {
+    try {
+      const data = await UserService.assignRoleToUser(
+        Number(req.params.user_id),
+        Number(req.body.role_id),
+        req.user?.user_id
+      );
+      return success(res, data, 'Role assigned');
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async removeRole(req, res, next) {
+    try {
+      const data = await UserService.removeRoleFromUser(
+        Number(req.params.user_id),
+        Number(req.body.role_id)
+      );
+      return success(res, data, 'Role removed');
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async syncRoles(req, res, next) {
+    try {
+      const data = await UserService.syncUserRoles(
+        Number(req.params.user_id),
+        req.body.role_ids,
+        req.user?.user_id
+      );
+      return success(res, data, 'Roles synchronized');
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async getDirectPermissions(req, res, next) {
+    try {
+      const permissions = await UserService.getDirectPermissions(Number(req.params.user_id));
+      return success(res, permissions);
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async getEffectivePermissions(req, res, next) {
+    try {
+      const permissions = await UserService.getEffectivePermissions(Number(req.params.user_id));
+      return success(res, permissions);
+    } catch (e) {
+      next(e);
+    }
   }
 };

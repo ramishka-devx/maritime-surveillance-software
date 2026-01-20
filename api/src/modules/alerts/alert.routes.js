@@ -15,15 +15,58 @@ import {
 
 const router = Router();
 
-router.get('/', authMiddleware, permissionMiddleware('alert.list'), validate(listSchema), AlertController.list);
-router.get('/:alert_id', authMiddleware, permissionMiddleware('alert.view'), validate(getByIdSchema), AlertController.getById);
-router.post('/', authMiddleware, permissionMiddleware('alert.create'), activityLogger('alert.create'), validate(createSchema), AlertController.create);
+/**
+ * @openapi
+ * /api/alerts:
+ *   get:
+ *     summary: List all alerts
+ *     tags: [Alerts]
+ */
+router.get('/', authMiddleware, permissionMiddleware('alerts.list'), validate(listSchema), AlertController.list);
 
-// Super-admin level operations
-router.put('/:alert_id', authMiddleware, permissionMiddleware('alert.update'), activityLogger('alert.update'), validate(updateSchema), AlertController.update);
-router.put('/:alert_id/assign', authMiddleware, permissionMiddleware('alert.assign'), activityLogger('alert.assign'), validate(assignSchema), AlertController.assign);
+/**
+ * @openapi
+ * /api/alerts/{alert_id}:
+ *   get:
+ *     summary: Get alert by ID
+ *     tags: [Alerts]
+ */
+router.get('/:alert_id', authMiddleware, permissionMiddleware('alerts.view'), validate(getByIdSchema), AlertController.getById);
 
-// Operator can update status (acknowledge/resolve/dismiss)
-router.put('/:alert_id/status', authMiddleware, permissionMiddleware('alert.updateStatus'), activityLogger('alert.updateStatus'), validate(updateStatusSchema), AlertController.updateStatus);
+/**
+ * @openapi
+ * /api/alerts:
+ *   post:
+ *     summary: Create a new alert
+ *     tags: [Alerts]
+ */
+router.post('/', authMiddleware, permissionMiddleware('alerts.create'), activityLogger('alerts.create'), validate(createSchema), AlertController.create);
+
+/**
+ * @openapi
+ * /api/alerts/{alert_id}:
+ *   put:
+ *     summary: Update an alert
+ *     tags: [Alerts]
+ */
+router.put('/:alert_id', authMiddleware, permissionMiddleware('alerts.update'), activityLogger('alerts.update'), validate(updateSchema), AlertController.update);
+
+/**
+ * @openapi
+ * /api/alerts/{alert_id}/assign:
+ *   put:
+ *     summary: Assign alert to a user
+ *     tags: [Alerts]
+ */
+router.put('/:alert_id/assign', authMiddleware, permissionMiddleware('alerts.assign'), activityLogger('alerts.assign'), validate(assignSchema), AlertController.assign);
+
+/**
+ * @openapi
+ * /api/alerts/{alert_id}/status:
+ *   put:
+ *     summary: Update alert status (acknowledge/resolve/dismiss)
+ *     tags: [Alerts]
+ */
+router.put('/:alert_id/status', authMiddleware, permissionMiddleware(['alerts.acknowledge', 'alerts.resolve', 'alerts.dismiss']), activityLogger('alerts.status'), validate(updateStatusSchema), AlertController.updateStatus);
 
 export default router;
