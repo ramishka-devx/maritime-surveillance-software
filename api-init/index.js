@@ -10,6 +10,7 @@ let socket;
 let heartbeatInterval;
 let flushInterval;
 
+
 // Buffer configuration
 const BUFFER_SIZE = 100; // Flush after 100 messages
 const BUFFER_TIMEOUT = 5000; // Or after 5 seconds
