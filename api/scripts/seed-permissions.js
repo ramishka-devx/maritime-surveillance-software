@@ -1,68 +1,28 @@
-import { query } from '../src/config/db.config.js';
+import { pool, query } from '../src/config/db.config.js';
 
+// Maritime Surveillance permissions
 const permissions = [
-  // User permissions
-  'user.list', 'user.update', 'user.status.update', 'user.role.update', 'user.analytics', 'user.delete',
+  // Users
+  'user.list', 'user.view', 'user.update', 'user.status.update', 'user.role.update',
 
-  // Permission management
-  'permission.add', 'permission.list', 'permission.delete', 'permission.assign', 'permission.revoke',
-
-  // Role management
+  // Roles & permissions
   'role.list', 'role.view', 'role.create', 'role.update', 'role.delete',
+  'permission.list', 'permission.assign', 'permission.revoke',
 
-  // Division types
-  'divisionType.add', 'divisionType.list', 'divisionType.update', 'divisionType.delete',
+  // Vessels
+  'vessel.create', 'vessel.list', 'vessel.view', 'vessel.update', 'vessel.delete',
 
-  // Divisions
-  'division.add', 'division.list', 'division.update', 'division.delete',
+  // Positions
+  'position.create', 'position.list', 'position.view',
 
-  // Machines
-  'machine.add', 'machine.list', 'machine.update', 'machine.delete',
-
-  // Meters
-  'meter.add', 'meter.list', 'meter.update', 'meter.delete',
-
-  // Parameters
-  'parameter.add', 'parameter.list', 'parameter.update', 'parameter.delete',
-
-  // Breakdowns
-  'breakdown.add', 'breakdown.list', 'breakdown.view', 'breakdown.update', 'breakdown.delete',
-  'breakdown.updateStatus', 'breakdown.assign', 'breakdown.startRepair', 'breakdown.completeRepair',
-
-  // Breakdown categories
-  'breakdownCategory.add', 'breakdownCategory.list', 'breakdownCategory.view',
-  'breakdownCategory.update', 'breakdownCategory.delete',
-
-  // Breakdown statuses
-  'breakdownStatus.add', 'breakdownStatus.list', 'breakdownStatus.view',
-  'breakdownStatus.update', 'breakdownStatus.delete',
-
-  // Breakdown comments
-  'breakdown.comment.add', 'breakdown.comment.list', 'breakdown.comment.view',
-  'breakdown.comment.update', 'breakdown.comment.delete',
-
-  // Breakdown repairs
-  'breakdown.repair.add', 'breakdown.repair.list', 'breakdown.repair.view',
-  'breakdown.repair.update', 'breakdown.repair.start', 'breakdown.repair.complete', 'breakdown.repair.delete',
-
-  // Breakdown analytics
-  'breakdown.analytics.view',
+  // Alerts
+  'alert.create', 'alert.list', 'alert.view', 'alert.update', 'alert.updateStatus', 'alert.assign',
 
   // Notifications
   'notification.list', 'notification.view', 'notification.read', 'notification.delete',
 
-  // Dashboard
-  'dashboard.view',
-
   // Activities
-  'activity.list', 'activity.view',
-
-  // Maintenance
-  'maintenance.add', 'maintenance.list', 'maintenance.update', 'maintenance.delete', 'maintenance.status.update',
-
-  // Kaizen
-  'kaizen.create', 'kaizen.view', 'kaizen.update', 'kaizen.delete', 'kaizen.assign',
-  'kaizen.approve', 'kaizen.comment', 'kaizen.view_all', 'kaizen.report', 'kaizen.manage'
+  'activity.list', 'activity.view'
 ];
 
 async function seedPermissions() {
@@ -76,36 +36,34 @@ async function seedPermissions() {
     await query(insertPermissionsQuery);
     console.log(`Inserted ${permissions.length} permissions`);
 
-    // Get admin role ID (assuming admin role exists)
-    const [adminRole] = await query('SELECT role_id FROM roles WHERE name = ? OR name = ? OR name = ?', ['super.admin', 'user', 'engineer']);
-    if (!adminRole) {
-      throw new Error('Admin role not found. Please run the initial seed first.');
-    }
+    // Super admin role
+    const [superAdminRole] = await query('SELECT role_id FROM roles WHERE name = ? LIMIT 1', ['super_admin']);
+    if (!superAdminRole) throw new Error('Role super_admin not found. Run db:seed first.');
 
     // Assign all permissions to admin role
     await query(`
       INSERT IGNORE INTO role_permissions (role_id, permission_id)
       SELECT ?, permission_id FROM permissions
-    `, [adminRole.role_id]);
-    console.log('Assigned all permissions to admin role');
+    `, [superAdminRole.role_id]);
+    console.log('Assigned all permissions to super_admin role');
 
-    // Get user role ID
-    const [userRole] = await query('SELECT role_id FROM roles WHERE name = ?', ['user']);
-    if (userRole) {
-      // Assign basic read permissions to user role
-      const basicPermissions = [
-        'user.list', 'division.list', 'divisionType.list', 'machine.list', 'meter.list',
-        'parameter.list', 'breakdown.list', 'breakdown.view', 'breakdownCategory.list',
-        'breakdownStatus.list', 'notification.list', 'notification.view', 'notification.read',
-        'dashboard.view', 'kaizen.view', 'kaizen.create', 'activity.list', 'activity.view'
+    // Operator role gets operational permissions
+    const [operatorRole] = await query('SELECT role_id FROM roles WHERE name = ? LIMIT 1', ['operator']);
+    if (operatorRole) {
+      const operatorPermissions = [
+        'vessel.list', 'vessel.view',
+        'position.create', 'position.list', 'position.view',
+        'alert.create', 'alert.list', 'alert.view', 'alert.updateStatus',
+        'notification.list', 'notification.view', 'notification.read',
+        'activity.list', 'activity.view'
       ];
 
-      const placeholders = basicPermissions.map(() => '?').join(',');
+      const placeholders = operatorPermissions.map(() => '?').join(',');
       await query(`
         INSERT IGNORE INTO role_permissions (role_id, permission_id)
         SELECT ?, permission_id FROM permissions WHERE name IN (${placeholders})
-      `, [userRole.role_id, ...basicPermissions]);
-      console.log('Assigned basic permissions to user role');
+      `, [operatorRole.role_id, ...operatorPermissions]);
+      console.log('Assigned operator permissions');
     }
 
     // Show results
@@ -128,7 +86,13 @@ async function seedPermissions() {
 
   } catch (error) {
     console.error('Error seeding permissions:', error);
-    process.exit(1);
+    process.exitCode = 1;
+  } finally {
+    try {
+      await pool.end();
+    } catch {
+      // ignore
+    }
   }
 }
 

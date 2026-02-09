@@ -1,0 +1,48 @@
+meta {
+  name: Delete Role
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/roles/:role_id
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 6
+}
+
+docs {
+  # Delete Role
+  
+  Deletes a non-system role from the system.
+  
+  ## Permission Required
+  - `roles.delete`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID to delete |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Role deleted successfully",
+    "data": {
+      "message": "Role deleted successfully"
+    }
+  }
+  ```
+  
+  ## Notes
+  - System roles (super_admin, admin, analyst, operator, viewer) cannot be deleted
+  - Roles assigned to users cannot be deleted - remove from users first
+}

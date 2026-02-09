@@ -1,10 +1,10 @@
 -- Script to seed all permissions and assign them to roles
 -- This script should be run after the initial schema and seed data are loaded
 
-USE machine_cure_db;
+USE maritime_surveillance_db;
 
 -- Define all permissions from the system
-SET @all_perms = 'user.list,user.update,user.status.update,user.role.update,user.analytics,user.delete,permission.add,permission.list,permission.delete,permission.assign,permission.revoke,role.list,role.view,role.create,role.update,role.delete,divisionType.add,divisionType.list,divisionType.update,divisionType.delete,division.add,division.list,division.update,division.delete,machine.add,machine.list,machine.update,machine.delete,meter.add,meter.list,meter.update,meter.delete,parameter.add,parameter.list,parameter.update,parameter.delete,breakdown.add,breakdown.list,breakdown.view,breakdown.update,breakdown.delete,breakdown.updateStatus,breakdown.assign,breakdown.startRepair,breakdown.completeRepair,breakdownCategory.add,breakdownCategory.list,breakdownCategory.view,breakdownCategory.update,breakdownCategory.delete,breakdownStatus.add,breakdownStatus.list,breakdownStatus.view,breakdownStatus.update,breakdownStatus.delete,breakdown.comment.add,breakdown.comment.list,breakdown.comment.view,breakdown.comment.update,breakdown.comment.delete,breakdown.repair.add,breakdown.repair.list,breakdown.repair.view,breakdown.repair.update,breakdown.repair.start,breakdown.repair.complete,breakdown.repair.delete,breakdown.analytics.view,notification.list,notification.view,notification.read,notification.delete,dashboard.view,activity.list,activity.view,maintenance.add,maintenance.list,maintenance.update,maintenance.delete,maintenance.status.update,kaizen.create,kaizen.view,kaizen.update,kaizen.delete,kaizen.assign,kaizen.approve,kaizen.comment,kaizen.view_all,kaizen.report,kaizen.manage';
+SET @all_perms = 'user.list,user.view,user.update,user.status.update,user.role.update,permission.list,permission.assign,permission.revoke,role.list,role.view,role.create,role.update,role.delete,vessel.create,vessel.list,vessel.view,vessel.update,vessel.delete,position.create,position.list,position.view,alert.create,alert.list,alert.view,alert.update,alert.updateStatus,alert.assign,notification.list,notification.view,notification.read,notification.delete,activity.list,activity.view';
 
 -- Insert all permissions if they don't exist
 DROP TEMPORARY TABLE IF EXISTS tmp_all_perms;

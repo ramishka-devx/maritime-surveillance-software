@@ -1,0 +1,61 @@
+meta {
+  name: Assign Permission to Role
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/roles/:role_id/permissions/assign
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 2
+}
+
+body:json {
+  {
+    "permission_id": 5
+  }
+}
+
+docs {
+  # Assign Permission to Role
+  
+  Assigns a single permission to a role.
+  
+  ## Permission Required
+  - `roles.permissions.assign`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | permission_id | integer | Yes | The permission ID to assign |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Permission assigned to role",
+    "data": {
+      "role_id": 2,
+      "permission_id": 5,
+      "message": "Permission assigned"
+    }
+  }
+  ```
+  
+  ## Notes
+  - If permission is already assigned, no error is thrown (idempotent)
+  - The granting user is recorded for audit purposes
+}

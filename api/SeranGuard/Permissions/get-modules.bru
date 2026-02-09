@@ -1,0 +1,43 @@
+meta {
+  name: Get Permission Modules
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/permissions/modules
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # Get Permission Modules
+  
+  Returns a list of all permission modules with permission counts.
+  
+  ## Permission Required
+  - `permissions.list`
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": [
+      { "module": "activities", "permission_count": 8 },
+      { "module": "alerts", "permission_count": 9 },
+      { "module": "analytics", "permission_count": 5 },
+      { "module": "map", "permission_count": 7 },
+      { "module": "notifications", "permission_count": 3 },
+      { "module": "permissions", "permission_count": 4 },
+      { "module": "roles", "permission_count": 9 },
+      { "module": "system", "permission_count": 5 },
+      { "module": "users", "permission_count": 11 },
+      { "module": "vessels", "permission_count": 10 }
+    ]
+  }
+  ```
+}

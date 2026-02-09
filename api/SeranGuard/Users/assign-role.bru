@@ -1,0 +1,64 @@
+meta {
+  name: Assign Role to User
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/users/:user_id/roles/assign
+  body: json
+  auth: bearer
+}
+
+params:path {
+  user_id: 15
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "role_id": 3
+  }
+}
+
+docs {
+  # Assign Role to User
+  
+  Adds a role to a user's role set. Users can have multiple roles.
+  
+  ## Permission Required
+  - `users.roles.assign`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | role_id | integer | Yes | The role ID to assign |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Role assigned to user",
+    "data": {
+      "user_id": 15,
+      "roles": [
+        { "role_id": 4, "name": "operator" },
+        { "role_id": 3, "name": "analyst" }
+      ]
+    }
+  }
+  ```
+  
+  ## Notes
+  - Adding a role that's already assigned is idempotent (no error)
+  - User's effective permissions are the union of all role permissions
+  - User's token must be refreshed to get updated permissions
+}

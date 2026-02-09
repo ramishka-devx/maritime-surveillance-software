@@ -1,0 +1,57 @@
+meta {
+  name: List Permissions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/permissions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+query {
+  page: 1
+  limit: 50
+  ~module: vessels
+}
+
+docs {
+  # List Permissions
+  
+  Returns a paginated list of all permissions in the system.
+  
+  ## Permission Required
+  - `permissions.list`
+  
+  ## Query Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | page | integer | Page number (default: 1) |
+  | limit | integer | Items per page (default: 50) |
+  | module | string | Filter by module (optional) |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "rows": [
+        {
+          "permission_id": 1,
+          "name": "users.list",
+          "module": "users",
+          "description": "View list of all users",
+          "is_active": 1,
+          "created_at": "2026-01-21T00:00:00.000Z"
+        }
+      ],
+      "total": 50
+    }
+  }
+  ```
+}

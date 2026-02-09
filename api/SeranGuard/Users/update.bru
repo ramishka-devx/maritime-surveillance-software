@@ -1,0 +1,67 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/users/:user_id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  user_id: 15
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "name": "Jane Smith",
+    "email": "jane.smith@maritime.gov",
+    "is_active": true
+  }
+}
+
+docs {
+  # Update User
+  
+  Updates an existing user's information.
+  
+  ## Permission Required
+  - `users.update`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | No | User's full name |
+  | email | string | No | Unique email address |
+  | is_active | boolean | No | Account status |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "User updated",
+    "data": {
+      "user_id": 15,
+      "name": "Jane Smith",
+      "email": "jane.smith@maritime.gov",
+      "is_active": 1
+    }
+  }
+  ```
+  
+  ## Notes
+  - To change password, use the password reset endpoint
+  - To update roles, use the role sync endpoint
+  - Cannot deactivate your own account
+}

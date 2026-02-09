@@ -1,48 +1,46 @@
--- Seed roles
-INSERT INTO roles (role_id, name) VALUES (1, 'admin') ON DUPLICATE KEY UPDATE name = VALUES(name);
-INSERT INTO roles (role_id, name) VALUES (2, 'user') ON DUPLICATE KEY UPDATE name = VALUES(name);
+-- Maritime Surveillance seed data
 
--- Seed permissions
-SET @perms = 'user.list,user.update,user.status.update,user.analytics,user.delete,permission.add,permission.list,permission.delete,permission.assign,permission.revoke,divisionType.add,divisionType.list,divisionType.update,divisionType.delete,division.add,division.list,division.update,division.delete,machine.add,machine.list,machine.update,machine.delete,meter.add,meter.list,meter.update,meter.delete,parameter.add,parameter.list,parameter.update,parameter.delete,breakdown.add,breakdown.list,breakdown.view,breakdown.update,breakdown.delete,breakdown.updateStatus,breakdown.assign,breakdown.startRepair,breakdown.completeRepair,breakdownCategory.add,breakdownCategory.list,breakdownCategory.update,breakdownCategory.delete,breakdownStatus.add,breakdownStatus.list,breakdownStatus.update,breakdownStatus.delete,breakdownComment.add,breakdownComment.list,breakdownComment.update,breakdownComment.delete,breakdownRepair.add,breakdownRepair.list,breakdownRepair.update,breakdownRepair.delete,notification.list,notification.view,notification.read,notification.delete';
+-- Roles
+INSERT INTO roles (role_id, name)
+VALUES
+	(1, 'super_admin'),
+	(2, 'operator')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
 
--- Insert permissions if not exists
-DROP TEMPORARY TABLE IF EXISTS tmp_perms;
-CREATE TEMPORARY TABLE tmp_perms (name VARCHAR(100) UNIQUE);
-SET @sql = CONCAT('INSERT IGNORE INTO permissions (name) VALUES ', REPLACE(@perms, ',', "'), ('"), "('");
-SET @sql = REPLACE(@sql, "VALUES ", "VALUES ('");
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+-- Users
+-- Passwords (dev only):
+-- super_admin: Admin123!
+-- operator: Operator123!
+INSERT INTO users (user_id, first_name, last_name, username, email, password_hash, role_id, status)
+VALUES
+	(1, 'Super', 'Admin', 'admin', 'admin@seranguard.local', '$2b$10$yR7bMcnL4WyS9gpf6jbftO52vwUTEfCnaYqwlKzwPhhpOnWOTtyWm', 1, 'verified'),
+	(2, 'Ops', 'Operator', 'operator', 'operator@seranguard.local', '$2b$10$QkGq8adQcoVRKMfLnvfG0OFk39BPyZ98yaoZrrvZ6BjlQqLF3DIgi', 2, 'verified')
+ON DUPLICATE KEY UPDATE
+	first_name = VALUES(first_name),
+	last_name = VALUES(last_name),
+	username = VALUES(username),
+	password_hash = VALUES(password_hash),
+	role_id = VALUES(role_id),
+	status = VALUES(status);
 
--- Grant all permissions to admin (role_id = 1)
-INSERT IGNORE INTO role_permissions (role_id, permission_id)
-SELECT 1, permission_id FROM permissions;
+-- Vessels
+INSERT INTO vessels (vessel_id, mmsi, imo, name, callsign, flag, vessel_type, length_m, width_m)
+VALUES
+	(1, '123456789', 'IMO1234567', 'SERAN GUARD', 'SG001', 'Unknown', 'Patrol', 35.50, 7.20)
+ON DUPLICATE KEY UPDATE
+	name = VALUES(name),
+	callsign = VALUES(callsign),
+	flag = VALUES(flag),
+	vessel_type = VALUES(vessel_type),
+	length_m = VALUES(length_m),
+	width_m = VALUES(width_m);
 
--- Seed breakdown_statuses
-INSERT IGNORE INTO breakdown_statuses (name, description, sort_order) VALUES
--- Core workflow statuses
-('Reported', 'Initial status when a breakdown is first reported', 1),
-('Open', 'Breakdown has been acknowledged but not yet assigned', 2),
-('Assigned', 'Breakdown has been assigned to a technician', 3),
-('In Repair', 'Repair work is currently in progress', 4),
-('Completed', 'Repair work has been completed', 5),
-('Verified', 'Repair has been verified and tested', 6),
-('Closed', 'Breakdown issue has been fully resolved', 7),
--- Additional workflow statuses
-('On Hold', 'Repair work is temporarily paused (waiting for parts, approval, etc.)', 8),
-('Cancelled', 'Breakdown report was invalid or cancelled', 9);
+-- Positions (sample)
+INSERT INTO vessel_positions (vessel_id, recorded_at, lat, lon, sog_kn, cog_deg, heading_deg, nav_status, source)
+VALUES
+	(1, UTC_TIMESTAMP(), 6.524379, 3.379206, 12.4, 86.2, 85, 'Under way using engine', 'ais');
 
--- Seed breakdown_categories
-INSERT IGNORE INTO breakdown_categories (name, description) VALUES
-('Mechanical', 'Issues related to mechanical components, moving parts, wear and tear'),
-('Electrical', 'Problems with electrical systems, wiring, motors, controls'),
-('Software', 'Issues with software, programming, automation systems'),
-('Hydraulic', 'Problems with hydraulic systems, pumps, cylinders, fluid leaks'),
-('Pneumatic', 'Issues with compressed air systems, valves, actuators'),
-('Safety', 'Safety system failures, emergency stops, protective equipment'),
-('Calibration', 'Accuracy issues, measurement problems, sensor drift'),
-('Lubrication', 'Problems with lubrication systems, oil leaks, grease issues'),
-('Cooling', 'Overheating issues, cooling system failures, ventilation problems'),
-('Material Handling', 'Conveyor issues, feeding problems, material flow disruptions'),
-('Quality', 'Product quality issues caused by machine problems'),
-('Other', 'Issues that do not fit into other categories');
+-- Alerts (sample)
+INSERT INTO alerts (vessel_id, type, severity, status, title, description, created_by, assigned_to)
+VALUES
+	(1, 'manual', 'medium', 'open', 'Test alert', 'Sample alert for maritime surveillance', 1, 2);

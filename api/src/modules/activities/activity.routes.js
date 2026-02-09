@@ -7,16 +7,30 @@ import { listSchema, getByIdSchema } from './activity.validation.js';
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/activities:
+ *   get:
+ *     summary: List activity logs
+ *     tags: [Activities]
+ */
 router.get('/',
   authMiddleware,
-  permissionMiddleware('activity.list'),
+  permissionMiddleware(['activities.logs.list', 'users.activity.view']),
   validate(listSchema),
   ActivityController.list
 );
 
+/**
+ * @openapi
+ * /api/activities/{activity_id}:
+ *   get:
+ *     summary: Get activity log by ID
+ *     tags: [Activities]
+ */
 router.get('/:activity_id',
   authMiddleware,
-  permissionMiddleware('activity.view'),
+  permissionMiddleware(['activities.logs.view', 'users.activity.view']),
   validate(getByIdSchema),
   ActivityController.getById
 );
