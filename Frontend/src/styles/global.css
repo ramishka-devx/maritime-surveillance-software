@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #0a1624;
+    --panel: rgba(16, 33, 54, 0.85);
+    --accent: #35c2ff;
+    --accent-2: #75f7ff;
+    --text: #e8f0fb;
+    --muted: #99abc5;
+    --border: #1e2f4a;
+    --success: #2dd4bf;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+  }
+
+  html {
+    font-family: 'Urbanist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply text-[#e8f0fb];
+    background: radial-gradient(circle at 20% 20%, rgba(53, 194, 255, 0.15), transparent 35%),
+      radial-gradient(circle at 80% 30%, rgba(117, 247, 255, 0.12), transparent 40%),
+      #060e1a;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: transparent;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-[rgba(16,33,54,0.85)] border border-[#1e2f4a] rounded-2xl p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)];
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(53,194,255,0.1)] text-[#35c2ff] border border-[rgba(53,194,255,0.35)] text-sm font-semibold;
+  }
+
+  .muted {
+    @apply text-[#99abc5];
+  }
+
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-ok {
+    @apply bg-[#2dd4bf];
+  }
+
+  .status-warn {
+    @apply bg-[#f59e0b];
+  }
+
+  .status-error {
+    @apply bg-[#ef4444];
+  }
+}
+
+.status-warn {
+  background: var(--warn);
+}
+
+.status-crit {
+  background: var(--danger);
+}
