@@ -1,132 +1,322 @@
-import React from 'react';
+import React, { useMemo, useState } from "react";
+import Navbar from "../components/Navbar";
+import AlertsPanel from "../components/AlertsPanel";
+
+const severityStyles = {
+  Critical: {
+    pill: "bg-red-500/15 text-red-300 border-red-500/30",
+    dot: "bg-red-500",
+    icon: "⛔",
+  },
+  High: {
+    pill: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+    dot: "bg-orange-500",
+    icon: "⚠️",
+  },
+  Medium: {
+    pill: "bg-yellow-500/15 text-yellow-200 border-yellow-500/30",
+    dot: "bg-yellow-400",
+    icon: "⚠️",
+  },
+  Low: {
+    pill: "bg-emerald-500/15 text-emerald-200 border-emerald-500/30",
+    dot: "bg-emerald-400",
+    icon: "ℹ️",
+  },
+};
 
 const Dashboard = () => {
-  const stats = [
-    { title: 'Active Vessels', value: '248', change: '+12', icon: '⚓', color: '#088395' },
-    { title: 'Active Alerts', value: '7', change: '-3', icon: '⚠️', color: '#f59e0b' },
-    { title: 'Zones Monitored', value: '15', change: '0', icon: '🗺️', color: '#10b981' },
-    { title: 'System Status', value: '98%', change: '+2%', icon: '✓', color: '#0a4d68' },
-  ];
+  const [alertFilter, setAlertFilter] = useState("All");
 
-  const recentActivity = [
-    { id: 1, vessel: 'MV Ocean Star', type: 'Entry', zone: 'Zone A-1', time: '2 mins ago', status: 'normal' },
-    { id: 2, vessel: 'SS Neptune', type: 'Alert', zone: 'Zone B-3', time: '15 mins ago', status: 'warning' },
-    { id: 3, vessel: 'HMS Guardian', type: 'Exit', zone: 'Zone A-2', time: '32 mins ago', status: 'normal' },
-    { id: 4, vessel: 'MV Atlantic', type: 'Entry', zone: 'Zone C-1', time: '1 hour ago', status: 'normal' },
-    { id: 5, vessel: 'SS Pacific', type: 'Speed Alert', zone: 'Zone B-1', time: '2 hours ago', status: 'critical' },
-  ];
+  const alerts = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "AIS Spoofing Detected",
+        vessel: "MV Ocean Star • MMSI 563829104",
+        meta: "Last seen near restricted zone • 2 min ago",
+        severity: "High",
+        action: "Locate",
+      },
+      {
+        id: 2,
+        title: "Loitering Behavior",
+        vessel: "SS Neptune • MMSI 441208773",
+        meta: "Speed < 2 knots for 18 min • 7 min ago",
+        severity: "Medium",
+        action: "Locate",
+      },
+      {
+        id: 3,
+        title: "Restricted Zone Violation",
+        vessel: "HMS Guardian • MMSI 271998120",
+        meta: "Entered Zone B-3 • 12 min ago",
+        severity: "Critical",
+        action: "Respond",
+      },
+      {
+        id: 4,
+        title: "Dark Vessel Detected",
+        vessel: "Unknown vessel",
+        meta: "Radar track without AIS • 26 min ago",
+        severity: "High",
+        action: "Investigate",
+      },
+      {
+        id: 5,
+        title: "Speed Anomaly",
+        vessel: "SS Pacific • MMSI 538110022",
+        meta: "Unusual speed change detected • 44 min ago",
+        severity: "Low",
+        action: "View",
+      },
+    ],
+    []
+  );
 
-  const vesselsByZone = [
-    { zone: 'Zone A', vessels: 67, percentage: 27 },
-    { zone: 'Zone B', vessels: 89, percentage: 36 },
-    { zone: 'Zone C', vessels: 54, percentage: 22 },
-    { zone: 'Zone D', vessels: 38, percentage: 15 },
-  ];
+
+  const filteredAlerts = useMemo(() => {
+    if (alertFilter === "All") return alerts;
+    return alerts.filter((a) => a.severity === alertFilter);
+  }, [alerts, alertFilter]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e] p-8 animate-fadeIn">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Maritime Surveillance Dashboard</h1>
-        <p className="text-lg text-gray-400">Real-time monitoring and analytics</p>
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-[#0b1220] to-[#111b2e] px-6 py-5">
+      {/* Page Title Row (matches “Dashboard” bar look) */}
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-white">Dashboard</h1>
+          <p className="text-xs text-[#9aa8c7]">
+            Real-time vessel monitoring & alerts
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+            Refresh
+          </button>
+          <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+            Fullscreen
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-[#1a2942] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-l-4 border-gray-700" style={{ borderLeftColor: stat.color }}>
-            <div className="text-4xl mb-4">{stat.icon}</div>
-            <p className="text-sm text-gray-400 font-semibold mb-2">{stat.title}</p>
-            <div className="flex items-baseline gap-3">
-              <h2 className="text-3xl font-bold text-white">{stat.value}</h2>
-              <span className={`text-sm font-semibold px-2 py-1 rounded ${
-                stat.change.startsWith('+') ? 'bg-green-500/10 text-green-400' :
-                stat.change.startsWith('-') ? 'bg-red-500/10 text-red-400' :
-                'bg-gray-700 text-gray-400'
-              }`}>
-                {stat.change}
+      {/* Main Grid: Map + Alerts rail */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
+        {/* LEFT: MAP AREA */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+          {/* Map Header strip */}
+          <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-white">
+                Maritime Map
+              </span>
+              <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                LIVE
               </span>
             </div>
-          </div>
-        ))}
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-[#1a2942] rounded-2xl p-6 shadow-lg border border-gray-700">
-          <div className="flex justify-between items-center mb-5 pb-4 border-b border-gray-700">
-            <h3 className="text-xl font-bold text-white">Recent Activity</h3>
-            <span className="flex items-center gap-2 text-sm font-semibold text-green-400">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              Live
-            </span>
+            <div className="flex items-center gap-2">
+              <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+                Layers
+              </button>
+              <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+                Zones
+              </button>
+              <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+                Filters
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col gap-3">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex gap-3 p-3 bg-[#0b1220] rounded-xl hover:bg-[#111b2e] transition-colors border border-gray-800">
-                <div className={`w-1.5 rounded-full flex-shrink-0 ${
-                  activity.status === 'normal' ? 'bg-green-500' :
-                  activity.status === 'warning' ? 'bg-yellow-500' :
-                  'bg-red-500'
-                }`}></div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-white truncate">{activity.vessel}</span>
-                    <span className="text-xs bg-[#243b78] text-blue-200 px-2 py-0.5 rounded font-semibold">{activity.type}</span>
-                  </div>
-                  <div className="flex gap-2 text-xs text-gray-400">
-                    <span>{activity.zone}</span>
-                    <span>•</span>
-                    <span>{activity.time}</span>
-                  </div>
-                </div>
+
+          
+          <div className="relative h-[72vh] min-h-[520px] bg-[#0f1a2d]">
+            {/* Fake map texture */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.06),transparent_35%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.05),transparent_35%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.04),transparent_45%)]" />
+            <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:60px_60px]" />
+
+           
+            <div className="absolute left-4 top-4 w-[240px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-xs font-bold text-white">Filters & Search</div>
+                <button className="text-[10px] font-semibold text-[#9aa8c7] hover:text-white">
+                  Reset
+                </button>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-[#1a2942] rounded-2xl p-6 shadow-lg border border-gray-700">
-          <div className="flex justify-between items-center mb-5 pb-4 border-b border-gray-700">
-            <h3 className="text-xl font-bold text-white">Vessel Distribution</h3>
-            <button className="text-xs font-semibold text-[#f28c1b] hover:text-orange-400 px-3 py-1.5 border border-[#f28c1b]/30 rounded-lg transition-colors">View All</button>
-          </div>
-          <div className="flex flex-col gap-4">
-            {vesselsByZone.map((item, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-200">{item.zone}</span>
-                  <span className="text-sm text-gray-400">{item.vessels} vessels</span>
-                </div>
-                <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-400" 
-                    style={{ width: `${item.percentage}%` }}
-                  ></div>
-                </div>
-                <div className="text-right text-xs text-gray-500 font-medium">{item.percentage}%</div>
+              <input
+                placeholder="Search MMSI / Vessel"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder:text-[#7f8db3] outline-none focus:border-[#f28c1b]/60"
+              />
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Chip label="All" active />
+                <Chip label="Risk" />
+                <Chip label="AIS Off" />
+                <Chip label="Zone" />
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
 
-      <div className="bg-[#1a2942] rounded-2xl p-6 shadow-lg border border-gray-700">
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
-          <h3 className="text-xl font-bold text-white">Surveillance Map</h3>
-          <div className="flex gap-2">
-            <button className="text-sm font-semibold text-gray-300 px-3 py-2 border border-gray-600 rounded-lg hover:bg-[#243b78] transition-colors">Refresh</button>
-            <button className="text-sm font-semibold text-gray-300 px-3 py-2 border border-gray-600 rounded-lg hover:bg-[#243b78] transition-colors">Fullscreen</button>
+            
+            <div className="absolute bottom-4 left-4 w-[260px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-xs font-bold text-white">MV Ocean Star</div>
+                <span className="rounded-md border border-sky-400/20 bg-sky-400/10 px-2 py-0.5 text-[10px] font-bold text-sky-200">
+                  Cargo
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <InfoRow k="MMSI" v="563829104" />
+                <InfoRow k="Speed" v="12.3 kn" />
+                <InfoRow k="Course" v="SW 214°" />
+                <InfoRow k="Status" v="Tracking" />
+              </div>
+
+              <div className="mt-3 flex gap-2">
+                <button className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+                  Details
+                </button>
+                <button className="flex-1 rounded-lg bg-[#f28c1b] px-3 py-2 text-xs font-semibold text-white hover:bg-[#d97706]">
+                  Track
+                </button>
+              </div>
+            </div>
+
+            {/* Overlay: Legend (top-right like screenshot) */}
+            <div className="absolute right-4 top-4 w-[170px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur">
+              <div className="mb-2 text-xs font-bold text-white">Legend</div>
+              <LegendRow label="Normal" dot="bg-emerald-400" />
+              <LegendRow label="Warning" dot="bg-yellow-400" />
+              <LegendRow label="Critical" dot="bg-red-500" />
+              <LegendRow label="Unknown" dot="bg-slate-400" />
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center py-16 bg-[#0b1220] rounded-xl border-2 border-dashed border-gray-700">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-gray-600 mb-3">
-            <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <line x1="8" y1="2" x2="8" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <line x1="16" y1="6" x2="16" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <p className="text-lg font-semibold text-gray-400 mb-1">Interactive Map View</p>
-          <span className="text-sm text-gray-500">Showing 248 active vessels across 15 monitored zones</span>
-        </div>
+
+        {/* RIGHT: ALERTS PANEL */}
+        <aside className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
+            <div>
+              <div className="text-sm font-bold text-white">Active Alerts</div>
+              <div className="text-[11px] text-[#9aa8c7]">
+                {filteredAlerts.length} showing
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <select
+                value={alertFilter}
+                onChange={(e) => setAlertFilter(e.target.value)}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] outline-none"
+              >
+                <option value="All">All</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="max-h-[72vh] min-h-[520px] overflow-y-auto p-3">
+            <div className="space-y-3">
+              {filteredAlerts.map((a) => {
+                const s = severityStyles[a.severity] || severityStyles.Low;
+                return (
+                  <div
+                    key={a.id}
+                    className="rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`mt-1 h-2.5 w-2.5 rounded-full ${s.dot}`}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs font-bold text-white">
+                              {a.title}
+                            </div>
+                            <span
+                              className={`rounded-md border px-2 py-0.5 text-[10px] font-bold ${s.pill}`}
+                            >
+                              {a.severity}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-[11px] text-[#c9d3ee]">
+                            {a.vessel}
+                          </div>
+                          <div className="mt-1 text-[11px] text-[#7f8db3]">
+                            {a.meta}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button className="h-fit rounded-lg bg-[#f28c1b] px-3 py-2 text-[11px] font-bold text-white hover:bg-[#d97706]">
+                        {a.action}
+                      </button>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between text-[11px] text-[#9aa8c7]">
+                      <span className="flex items-center gap-2">
+                        <span className="opacity-80">{s.icon}</span>
+                        Suggested: {a.action}
+                      </span>
+                      <button className="font-semibold text-[#c9d3ee] hover:text-white">
+                        View details →
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Footer strip */}
+          <div className="border-t border-white/10 bg-white/5 px-4 py-3 text-[11px] text-[#9aa8c7]">
+            Tip: Click an alert to center the map on the vessel.
+          </div>
+        </aside>
       </div>
     </div>
   );
 };
+
+function Chip({ label, active }) {
+  return (
+    <button
+      className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold border transition ${
+        active
+          ? "bg-[#f28c1b]/15 text-[#ffd7a8] border-[#f28c1b]/30"
+          : "bg-white/5 text-[#9aa8c7] border-white/10 hover:bg-white/10 hover:text-white"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function InfoRow({ k, v }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-[#7f8db3]">
+        {k}
+      </div>
+      <div className="text-[11px] font-semibold text-white">{v}</div>
+    </div>
+  );
+}
+
+function LegendRow({ label, dot }) {
+  return (
+    <div className="flex items-center justify-between py-1 text-[11px] text-[#c9d3ee]">
+      <div className="flex items-center gap-2">
+        <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
+        <span>{label}</span>
+      </div>
+    </div>
+  );
+}
 
 export default Dashboard;

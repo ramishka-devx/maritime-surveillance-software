@@ -7,15 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        'primary-blue': '#243b78',
-        'accent-orange': '#f28c1b',
-        'nav-bg': '#0b1220',
-        'nav-bg-soft': '#111b2e',
-        'dark-text': '#0f172a',
-        'gray-text': '#64748b',
-        'text-muted': '#94a3b8',
-        'text-placeholder': '#cbd5e1',
-      },
+    'primary-blue': '#1b398e',
+    'accent-orange': '#f28c1b',
+
+    // NEW navbar blue
+    'navbar-blue': '#2150b0',
+
+    'nav-bg': '#0b1220',
+    'nav-bg-soft': '#111b2e',
+    'dark-text': '#0f172a',
+    'gray-text': '#64748b',
+    'text-muted': '#94a3b8',
+    'text-placeholder': '#cbd5e1',
+  },
       backgroundColor: {
         'input-bg': '#f1f5f9',
         'error-bg': '#fee2e2',

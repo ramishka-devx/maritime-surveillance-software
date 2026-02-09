@@ -1,224 +1,291 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from "react";
 
-const Reports = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
+const TYPE_STYLES = {
+  Summary: "bg-white/5 text-white/80 border-white/10",
+  Anomaly: "bg-amber-500/10 text-amber-200 border-amber-400/20",
+  Security: "bg-red-500/10 text-red-200 border-red-400/20",
+  Violation: "bg-purple-500/10 text-purple-200 border-purple-400/20",
+  Analysis: "bg-sky-500/10 text-sky-200 border-sky-400/20",
+};
 
-  const reportTypes = [
-    {
-      id: 1,
-      title: 'Vessel Activity Report',
-      description: 'Comprehensive analysis of all vessel movements and activities',
-      icon: '⚓',
-      count: 248,
-      color: '#088395'
-    },
-    {
-      id: 2,
-      title: 'Security Incidents',
-      description: 'Detailed report of all security-related incidents and alerts',
-      icon: '🚨',
-      count: 23,
-      color: '#ef4444'
-    },
-    {
-      id: 3,
-      title: 'Zone Analysis',
-      description: 'Traffic patterns and statistics for each monitored zone',
-      icon: '🗺️',
-      count: 15,
-      color: '#10b981'
-    },
-    {
-      id: 4,
-      title: 'Compliance Report',
-      description: 'Regulatory compliance status and violations',
-      icon: '📋',
-      count: 12,
-      color: '#f59e0b'
-    },
-  ];
+function DocIcon() {
+  return (
+    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <polyline
+          points="14 2 14 8 20 8"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
 
-  const recentReports = [
-    {
-      id: 1,
-      title: 'Weekly Surveillance Summary',
-      type: 'Activity Report',
-      date: 'Jan 18, 2026',
-      size: '2.4 MB',
-      status: 'completed'
-    },
-    {
-      id: 2,
-      title: 'Monthly Security Analysis',
-      type: 'Security Report',
-      date: 'Jan 15, 2026',
-      size: '5.1 MB',
-      status: 'completed'
-    },
-    {
-      id: 3,
-      title: 'Zone B Traffic Patterns',
-      type: 'Zone Analysis',
-      date: 'Jan 14, 2026',
-      size: '1.8 MB',
-      status: 'completed'
-    },
-    {
-      id: 4,
-      title: 'Compliance Audit Q1 2026',
-      type: 'Compliance Report',
-      date: 'Jan 10, 2026',
-      size: '3.2 MB',
-      status: 'completed'
-    },
-    {
-      id: 5,
-      title: 'Incident Response Summary',
-      type: 'Security Report',
-      date: 'Jan 8, 2026',
-      size: '1.5 MB',
-      status: 'completed'
-    },
-  ];
+function DownloadIcon() {
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 10l5 5 5-5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 15V3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-  const statistics = [
-    { label: 'Total Reports Generated', value: '1,247', change: '+12%' },
-    { label: 'Active Monitoring Hours', value: '8,760', change: '100%' },
-    { label: 'Incidents Documented', value: '156', change: '-8%' },
-    { label: 'Compliance Score', value: '94%', change: '+3%' },
-  ];
+export default function Reports() {
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("Newest");
+
+  // Screenshot-like list
+  const recentReports = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Daily Surveillance Summary",
+        date: "2024-01-15",
+        type: "Summary",
+        stats: "12 alerts • 156 vessels",
+      },
+      {
+        id: 2,
+        title: "Anomaly Detection Report",
+        date: "2024-01-15",
+        type: "Anomaly",
+        stats: "8 alerts • 9 vessels",
+      },
+      {
+        id: 3,
+        title: "AIS Spoofing Incidents",
+        date: "2024-01-14",
+        type: "Security",
+        stats: "3 alerts • 3 vessels",
+      },
+      {
+        id: 4,
+        title: "Restricted Zone Violations",
+        date: "2024-01-14",
+        type: "Violation",
+        stats: "5 alerts • 5 vessels",
+      },
+      {
+        id: 5,
+        title: "Weekly Activity Analysis",
+        date: "2024-01-12",
+        type: "Analysis",
+        stats: "45 alerts • 892 vessels",
+      },
+    ],
+    []
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    let arr = recentReports.filter((r) => {
+      const qOk = q.length === 0 ? true : `${r.title} ${r.type}`.toLowerCase().includes(q);
+      const tOk = typeFilter === "All" ? true : r.type === typeFilter;
+      return qOk && tOk;
+    });
+
+    arr.sort((a, b) => {
+      if (sortBy === "Newest") return b.date.localeCompare(a.date);
+      if (sortBy === "Oldest") return a.date.localeCompare(b.date);
+      if (sortBy === "Title A-Z") return a.title.localeCompare(b.title);
+      if (sortBy === "Title Z-A") return b.title.localeCompare(a.title);
+      return 0;
+    });
+
+    return arr;
+  }, [recentReports, query, typeFilter, sortBy]);
+
+  const types = useMemo(() => ["All", ...Array.from(new Set(recentReports.map((r) => r.type)))], [recentReports]);
+
+  const handleDownload = (report) => {
+    // TODO: Replace with real download logic later
+    alert(`Downloading: ${report.title}`);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e] p-8">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Reports & Analytics</h1>
-          <p className="text-gray-400">Generate and manage surveillance reports</p>
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-nav-bg to-nav-bg-soft px-6 py-5">
+      <div className="mx-auto max-w-[1100px]">
+        {/* Header */}
+        <div className="mb-4">
+          <h1 className="text-lg font-extrabold text-accent-orange">Reports</h1>
+          <p className="text-xs font-semibold text-text-muted">
+            Generate and download surveillance reports
+          </p>
         </div>
-        <button className="flex items-center gap-2 bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Export All
-        </button>
-      </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statistics.map((stat, index) => (
-          <div key={index} className="bg-[#1a2942] border border-gray-700 rounded-lg p-5 hover:shadow-lg transition-shadow duration-200">
-            <p className="text-gray-400 text-sm mb-2">{stat.label}</p>
-            <div className="flex justify-between items-end">
-              <h3 className="text-2xl font-bold text-white">{stat.value}</h3>
-              <span className={`text-sm font-semibold ${stat.change.startsWith('+') ? 'text-green-400' : stat.change.startsWith('-') ? 'text-red-400' : 'text-gray-400'}`}>
-                {stat.change}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Generate New Report Section */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-4">Generate New Report</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {reportTypes.map((report) => (
-            <div key={report.id} className="bg-[#1a2942] border-l-4 border-gray-600 rounded-lg p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1" style={{ borderLeftColor: report.color }}>
-              <div className="text-4xl mb-3">{report.icon}</div>
-              <h3 className="text-lg font-bold text-white mb-2">{report.title}</h3>
-              <p className="text-gray-400 text-sm mb-4">{report.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-300">{report.count} records</span>
-                <button className="flex items-center gap-1 text-[#f28c1b] hover:text-orange-300 font-semibold transition-colors duration-200">
-                  Generate
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+        {/* Controls bar (modern, but still matches screenshot) */}
+        <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            {/* Search */}
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <span className="text-white/70">🔎</span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search reports..."
+                className="w-full md:w-[320px] bg-transparent text-xs font-semibold text-white placeholder:text-text-muted outline-none"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-extrabold text-white/80 hover:bg-white/10"
+                >
+                  Clear
                 </button>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Recent Reports Section */}
-      <div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h2 className="text-2xl font-bold text-white">Recent Reports</h2>
-          <div className="flex gap-2">
-            <button 
-              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${selectedPeriod === 'week' ? 'bg-[#f28c1b] text-white' : 'bg-[#1a2942] text-gray-400 hover:bg-[#253659]'}`}
-              onClick={() => setSelectedPeriod('week')}
-            >
-              This Week
-            </button>
-            <button 
-              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${selectedPeriod === 'month' ? 'bg-[#f28c1b] text-white' : 'bg-[#1a2942] text-gray-400 hover:bg-[#253659]'}`}
-              onClick={() => setSelectedPeriod('month')}
-            >
-              This Month
-            </button>
-            <button 
-              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${selectedPeriod === 'year' ? 'bg-[#f28c1b] text-white' : 'bg-[#1a2942] text-gray-400 hover:bg-[#253659]'}`}
-              onClick={() => setSelectedPeriod('year')}
-            >
-              This Year
-            </button>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
+              >
+                {types.map((t) => (
+                  <option key={t} value={t}>
+                    {t === "All" ? "All Types" : t}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
+              >
+                <option>Newest</option>
+                <option>Oldest</option>
+                <option>Title A-Z</option>
+                <option>Title Z-A</option>
+              </select>
+
+              {/* Stub button for future feature */}
+              <button
+                type="button"
+                onClick={() => alert("Open report generator modal (TODO)")}
+                className="rounded-xl bg-primary-blue px-3 py-2 text-[11px] font-extrabold text-white hover:bg-[#1f3570] transition"
+              >
+                + Generate
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Reports Table */}
-        <div className="bg-[#1a2942] border border-gray-700 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 bg-[#0b1220] p-4 border-b border-gray-700">
-            <div className="col-span-4 text-gray-400 font-semibold text-sm">Report Name</div>
-            <div className="col-span-2 text-gray-400 font-semibold text-sm">Type</div>
-            <div className="col-span-2 text-gray-400 font-semibold text-sm">Date</div>
-            <div className="col-span-2 text-gray-400 font-semibold text-sm">Size</div>
-            <div className="col-span-2 text-gray-400 font-semibold text-sm">Actions</div>
-          </div>
-          {recentReports.map((report) => (
-            <div key={report.id} className="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 hover:bg-[#253659] transition-colors duration-200 last:border-b-0">
-              <div className="col-span-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span className="text-white text-sm">{report.title}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="bg-[#243b78] text-[#88b0ff] px-2 py-1 rounded text-xs font-medium">{report.type}</span>
-              </div>
-              <div className="col-span-2 text-gray-400 text-sm">{report.date}</div>
-              <div className="col-span-2 text-gray-400 text-sm">{report.size}</div>
-              <div className="col-span-2 flex gap-2">
-                <button className="p-1.5 text-gray-400 hover:text-[#f28c1b] transition-colors duration-200" title="View">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                <button className="p-1.5 text-gray-400 hover:text-[#f28c1b] transition-colors duration-200" title="Download">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                <button className="p-1.5 text-gray-400 hover:text-[#f28c1b] transition-colors duration-200" title="Share">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
+        {/* Main panel: Recent Reports (matches screenshot) */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+          <div className="mb-3">
+            <div className="text-sm font-extrabold text-white">Recent Reports</div>
+            <div className="text-[11px] font-semibold text-text-muted">
+              {filtered.length} report{filtered.length === 1 ? "" : "s"}
             </div>
-          ))}
+          </div>
+
+          <div className="space-y-3">
+            {filtered.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition"
+              >
+                {/* Left: icon + title */}
+                <div className="flex min-w-0 items-center gap-3">
+                  <DocIcon />
+
+                  <div className="min-w-0">
+                    <div className="truncate text-xs font-extrabold text-white">
+                      {r.title}
+                    </div>
+
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-text-muted">
+                      <span className="inline-flex items-center gap-1">
+                        📅 {r.date}
+                      </span>
+
+                      <span
+                        className={[
+                          "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-extrabold",
+                          TYPE_STYLES[r.type] || TYPE_STYLES.Summary,
+                        ].join(" ")}
+                      >
+                        {r.type}
+                      </span>
+
+                      <span className="text-white/70">• {r.stats}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: download */}
+                <button
+                  type="button"
+                  onClick={() => handleDownload(r)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-[11px] font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
+                  title="Download report"
+                >
+                  <DownloadIcon />
+                  Download
+                </button>
+              </div>
+            ))}
+
+            {filtered.length === 0 && (
+              <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+                <div className="text-sm font-extrabold text-white">No reports found</div>
+                <div className="mt-1 text-sm font-semibold text-text-muted">
+                  Try a different search or filter.
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* OPTIONAL: Footer hints (modern touch) */}
+        <div className="mt-3 text-[15px] font-semibold text-text-muted">
+          Tip: Use <span className="text-white/80">Generate</span> to create a new report template, then download it here.
         </div>
       </div>
     </div>
   );
-};
-
-export default Reports;
+}
