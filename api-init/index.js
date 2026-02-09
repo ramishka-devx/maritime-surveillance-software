@@ -1,13 +1,21 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 const WebSocket = require('ws');
 const dotenv = require('dotenv');
 
 dotenv.config();
 =======
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 const WebSocket = require("ws");
 const config = require("./config");
 const parseAIS = require("./parser");
 const { insertAIS, insertAISBatch } = require("./insert");
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -83,6 +91,106 @@ function connectToAISStream() {
       })
     );
 
+=======
+
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 5000;
+let socket;
+let heartbeatInterval;
+let flushInterval;
+
+// Buffer configuration
+const BUFFER_SIZE = 100; // Flush after 100 messages
+const BUFFER_TIMEOUT = 5000; // Or after 5 seconds
+let messageBuffer = [];
+let lastFlushTime = Date.now();
+
+async function flushBuffer() {
+  if (messageBuffer.length === 0) return;
+
+  const batch = [...messageBuffer];
+  messageBuffer = [];
+
+  try {
+    const result = await insertAISBatch(batch);
+    if (result.inserted > 0) {
+      console.log(`[DB] ✓ Inserted ${result.inserted} records${result.failed > 0 ? ` (${result.failed} failed)` : ''}`);
+    }
+  } catch (err) {
+    console.error("[DB] Error flushing buffer:", err.message);
+  }
+
+  lastFlushTime = Date.now();
+}
+
+function connectToAISStream() {
+  console.log("[AIS] Attempting to connect to AIS stream...");
+  socket = new WebSocket(config.ais.wsUrl);
+
+  socket.onopen = () => {
+    console.log("[AIS] ✓ Connected to AIS stream");
+    reconnectAttempts = 0;
+
+    socket.send(
+      JSON.stringify({
+        Apikey: config.ais.apiKey,
+        BoundingBoxes: [[[-90, -180], [90, 180]]],
+        FilterMessageTypes: ["PositionReport"]
+      })
+    );
+
+>>>>>>> Stashed changes
+=======
+
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 5000;
+let socket;
+let heartbeatInterval;
+let flushInterval;
+
+// Buffer configuration
+const BUFFER_SIZE = 100; // Flush after 100 messages
+const BUFFER_TIMEOUT = 5000; // Or after 5 seconds
+let messageBuffer = [];
+let lastFlushTime = Date.now();
+
+async function flushBuffer() {
+  if (messageBuffer.length === 0) return;
+
+  const batch = [...messageBuffer];
+  messageBuffer = [];
+
+  try {
+    const result = await insertAISBatch(batch);
+    if (result.inserted > 0) {
+      console.log(`[DB] ✓ Inserted ${result.inserted} records${result.failed > 0 ? ` (${result.failed} failed)` : ''}`);
+    }
+  } catch (err) {
+    console.error("[DB] Error flushing buffer:", err.message);
+  }
+
+  lastFlushTime = Date.now();
+}
+
+function connectToAISStream() {
+  console.log("[AIS] Attempting to connect to AIS stream...");
+  socket = new WebSocket(config.ais.wsUrl);
+
+  socket.onopen = () => {
+    console.log("[AIS] ✓ Connected to AIS stream");
+    reconnectAttempts = 0;
+
+    socket.send(
+      JSON.stringify({
+        Apikey: config.ais.apiKey,
+        BoundingBoxes: [[[-90, -180], [90, 180]]],
+        FilterMessageTypes: ["PositionReport"]
+      })
+    );
+
+>>>>>>> Stashed changes
     // Setup heartbeat to keep connection alive
     clearInterval(heartbeatInterval);
     heartbeatInterval = setInterval(() => {
@@ -156,4 +264,10 @@ process.on("SIGINT", async () => {
 
   process.exit(0);
 });
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

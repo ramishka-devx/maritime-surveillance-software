@@ -21,14 +21,26 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "nodemon": "^3.1.10",
     "ws": "^8.19.0"
 =======
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     "pg": "^8.18.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   }
 }
