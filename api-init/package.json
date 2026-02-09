@@ -1,21 +1,29 @@
 {
-  "name": "api-init",
+  "name": "maritime-ais-stream",
   "type": "commonjs",
   "version": "1.0.0",
+  "description": "AIS data stream processor for maritime surveillance",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "ais",
+    "maritime",
+    "surveillance",
+    "shipping"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "nodemon": "^3.1.10",
+    "pg": "^8.18.0",
     "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
