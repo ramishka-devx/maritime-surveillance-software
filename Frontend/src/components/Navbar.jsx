@@ -2,17 +2,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import SerenGuardLogo from "../images/SerenGuard.png";
 
-function NavIcon({ label }) {
-  const map = {
-    Dashboard: "🧭",
-    Map: "🗺️",
-    "Alert History": "🛎️",
-    Reports: "📄",
-    Settings: "⚙️",
-  };
-  return <span className="mr-2 text-[16px] opacity-90">{map[label] || "•"}</span>;
-}
-
 function Navbar({ user, links, onLogout }) {
   const { pathname } = useLocation();
 
@@ -59,7 +48,6 @@ function Navbar({ user, links, onLogout }) {
                     : "text-[#b9c6e6] hover:text-white",
                 ].join(" ")}
               >
-                <NavIcon label={link.label} />
                 {link.label}
 
                 {/* Active underline */}
@@ -139,7 +127,6 @@ function Navbar({ user, links, onLogout }) {
                     : "bg-white/5 text-[#b9c6e6] border-white/10 hover:bg-white/10 hover:text-white",
                 ].join(" ")}
               >
-                <NavIcon label={link.label} />
                 {link.label}
               </Link>
             );
