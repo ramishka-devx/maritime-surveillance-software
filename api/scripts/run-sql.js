@@ -1,6 +1,8 @@
 import { env } from '../src/config/env.js';
-import mysql from 'mysql2/promise';
+import pg from 'pg';
 import fs from 'fs';
+
+const { Client } = pg;
 
 function splitSqlStatements(sql) {
   // Split on semicolons that are not inside string literals.
@@ -52,20 +54,42 @@ function splitSqlStatements(sql) {
       // Also remove any stray DELIMITER lines
       sqlToRun = sqlToRun.replace(/^DELIMITER\s+.*$/gim, '');
     }
-    const connection = await mysql.createConnection({
+    // Try to ensure the database exists (best-effort).
+    // If the user doesn't have CREATEDB, we'll continue and assume DB already exists.
+    const adminClient = new Client({
       host: env.db.host,
       port: env.db.port,
       user: env.db.user,
       password: env.db.password,
-      multipleStatements: true
+      database: 'postgres'
     });
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${env.db.database}\``);
-    await connection.changeUser({ database: env.db.database });
+    try {
+      await adminClient.connect();
+      const dbName = String(env.db.database);
+      const exists = await adminClient.query('SELECT 1 FROM pg_database WHERE datname = $1', [dbName]);
+      if (exists.rowCount === 0) {
+        const ident = '"' + dbName.replace(/"/g, '""') + '"';
+        await adminClient.query(`CREATE DATABASE ${ident}`);
+      }
+    } catch (e) {
+      // ignore (db may exist, or insufficient privileges)
+    } finally {
+      try { await adminClient.end(); } catch { /* ignore */ }
+    }
+
+    const client = new Client({
+      host: env.db.host,
+      port: env.db.port,
+      user: env.db.user,
+      password: env.db.password,
+      database: env.db.database
+    });
+    await client.connect();
     // Execute statements individually for clearer diagnostics and to avoid empty-statement errors
     const statements = splitSqlStatements(sqlToRun);
     for (const [idx, stmt] of statements.entries()) {
       try {
-        await connection.query(stmt);
+        await client.query(stmt);
       } catch (err) {
         const snippet = stmt.length > 300 ? stmt.slice(0, 300) + '…' : stmt;
         console.error(`\n❌ SQL error in ${file} at statement #${idx + 1}:\n${snippet}\n`);
@@ -73,7 +97,7 @@ function splitSqlStatements(sql) {
       }
     }
     console.log(`SQL executed for ${file} (${statements.length} statements)`);
-    await connection.end();
+    await client.end();
   } catch (e) {
     console.error(e);
     process.exit(1);

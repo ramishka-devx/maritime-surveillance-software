@@ -9,6 +9,21 @@ export const PermissionController = {
     } catch (e) { next(e); }
   },
 
+  async requestAccess(req, res, next) {
+    try {
+      const requesterUserId = req.user?.user_id;
+      const { permission, reason } = req.body;
+      const data = await PermissionService.requestAccess({
+        requesterUserId,
+        permissionName: permission,
+        reason,
+      });
+      return success(res, data, 'Request submitted');
+    } catch (e) {
+      next(e);
+    }
+  },
+
   async list(req, res, next) {
     try {
       const { page = 1, limit = 50, module } = req.query;

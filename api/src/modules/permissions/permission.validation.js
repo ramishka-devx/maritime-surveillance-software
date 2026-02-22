@@ -60,3 +60,17 @@ export const assignSchema = Joi.object({
     permission_id: Joi.number().integer().required()
   })
 });
+
+export const requestAccessSchema = Joi.object({
+  body: Joi.object({
+    permission: Joi.string()
+      .max(100)
+      .pattern(/^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'Permission name must be in format: module.resource.action (e.g., alerts.list)',
+        'any.required': 'Permission name is required'
+      }),
+    reason: Joi.string().max(255).allow('').optional()
+  })
+});

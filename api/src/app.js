@@ -17,6 +17,7 @@ import activityRoutes from './modules/activities/activity.routes.js';
 import vesselRoutes from './modules/vessels/vessel.routes.js';
 import positionRoutes from './modules/positions/position.routes.js';
 import alertRoutes from './modules/alerts/alert.routes.js';
+import aisRoutes from './modules/ais/ais.routes.js';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/vessels', vesselRoutes);
+app.use('/api/ais', aisRoutes);
 app.use('/api', positionRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/notifications', notificationRoutes);

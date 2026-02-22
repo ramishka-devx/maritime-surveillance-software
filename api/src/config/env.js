@@ -13,10 +13,10 @@ export const env = {
   },
   db: {
     host: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USER || 'root',
+    port: Number(process.env.DB_PORT || 5432),
+    user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'maritime_surveillance_db',
+    database: process.env.DB_NAME || 'ais_db',
     failFast: process.env.DB_FAIL_FAST
       ? process.env.DB_FAIL_FAST === 'true'
       : process.env.NODE_ENV === 'production',

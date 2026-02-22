@@ -127,7 +127,7 @@ export function AuthProvider({ children }) {
    */
   const hasPermission = useCallback((permission) => {
     // Super admin has all permissions
-    if (roles.some(r => r.name === 'super_admin' || r.role_id === 1)) {
+    if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
       return true;
     }
     return permissions.includes(permission);
@@ -140,7 +140,7 @@ export function AuthProvider({ children }) {
    */
   const hasAnyPermission = useCallback((permissionList) => {
     // Super admin has all permissions
-    if (roles.some(r => r.name === 'super_admin' || r.role_id === 1)) {
+    if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
       return true;
     }
     return permissionList.some(p => permissions.includes(p));
@@ -153,7 +153,7 @@ export function AuthProvider({ children }) {
    */
   const hasAllPermissions = useCallback((permissionList) => {
     // Super admin has all permissions
-    if (roles.some(r => r.name === 'super_admin' || r.role_id === 1)) {
+    if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
       return true;
     }
     return permissionList.every(p => permissions.includes(p));
@@ -165,7 +165,7 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const hasRole = useCallback((roleName) => {
-    return roles.some(r => r.name === roleName);
+    return roles.some((r) => r === roleName || r?.name === roleName);
   }, [roles]);
 
   /**
@@ -173,7 +173,7 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const isSuperAdmin = useCallback(() => {
-    return roles.some(r => r.name === 'super_admin' || r.role_id === 1);
+    return roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1);
   }, [roles]);
 
   const value = useMemo(
