@@ -1,27 +1,28 @@
 import React, { useMemo, useState } from "react";
 import RequestAccessGate from "../components/RequestAccessGate.jsx";
+import { AlertOctagon, AlertTriangle, Info } from "lucide-react";
 import PermissionGate from "../auth/PermissionGate.jsx";
 
 const severityStyles = {
   Critical: {
     pill: "bg-red-500/15 text-red-300 border-red-500/30",
     dot: "bg-red-500",
-    icon: "⛔",
+    icon: AlertOctagon,
   },
   High: {
     pill: "bg-orange-500/15 text-orange-300 border-orange-500/30",
     dot: "bg-orange-500",
-    icon: "⚠️",
+    icon: AlertTriangle,
   },
   Medium: {
     pill: "bg-yellow-500/15 text-yellow-200 border-yellow-500/30",
     dot: "bg-yellow-400",
-    icon: "⚠️",
+    icon: AlertTriangle,
   },
   Low: {
     pill: "bg-emerald-500/15 text-emerald-200 border-emerald-500/30",
     dot: "bg-emerald-400",
-    icon: "ℹ️",
+    icon: Info,
   },
 };
 
@@ -213,11 +214,11 @@ const Dashboard = () => {
                 onChange={(e) => setAlertFilter(e.target.value)}
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] outline-none"
               >
-                <option value="All">All</option>
-                <option value="Critical">Critical</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
+                <option value="All" className="bg-[#0b1220] text-white">All</option>
+                <option value="Critical" className="bg-[#0b1220] text-white">Critical</option>
+                <option value="High" className="bg-[#0b1220] text-white">High</option>
+                <option value="Medium" className="bg-[#0b1220] text-white">Medium</option>
+                <option value="Low" className="bg-[#0b1220] text-white">Low</option>
               </select>
             </div>
 
@@ -262,7 +263,7 @@ const Dashboard = () => {
 
                       <div className="mt-3 flex items-center justify-between text-[11px] text-[#9aa8c7]">
                         <span className="flex items-center gap-2">
-                          <span className="opacity-80">{s.icon}</span>
+                          <s.icon size={14} className="opacity-80" />
                           Suggested: {a.action}
                         </span>
                         <button className="font-semibold text-[#c9d3ee] hover:text-white">
