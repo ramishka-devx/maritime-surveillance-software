@@ -440,7 +440,6 @@ export default function AlertsPanel({
                 {/* Mini footer row */}
                 <div className="mt-3 flex items-center justify-between text-[11px] font-semibold text-text-muted">
                   <span className="flex items-center gap-2">
-                    <span className="opacity-90">{s.icon}</span>
                     Assigned: <span className="text-white/80">{a.assignedTo}</span>
                   </span>
 

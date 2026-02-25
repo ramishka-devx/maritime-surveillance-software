@@ -25,20 +25,20 @@ const Settings = ({ user }) => {
 
       <div className="flex flex-col md:flex-row">
         {/* Sidebar */}
-        <div className="md:w-64 bg-[#1a2942] border-r border-gray-700 p-4">
+        <div className="md:w-48 bg-[#1a2942] border-r border-gray-700 p-4">
           {[
-            { id: 'general', label: 'General', icon: '⚙️' },
-            { id: 'profile', label: 'Profile', icon: '👤' },
-            { id: 'notifications', label: 'Notifications', icon: '🔔' },
-            { id: 'security', label: 'Security', icon: '🔒' },
-            { id: 'system', label: 'System', icon: '💻' },
+            { id: 'general', label: 'General' },
+            { id: 'profile', label: 'Profile' },
+            { id: 'notifications', label: 'Notifications'},
+            { id: 'security', label: 'Security'},
+            { id: 'system', label: 'System'},
           ].map((tab) => (
             <button 
               key={tab.id}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all duration-200 mb-2 ${
                 activeTab === tab.id 
-                  ? 'bg-[#f28c1b] text-white' 
-                  : 'text-gray-400 hover:bg-[#243b78] hover:text-white'
+                  ? 'bg-[#d97706] text-white' 
+                  : 'text-gray-400 hover:bg-[#d97706] hover:text-white'
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -97,7 +97,7 @@ const Settings = ({ user }) => {
                   <div className="w-24 h-24 bg-gradient-to-br from-[#f28c1b] to-[#d97a0a] rounded-full flex items-center justify-center">
                     <span className="text-3xl font-bold text-white">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
                   </div>
-                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Change Avatar</button>
+                  <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">Change Avatar</button>
                 </div>
 
                 <div>
@@ -138,7 +138,7 @@ const Settings = ({ user }) => {
                   />
                 </div>
 
-                <button className="w-full bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors mt-4">Save Changes</button>
+                <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">Save Changes</button>
               </div>
             </div>
           )}
@@ -267,7 +267,7 @@ const Settings = ({ user }) => {
                     <h4 className="text-white font-semibold">Change Password</h4>
                     <p className="text-gray-400 text-sm">Update your account password</p>
                   </div>
-                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Change</button>
+                  <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">Change</button>
                 </div>
 
                 <div className="flex items-center justify-between py-3 border-b border-gray-700">
@@ -275,7 +275,7 @@ const Settings = ({ user }) => {
                     <h4 className="text-white font-semibold">Two-Factor Authentication</h4>
                     <p className="text-gray-400 text-sm">Add an extra layer of security</p>
                   </div>
-                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Enable</button>
+                  <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">Enable</button>
                 </div>
 
                 <div className="flex items-center justify-between py-3 border-b border-gray-700">
@@ -283,7 +283,7 @@ const Settings = ({ user }) => {
                     <h4 className="text-white font-semibold">Active Sessions</h4>
                     <p className="text-gray-400 text-sm">Manage your active login sessions</p>
                   </div>
-                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">View</button>
+                  <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">View</button>
                 </div>
 
                 <div className="flex items-center justify-between py-3">
@@ -291,7 +291,7 @@ const Settings = ({ user }) => {
                     <h4 className="text-white font-semibold">Login History</h4>
                     <p className="text-gray-400 text-sm">Review your recent login activity</p>
                   </div>
-                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">View History</button>
+                  <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">View History</button>
                 </div>
               </div>
             </div>
@@ -314,7 +314,7 @@ const Settings = ({ user }) => {
                     <h4 className="text-white font-semibold">Data Retention</h4>
                     <p className="text-gray-400 text-sm">Set data storage duration</p>
                   </div>
-                  <select className="bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-[#f28c1b] focus:outline-none transition-colors">
+                  <select className="bg-[#0b1220] border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-[#d97706] focus:outline-none transition-colors">
                     <option>30 Days</option>
                     <option>90 Days</option>
                     <option>180 Days</option>
@@ -338,7 +338,7 @@ const Settings = ({ user }) => {
                     <h4 className="text-white font-semibold">System Version</h4>
                     <p className="text-gray-400 text-sm">SerenGuard v1.0.0</p>
                   </div>
-                  <button className="bg-[#f28c1b] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Check Updates</button>
+                  <button className="border border-[#d97706] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg font-semibold transition-colors">Check Updates</button>
                 </div>
               </div>
             </div>

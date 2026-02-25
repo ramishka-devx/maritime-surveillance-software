@@ -160,23 +160,7 @@ const SignIn = ({ onLogin, onRegister }) => {
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="role" className="text-xs font-semibold text-[#9aa8c7] uppercase">Role</label>
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => {
-                    setRole(e.target.value);
-                    resetMessages();
-                  }}
-                  className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
-                >
-                  <option>Operator</option>
-                  <option>Supervisor</option>
-                  <option>Administrator</option>
-                  <option>Analyst</option>
-                </select>
-              </div>
+              
             </>
           )}
 
@@ -212,25 +196,7 @@ const SignIn = ({ onLogin, onRegister }) => {
             />
           </div>
 
-          {mode === 'login' && (
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="role" className="text-xs font-semibold text-[#9aa8c7] uppercase">Role</label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => {
-                  setRole(e.target.value);
-                  resetMessages();
-                }}
-                className="bg-white text-gray-900 border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-[#f28c1b] focus:ring-2 focus:ring-[#f28c1b]/30"
-              >
-                <option>Operator</option>
-                <option>Supervisor</option>
-                <option>Administrator</option>
-                <option>Analyst</option>
-              </select>
-            </div>
-          )}
+          
 
           {mode === 'signup' && (
             <div className="flex flex-col gap-1.5">

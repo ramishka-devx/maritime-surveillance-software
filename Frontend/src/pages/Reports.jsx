@@ -261,7 +261,7 @@ export default function Reports() {
                 <button
                   type="button"
                   onClick={() => handleDownload(r)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-[11px] font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
+                  className="inline-flex items-center gap-2 rounded-xl border border-[#d97706] px-4 py-2 text-[11px] font-extrabold text-accent-orange hover:bg-[#d97706] hover:bg-accent-orange/10 transition"
                   title="Download report"
                 >
                   <DownloadIcon />

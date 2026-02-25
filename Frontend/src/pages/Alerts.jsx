@@ -248,12 +248,37 @@ export default function AlertsPage() {
         <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-white/80">🔎</span>
+              <span className="text-white/80 font-semibold text-sm">Filters:</span>
+              
+              <select
+                value={severityFilter}
+                onChange={(e) => setSeverityFilter(e.target.value)}
+                className="rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-[12px] font-extrabold text-white/90 outline-none "
+              >
+                <option value="all">All Severity</option>
+                <option value="critical">Critical</option>
+                <option value="warning">Warning</option>
+                <option value="info">Info</option>
+              </select>
+
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-[12px] font-extrabold text-white/90 outline-none"
+              >
+                <option value="All">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Investigating">Investigating</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search alerts, vessel, MMSI..."
-                className="w-full md:w-[340px] bg-transparent text-xs font-semibold text-white placeholder:text-text-muted outline-none"
+                className="w-full md:w-[340px] bg-transparent border border-white/10 rounded-lg px-3 py-2 text-xs font-semibold text-white placeholder:text-text-muted outline-none"
               />
               {query && (
                 <button
@@ -264,26 +289,6 @@ export default function AlertsPage() {
                   Clear
                 </button>
               )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex gap-2 rounded-xl border border-white/10 bg-white/5 p-1">
-                <Tab label="All" active={severityFilter === "all"} onClick={() => setSeverityFilter("all")} />
-                <Tab label="Critical" active={severityFilter === "critical"} onClick={() => setSeverityFilter("critical")} />
-                <Tab label="Warning" active={severityFilter === "warning"} onClick={() => setSeverityFilter("warning")} />
-                <Tab label="Info" active={severityFilter === "info"} onClick={() => setSeverityFilter("info")} />
-              </div>
-
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
-              >
-                <option value="All">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Investigating">Investigating</option>
-                <option value="Resolved">Resolved</option>
-              </select>
             </div>
           </div>
         </div>
@@ -311,9 +316,7 @@ export default function AlertsPage() {
                     onClick={() => toggleExpand(a.id)}
                     className="flex flex-1 items-start gap-3 text-left"
                   >
-                    <div className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl border ${s.pill}`}>
-                      <span className="text-sm">{s.icon}</span>
-                    </div>
+                    
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -332,7 +335,7 @@ export default function AlertsPage() {
                         </span>
                       </div>
 
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] font-semibold text-white/80">
+                      <div className="mt-1 flex flex-wrap items-start gap-3 text-[11px] font-semibold text-white/80">
                         <span>🗓 {a.when}</span>
                         <span>•</span>
                         <span>🚢 {a.vessel}</span>

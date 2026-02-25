@@ -6,7 +6,7 @@ function NavIcon({ label }) {
   const map = {
     Dashboard: "🧭",
     Map: "🗺️",
-    "Alert History": "🛎️",
+    Alerts: "🛎️",
     Reports: "📄",
     Settings: "⚙️",
   };
@@ -59,7 +59,6 @@ function Navbar({ user, links, onLogout }) {
                     : "text-[#b9c6e6] hover:text-white",
                 ].join(" ")}
               >
-                <NavIcon label={link.label} />
                 {link.label}
 
                 {/* Active underline */}
@@ -80,7 +79,7 @@ function Navbar({ user, links, onLogout }) {
         {/* Right side */}
         <div className="flex items-center gap-3">
           {/* User chip */}
-          <div className="hidden sm:flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
+          <div className="hidden sm:flex items-center gap-3 mr-4">
             <div
               className="
                 flex h-9 w-9 items-center justify-center rounded-xl
@@ -101,11 +100,7 @@ function Navbar({ user, links, onLogout }) {
             </div>
           </div>
 
-          {/* Optional LIVE pill */}
-          <div className="hidden lg:flex items-center gap-2 rounded-xl border border-emerald-400/15 bg-emerald-400/10 px-3 py-2 text-[13px] font-bold text-emerald-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            LIVE
-          </div>
+          
 
           {/* Logout */}
           <button
@@ -113,7 +108,6 @@ function Navbar({ user, links, onLogout }) {
             className="
               rounded-xl bg-accent-orange px-4 py-2
               text-base font-extrabold text-white
-              shadow-[0_8px_20px_rgba(242,140,27,0.25)]
               hover:bg-[#d97706] transition
             "
           >
@@ -139,7 +133,6 @@ function Navbar({ user, links, onLogout }) {
                     : "bg-white/5 text-[#b9c6e6] border-white/10 hover:bg-white/10 hover:text-white",
                 ].join(" ")}
               >
-                <NavIcon label={link.label} />
                 {link.label}
               </Link>
             );
