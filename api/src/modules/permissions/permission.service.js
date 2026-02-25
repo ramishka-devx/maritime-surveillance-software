@@ -1,5 +1,7 @@
 import { PermissionModel } from './permission.model.js';
 import { notFound, badRequest } from '../../utils/errorHandler.js';
+import { query } from '../../config/db.config.js';
+import { NotificationService } from '../notifications/notification.service.js';
 
 export const PermissionService = {
   async create(payload) {
@@ -69,6 +71,77 @@ export const PermissionService = {
     if (!existing) throw notFound('Permission not found');
     
     return PermissionModel.getRolesWithPermission(permission_id);
+  },
+
+  async requestAccess({ requesterUserId, permissionName, reason = '' }) {
+    const userId = Number(requesterUserId);
+    if (!userId || Number.isNaN(userId)) {
+      throw badRequest('Invalid requester');
+    }
+
+    const rawPermission = String(permissionName || '').trim();
+    if (!rawPermission) {
+      throw badRequest('Permission name is required');
+    }
+
+    const permission = await PermissionModel.findByName(rawPermission);
+    if (!permission || !Number(permission.is_active)) {
+      throw notFound('Permission not found');
+    }
+
+    const [requester] = await query(
+      'SELECT user_id, username, email, first_name, last_name FROM users WHERE user_id = ? LIMIT 1',
+      [userId],
+    );
+
+    const requesterLabel = requester
+      ? [requester.first_name, requester.last_name].filter(Boolean).join(' ').trim() || requester.username || requester.email
+      : `User #${userId}`;
+
+    const admins = await query(
+      `SELECT DISTINCT u.user_id
+       FROM users u
+       JOIN user_roles ur ON ur.user_id = u.user_id
+       JOIN roles r ON r.role_id = ur.role_id
+       WHERE r.name = 'super_admin'`,
+    );
+
+    const adminIds = (admins || [])
+      .map((a) => Number(a.user_id))
+      .filter((id) => id && !Number.isNaN(id) && id !== userId);
+
+    const cleanedReason = String(reason || '').trim();
+    const message = [
+      `User: ${requesterLabel}`,
+      requester?.email ? `Email: ${requester.email}` : null,
+      `Requested permission: ${rawPermission}`,
+      cleanedReason ? `Reason: ${cleanedReason}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const title = `Permission request: ${rawPermission}`;
+
+    let notified = 0;
+    for (const adminId of adminIds) {
+      // Create as a notification; email is best-effort.
+      await NotificationService.createNotification(
+        adminId,
+        'permission_request',
+        title,
+        message,
+        'permission_request',
+        null,
+        'medium',
+      );
+      notified += 1;
+    }
+
+    return {
+      permission: rawPermission,
+      requester_user_id: userId,
+      notified_admins: notified,
+    };
   },
 
   // Legacy methods for backward compatibility

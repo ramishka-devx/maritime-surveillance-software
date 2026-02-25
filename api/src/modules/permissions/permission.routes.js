@@ -4,7 +4,7 @@ import { permissionMiddleware } from '../../middleware/permissionMiddleware.js';
 import { validate } from '../../middleware/validateRequest.js';
 import { activityLogger } from '../../middleware/activityLogger.js';
 import { PermissionController } from './permission.controller.js';
-import { createSchema, updateSchema, getByIdSchema, listSchema, assignSchema } from './permission.validation.js';
+import { createSchema, updateSchema, getByIdSchema, listSchema, assignSchema, requestAccessSchema } from './permission.validation.js';
 
 const router = Router();
 
@@ -61,6 +61,23 @@ router.get('/by-module', authMiddleware, permissionMiddleware('permissions.list'
  *     tags: [Permissions]
  */
 router.get('/modules', authMiddleware, permissionMiddleware('permissions.list'), PermissionController.getModules);
+
+/**
+ * @openapi
+ * /api/permissions/request-access:
+ *   post:
+ *     summary: Request access to a permission (notifies super admins)
+ *     tags: [Permissions]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post(
+	'/request-access',
+	authMiddleware,
+	activityLogger('permissions.request_access'),
+	validate(requestAccessSchema),
+	PermissionController.requestAccess,
+);
 
 /**
  * @openapi

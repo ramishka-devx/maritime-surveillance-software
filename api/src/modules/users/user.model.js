@@ -41,7 +41,7 @@ export const UserModel = {
     return this.findByUsername(raw);
   },
   async findById(user_id) {
-    const rows = await query('SELECT u.user_id, u.first_name, u.last_name, u.username, u.email, u.role_id, u.status, r.name as role, u.profileImg, u.created_at, u.updated_at FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.user_id = ? LIMIT 1', [user_id]);
+    const rows = await query('SELECT u.user_id, u.first_name, u.last_name, u.username, u.email, u.role_id, u.status, r.name as role, u.profile_img as "profileImg", u.created_at, u.updated_at FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.user_id = ? LIMIT 1', [user_id]);
     return rows[0];
   },
   async list({ page = 1, limit = 10 }) {
@@ -63,7 +63,8 @@ export const UserModel = {
     const params = [];
     for (const [k, v] of Object.entries(payload)) {
       if (v === undefined) continue;
-      fields.push(`${k} = ?`);
+      const col = k === 'profileImg' ? 'profile_img' : k;
+      fields.push(`${col} = ?`);
       params.push(v);
     }
     if (fields.length === 0) return this.findById(user_id);

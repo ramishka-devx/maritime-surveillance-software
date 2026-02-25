@@ -1,39 +1,64 @@
 import { pool, query } from '../src/config/db.config.js';
 
-// Maritime Surveillance permissions
+// Permission names used by permissionMiddleware() across api/src
 const permissions = [
-  // Users
-  'user.list', 'user.view', 'user.update', 'user.status.update', 'user.role.update',
-
-  // Roles & permissions
-  'role.list', 'role.view', 'role.create', 'role.update', 'role.delete',
-  'permission.list', 'permission.assign', 'permission.revoke',
-
-  // Vessels
-  'vessel.create', 'vessel.list', 'vessel.view', 'vessel.update', 'vessel.delete',
-
-  // Positions
-  'position.create', 'position.list', 'position.view',
-
-  // Alerts
-  'alert.create', 'alert.list', 'alert.view', 'alert.update', 'alert.updateStatus', 'alert.assign',
-
-  // Notifications
-  'notification.list', 'notification.view', 'notification.read', 'notification.delete',
-
-  // Activities
-  'activity.list', 'activity.view'
+  'activities.logs.list',
+  'activities.logs.view',
+  'ais.view',
+  'alerts.acknowledge',
+  'alerts.assign',
+  'alerts.create',
+  'alerts.dismiss',
+  'alerts.list',
+  'alerts.resolve',
+  'alerts.update',
+  'alerts.view',
+  'analytics.dashboard.view',
+  'dashboard.active_alerts.view',
+  'dashboard.map.view',
+  'notifications.delete',
+  'notifications.view',
+  'permissions.create',
+  'permissions.delete',
+  'permissions.list',
+  'permissions.view',
+  'roles.create',
+  'roles.delete',
+  'roles.list',
+  'roles.permissions.assign',
+  'roles.permissions.revoke',
+  'roles.permissions.view',
+  'roles.update',
+  'roles.view',
+  'users.activity.view',
+  'users.list',
+  'users.permissions.assign',
+  'users.permissions.view',
+  'users.roles.assign',
+  'users.suspend',
+  'users.update',
+  'users.verify',
+  'users.view',
+  'vessels.create',
+  'vessels.delete',
+  'vessels.history.view',
+  'vessels.list',
+  'vessels.positions.create',
+  'vessels.positions.view',
+  'vessels.update',
+  'vessels.view'
 ];
 
 async function seedPermissions() {
   try {
     console.log('Starting permission seeding...');
 
-    // Insert all permissions
-    const permissionValues = permissions.map(name => `('${name}')`).join(', ');
-    const insertPermissionsQuery = `INSERT IGNORE INTO permissions (name) VALUES ${permissionValues}`;
-
-    await query(insertPermissionsQuery);
+    // Insert all permissions (also store module prefix for grouping)
+    const rows = permissions.map(name => ({ name, module: name.split('.')[0] || null }));
+    const placeholders = rows.map(() => '(?, ?)').join(', ');
+    const params = rows.flatMap(p => [p.name, p.module]);
+    const insertPermissionsQuery = `INSERT IGNORE INTO permissions (name, module) VALUES ${placeholders}`;
+    await query(insertPermissionsQuery, params);
     console.log(`Inserted ${permissions.length} permissions`);
 
     // Super admin role
@@ -51,11 +76,15 @@ async function seedPermissions() {
     const [operatorRole] = await query('SELECT role_id FROM roles WHERE name = ? LIMIT 1', ['operator']);
     if (operatorRole) {
       const operatorPermissions = [
-        'vessel.list', 'vessel.view',
-        'position.create', 'position.list', 'position.view',
-        'alert.create', 'alert.list', 'alert.view', 'alert.updateStatus',
-        'notification.list', 'notification.view', 'notification.read',
-        'activity.list', 'activity.view'
+        // Keep this intentionally minimal: operators can view the operational data,
+        // while admins can grant additional permissions as needed.
+        'ais.view',
+        'vessels.list',
+        'vessels.view',
+        'vessels.positions.view',
+        'alerts.list',
+        'alerts.view',
+        'notifications.view'
       ];
 
       const placeholders = operatorPermissions.map(() => '?').join(',');
