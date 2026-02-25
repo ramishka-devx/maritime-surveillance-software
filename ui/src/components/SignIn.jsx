@@ -93,8 +93,23 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm bg-gradient-to-br from-[#243b78] to-[#1a2d5a] rounded-2xl p-10 shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/video1.mp4" type="video/mp4" />
+      </video>
+      
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+      <div className="w-full max-w-sm bg-gradient-to-br from-[#243b78]/90 to-[#1a2d5a]/90 rounded-2xl p-10 shadow-2xl backdrop-blur-md relative z-10">
+        {/* Logo Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img src={SerenGuardLogo} alt="SerenGuard Logo" className="w-14 h-14" />
