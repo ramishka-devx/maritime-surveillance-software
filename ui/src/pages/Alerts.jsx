@@ -1,23 +1,24 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Search, Calendar, Ship, AlertOctagon, AlertTriangle, Info } from "lucide-react";
 
 const SEVERITY = {
   critical: {
     label: "Critical",
     dot: "bg-red-400",
     pill: "bg-red-500/15 text-red-200 border-red-400/25",
-    icon: "⛔",
+    icon: AlertOctagon,
   },
   warning: {
     label: "Warning",
     dot: "bg-amber-300",
     pill: "bg-amber-500/15 text-amber-200 border-amber-400/25",
-    icon: "⚠️",
+    icon: AlertTriangle,
   },
   info: {
     label: "Info",
     dot: "bg-sky-300",
     pill: "bg-sky-500/15 text-sky-200 border-sky-400/25",
-    icon: "ℹ️",
+    icon: Info,
   },
 };
 
@@ -257,8 +258,8 @@ export default function AlertsPage() {
 
         <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-white/80">🔎</span>
+            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+              <Search className="text-white/80" size={18} />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -320,7 +321,7 @@ export default function AlertsPage() {
                     className="flex flex-1 items-start gap-3 text-left"
                   >
                     <div className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl border ${s.pill}`}>
-                      <span className="text-sm">{s.icon}</span>
+                      <s.icon size={16} />
                     </div>
 
                     <div className="min-w-0">
@@ -339,9 +340,15 @@ export default function AlertsPage() {
                       </div>
 
                       <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] font-semibold text-white/80">
-                        <span>🗓 {a.when}</span>
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          <span>{a.when}</span>
+                        </div>
                         <span>•</span>
-                        <span>🚢 {a.vessel}</span>
+                        <div className="flex items-center gap-1">
+                          <Ship size={14} />
+                          <span>{a.vessel}</span>
+                        </div>
                         {a.mmsi !== "—" && (
                           <>
                             <span>•</span>
@@ -430,7 +437,7 @@ function Tab({ label, active, onClick }) {
       className={[
         "rounded-lg px-3 py-2 text-[15px] font-extrabold transition",
         active
-          ? "bg-accent-orange/15 text-[#ffd7a8] shadow-[0_0_18px_rgba(242,140,27,0.25)]"
+          ? "bg-accent-orange/15 text-[#ffd7a8]"
           : "text-text-muted hover:text-white hover:bg-white/5",
       ].join(" ")}
     >

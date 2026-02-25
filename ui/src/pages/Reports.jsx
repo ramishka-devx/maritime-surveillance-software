@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { FileText, Download, Search, Calendar } from "lucide-react";
 
 const TYPE_STYLES = {
   Summary: "bg-white/5 text-white/80 border-white/10",
@@ -8,56 +9,7 @@ const TYPE_STYLES = {
   Analysis: "bg-sky-500/10 text-sky-200 border-sky-400/20",
 };
 
-function DocIcon() {
-  return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80">
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <polyline
-          points="14 2 14 8 20 8"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  );
-}
 
-function DownloadIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M7 10l5 5 5-5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 15V3"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export default function Reports() {
   const [query, setQuery] = useState("");
@@ -115,7 +67,7 @@ export default function Reports() {
         <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-              <span className="text-white/70">🔎</span>
+              <Search size={18} className="text-white/70" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -137,7 +89,7 @@ export default function Reports() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-white/90 outline-none"
               >
                 {types.map((t) => (
                   <option key={t} value={t} className="bg-[#0b1220] text-white">
@@ -149,7 +101,7 @@ export default function Reports() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-white/90 outline-none"
               >
                 <option value="Newest" className="bg-[#0b1220] text-white">Newest</option>
                 <option value="Oldest" className="bg-[#0b1220] text-white">Oldest</option>
@@ -160,9 +112,9 @@ export default function Reports() {
               <button
                 type="button"
                 onClick={() => alert("Open report generator modal (TODO)")}
-                className="rounded-xl bg-primary-blue px-3 py-2 text-[11px] font-extrabold text-white hover:bg-[#1f3570] transition"
+                className="rounded-xl bg-primary-blue px-3 py-2 text-[11px] font-bold text-white hover:bg-[#1f3570] transition"
               >
-                + Generate
+                Generate
               </button>
             </div>
           </div>
@@ -183,13 +135,18 @@ export default function Reports() {
                 className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <DocIcon />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80">
+                    <FileText size={16} />
+                  </div>
 
                   <div className="min-w-0">
                     <div className="truncate text-xs font-extrabold text-white">{r.title}</div>
 
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-text-muted">
-                      <span className="inline-flex items-center gap-1">📅 {r.date}</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar size={14} />
+                        {r.date}
+                      </span>
 
                       <span
                         className={[
@@ -211,7 +168,7 @@ export default function Reports() {
                   className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-[11px] font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
                   title="Download report"
                 >
-                  <DownloadIcon />
+                  <Download size={16} />
                   Download
                 </button>
               </div>
