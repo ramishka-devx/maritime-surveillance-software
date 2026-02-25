@@ -2,11 +2,11 @@ import React, { useEffect, useMemo } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import SignIn from './components/SignIn.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import Alerts from './pages/Alerts.jsx';
-import Reports from './pages/Reports.jsx';
-import Settings from './pages/Settings.jsx';
-import Permissions from './pages/Permissions.jsx';
+import Dashboard from './pages/Dashboard/index.jsx';
+import Alerts from './pages/Alerts/index.jsx';
+import Reports from './pages/Reports/index.jsx';
+import Settings from './pages/Settings/index.jsx';
+import Permissions from './pages/Permissions/index.jsx';
 import RequestAccessGate from './components/RequestAccessGate.jsx';
 import { useAuth } from './auth/AuthContext.jsx';
 
