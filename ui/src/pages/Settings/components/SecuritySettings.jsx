@@ -1,38 +1,28 @@
 export function SecuritySettings() {
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-6">Security Settings</h2>
-      <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-4">
-        <div className="flex items-center justify-between py-3 border-b border-gray-700">
+      <h2 className="text-base font-extrabold text-white mb-4">Security Settings</h2>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between py-2 border-b border-white/10">
           <div>
-            <h4 className="text-white font-semibold">Change Password</h4>
-            <p className="text-gray-400 text-sm">Update your account password</p>
+            <div className="text-sm font-bold text-white">Change Password</div>
+            <div className="text-xs text-text-muted">Update your account password</div>
           </div>
-          <button className="border border-[#f28c1b] hover:bg-[#f28c1b] text-white px-4 py-2 rounded-lg font-semibold transition-colors" type="button">Change</button>
+          <button className="border border-accent-orange hover:bg-accent-orange/10 text-accent-orange px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors" type="button">Change</button>
         </div>
-
-        <div className="flex items-center justify-between py-3 border-b border-gray-700">
+        <div className="flex items-center justify-between py-2 border-b border-white/10">
           <div>
-            <h4 className="text-white font-semibold">Two-Factor Authentication</h4>
-            <p className="text-gray-400 text-sm">Add an extra layer of security</p>
+            <div className="text-sm font-bold text-white">Two-Factor Authentication</div>
+            <div className="text-xs text-text-muted">Add an extra layer of security</div>
           </div>
-          <button className="border border-[#f28c1b] hover:bg-[#f28c1b] text-white px-4 py-2 rounded-lg font-semibold transition-colors" type="button">Enable</button>
+          <button className="border border-accent-orange hover:bg-accent-orange/10 text-accent-orange px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors" type="button">Enable</button>
         </div>
-
-        <div className="flex items-center justify-between py-3 border-b border-gray-700">
+        <div className="flex items-center justify-between py-2">
           <div>
-            <h4 className="text-white font-semibold">Active Sessions</h4>
-            <p className="text-gray-400 text-sm">Manage your active login sessions</p>
+            <div className="text-sm font-bold text-white">Active Sessions</div>
+            <div className="text-xs text-text-muted">Manage your active login sessions</div>
           </div>
-          <button className="border border-[#f28c1b] hover:bg-[#f28c1b] text-white px-4 py-2 rounded-lg font-semibold transition-colors" type="button">View</button>
-        </div>
-
-        <div className="flex items-center justify-between py-3">
-          <div>
-            <h4 className="text-white font-semibold">Login History</h4>
-            <p className="text-gray-400 text-sm">Review your recent login activity</p>
-          </div>
-          <button className="border border-[#f28c1b] hover:bg-[#f28c1b] text-white px-4 py-2 rounded-lg font-semibold transition-colors" type="button">View History</button>
+          <button className="border border-accent-orange hover:bg-accent-orange/10 text-accent-orange px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors" type="button">View</button>
         </div>
       </div>
     </div>

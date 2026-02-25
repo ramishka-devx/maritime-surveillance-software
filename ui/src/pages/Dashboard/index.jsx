@@ -57,24 +57,24 @@ const Dashboard = () => {
   }, [alerts, alertFilter]);
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-b from-[#0b1220] to-[#111b2e]">
+    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-b from-nav-bg to-nav-bg-soft">
       {/* Header Section */}
       <div className="px-6 py-5 border-b border-white/10 flex-shrink-0">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-lg font-extrabold text-accent-orange">
               Dashboard 
             </h1>
-            <p className="text-xs text-[#9aa8c7]">
+            <p className="text-xs font-semibold text-text-muted">
               Real-time vessel monitoring & alerts
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10">
               Refresh
             </button>
-            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10">
               Fullscreen
             </button>
           </div>
