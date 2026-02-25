@@ -96,6 +96,11 @@ export function AuthProvider({ children }) {
     // Store token
     localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
     setToken(nextToken);
+
+    // Store user data from login response
+    if (data?.user) {
+      setUser(data.user);
+    }
     
     // Store permissions and roles from login response
     if (data?.permissions) {
@@ -106,8 +111,6 @@ export function AuthProvider({ children }) {
       setRoles(data.roles);
       localStorage.setItem(ROLES_STORAGE_KEY, JSON.stringify(data.roles));
     }
-    
-    await loadProfile(nextToken);
   }
 
   function logout() {

@@ -16,6 +16,9 @@ export { RequirePermission } from './RequirePermission.jsx';
 // UI conditional rendering
 export { PermissionGate, HideFromPermission } from './PermissionGate.jsx';
 
+// Component wrapper for permission-based access control
+export { withPermission } from './withPermission.jsx';
+
 // Permission hook
 export { usePermission } from './usePermission.js';
 
