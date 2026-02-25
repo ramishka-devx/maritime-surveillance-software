@@ -1,7 +1,7 @@
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import { AlertCard } from "./AlertCard.jsx";
 
-export function AlertsPanel({ alerts, filteredAlerts, alertFilter, setAlertFilter }) {
+export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter }) {
   return (
     <RequestAccessGate
       permission="dashboard.active_alerts.view"

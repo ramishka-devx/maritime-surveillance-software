@@ -1,12 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import { SEVERITY_STYLES } from "./alertConstants.js";
 
 export function AlertCard({ alert }) {
+  const navigate = useNavigate();
   // Get severity styling, fallback to Low if not found
   const severityStyle = SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.Low;
   const SeverityIcon = severityStyle.icon;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition">
+    <div
+      className="cursor-pointer rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition"
+      onClick={() => navigate(`/alert/${alert.id}`)}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           {/* Severity indicator dot */}

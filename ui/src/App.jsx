@@ -138,6 +138,21 @@ export default function App() {
         }
       />
       <Route
+        path="/alerts/:id"
+        element={
+          <ProtectedLayout
+            isAuthed={isAuthed}
+            session={session}
+            navLinks={navLinks}
+            onLogout={handleLogout}
+          >
+            <RequestAccessGate permission="alerts.list" featureName="Alerts">
+              <Alerts />
+            </RequestAccessGate>
+          </ProtectedLayout>
+        }
+      />
+      <Route
         path="/reports"
         element={
           <ProtectedLayout
@@ -175,6 +190,19 @@ export default function App() {
             onLogout={handleLogout}
           >
             <Permissions />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/alert/:id"
+        element={
+          <ProtectedLayout
+            isAuthed={isAuthed}
+            session={session}
+            navLinks={navLinks}
+            onLogout={handleLogout}
+          >
+            <Dashboard user={session} />
           </ProtectedLayout>
         }
       />

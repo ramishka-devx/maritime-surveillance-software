@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Calendar, Ship } from "lucide-react";
 import { SEVERITY, STATUS } from "../constants.js";
 
@@ -9,6 +10,7 @@ export function AlertItem({
   onResolve,
   onAssignTo,
 }) {
+  const navigate = useNavigate();
   const s = SEVERITY[alert.level] || SEVERITY.info;
   const st = STATUS[alert.status] || STATUS.Active;
 
@@ -23,7 +25,7 @@ export function AlertItem({
       <div className="flex items-start justify-between gap-3">
         <button
           type="button"
-          onClick={() => onToggleExpand(alert.id)}
+          onClick={() => navigate(`/alerts/${alert.id}`)}
           className="flex flex-1 items-start gap-3 text-left"
         >
           <div className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl border ${s.pill}`}>
