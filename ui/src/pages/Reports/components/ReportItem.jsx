@@ -10,9 +10,9 @@ export function ReportItem({ report, onDownload }) {
         </div>
 
         <div className="min-w-0">
-          <div className="truncate text-xs font-extrabold text-white">{report.title}</div>
+          <div className="truncate text-sm font-extrabold text-white">{report.title}</div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-text-muted">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold text-text-muted">
             <span className="inline-flex items-center gap-1">
               <Calendar size={14} />
               {report.date}
@@ -20,7 +20,7 @@ export function ReportItem({ report, onDownload }) {
 
             <span
               className={[
-                "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-extrabold",
+                "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-extrabold",
                 TYPE_STYLES[report.type] || TYPE_STYLES.Summary,
               ].join(" ")}
             >
@@ -35,7 +35,7 @@ export function ReportItem({ report, onDownload }) {
       <button
         type="button"
         onClick={() => onDownload(report)}
-        className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-[11px] font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
+        className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-xs font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
         title="Download report"
       >
         <Download size={16} />

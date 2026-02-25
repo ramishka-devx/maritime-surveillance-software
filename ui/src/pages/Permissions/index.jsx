@@ -37,8 +37,8 @@ export default function Permissions() {
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
           <div className="mb-4">
-            <h3 className="text-sm font-extrabold text-white">Operator Permissions</h3>
-            <p className="mt-1 text-[11px] font-semibold text-text-muted">
+            <h3 className="text-md font-extrabold text-white">Operator Permissions</h3>
+            <p className="mt-1 text-sm font-semibold text-text-muted">
               Select an operator, then grant/revoke feature permissions (for example:{' '}
               <span className="text-white/80 font-extrabold">ais.view</span>).
             </p>
