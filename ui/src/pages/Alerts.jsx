@@ -287,12 +287,12 @@ export default function AlertsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
+                className="rounded-xl border border-white/10 bg-[#0b1220] px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
               >
-                <option value="All">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Investigating">Investigating</option>
-                <option value="Resolved">Resolved</option>
+                <option value="All" className="bg-[#0b1220] text-white">All Status</option>
+                <option value="Active" className="bg-[#0b1220] text-white">Active</option>
+                <option value="Investigating" className="bg-[#0b1220] text-white">Investigating</option>
+                <option value="Resolved" className="bg-[#0b1220] text-white">Resolved</option>
               </select>
             </div>
           </div>

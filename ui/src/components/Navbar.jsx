@@ -2,18 +2,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import SerenGuardLogo from "../assets/SerenGuard.png";
 
-function NavIcon({ label }) {
-  const map = {
-    Dashboard: "🧭",
-    Map: "🗺️",
-    "Alert History": "🛎️",
-    Permissions: "🔑",
-    Reports: "📄",
-    Settings: "⚙️",
-  };
-  return <span className="mr-2 text-[16px] opacity-90">{map[label] || "•"}</span>;
-}
-
 function Navbar({ user, links, onLogout }) {
   const { pathname } = useLocation();
 
@@ -54,7 +42,6 @@ function Navbar({ user, links, onLogout }) {
                   active ? "text-white" : "text-[#b9c6e6] hover:text-white",
                 ].join(" ")}
               >
-                <NavIcon label={link.label} />
                 {link.label}
 
                 <span
@@ -72,7 +59,7 @@ function Navbar({ user, links, onLogout }) {
         </nav>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
+          <div className="hidden sm:flex items-center gap-3 rounded-2xl  px-3 py-2">
             <div
               className="
                 flex h-9 w-9 items-center justify-center rounded-xl
@@ -93,19 +80,11 @@ function Navbar({ user, links, onLogout }) {
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 rounded-xl border border-emerald-400/15 bg-emerald-400/10 px-3 py-2 text-[13px] font-bold text-emerald-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            LIVE
-          </div>
+         
 
           <button
             onClick={onLogout}
-            className="
-              rounded-xl bg-accent-orange px-4 py-2
-              text-base font-extrabold text-white
-              shadow-[0_8px_20px_rgba(242,140,27,0.25)]
-              hover:bg-[#d97706] transition
-            "
+            className="border border-[#f28c1b] hover:bg-[#f28c1b] text-white px-4 py-2 rounded-lg font-semibold transition-colors"
             type="button"
           >
             Logout
@@ -129,7 +108,6 @@ function Navbar({ user, links, onLogout }) {
                     : "bg-white/5 text-[#b9c6e6] border-white/10 hover:bg-white/10 hover:text-white",
                 ].join(" ")}
               >
-                <NavIcon label={link.label} />
                 {link.label}
               </Link>
             );

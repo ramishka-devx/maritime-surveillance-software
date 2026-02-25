@@ -140,7 +140,7 @@ export default function Reports() {
                 className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
               >
                 {types.map((t) => (
-                  <option key={t} value={t}>
+                  <option key={t} value={t} className="bg-[#0b1220] text-white">
                     {t === "All" ? "All Types" : t}
                   </option>
                 ))}
@@ -151,10 +151,10 @@ export default function Reports() {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
               >
-                <option>Newest</option>
-                <option>Oldest</option>
-                <option>Title A-Z</option>
-                <option>Title Z-A</option>
+                <option value="Newest" className="bg-[#0b1220] text-white">Newest</option>
+                <option value="Oldest" className="bg-[#0b1220] text-white">Oldest</option>
+                <option value="Title A-Z" className="bg-[#0b1220] text-white">Title A-Z</option>
+                <option value="Title Z-A" className="bg-[#0b1220] text-white">Title Z-A</option>
               </select>
 
               <button
