@@ -61,7 +61,7 @@ export default function Reports() {
       <div className="mx-auto max-w-[1100px]">
         <div className="mb-4">
           <h1 className="text-lg font-extrabold text-accent-orange">Reports</h1>
-          <p className="text-xs font-semibold text-text-muted">Generate and download surveillance reports</p>
+          <p className="text-sm font-semibold text-text-muted">Generate and download surveillance reports</p>
         </div>
 
         <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -72,13 +72,13 @@ export default function Reports() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search reports..."
-                className="w-full md:w-[320px] bg-transparent text-xs font-semibold text-white placeholder:text-text-muted outline-none"
+                className="w-full md:w-[320px] bg-transparent text-sm font-semibold text-white placeholder:text-text-muted outline-none"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-extrabold text-white/80 hover:bg-white/10"
+                  className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-extrabold text-white/80 hover:bg-white/10"
                 >
                   Clear
                 </button>
@@ -112,7 +112,7 @@ export default function Reports() {
               <button
                 type="button"
                 onClick={() => alert("Open report generator modal (TODO)")}
-                className="rounded-xl bg-primary-blue px-3 py-2 text-[11px] font-bold text-white hover:bg-[#1f3570] transition"
+                className="rounded-xl bg-primary-blue px-3 py-2 text-xs font-bold text-white hover:bg-[#1f3570] transition"
               >
                 Generate
               </button>
@@ -122,8 +122,8 @@ export default function Reports() {
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
           <div className="mb-3">
-            <div className="text-sm font-extrabold text-white">Recent Reports</div>
-            <div className="text-[11px] font-semibold text-text-muted">
+            <div className="text-base font-extrabold text-white">Recent Reports</div>
+            <div className="text-xs font-semibold text-text-muted">
               {filtered.length} report{filtered.length === 1 ? "" : "s"}
             </div>
           </div>
@@ -140,9 +140,9 @@ export default function Reports() {
                   </div>
 
                   <div className="min-w-0">
-                    <div className="truncate text-xs font-extrabold text-white">{r.title}</div>
+                    <div className="truncate text-sm font-extrabold text-white">{r.title}</div>
 
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-text-muted">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold text-text-muted">
                       <span className="inline-flex items-center gap-1">
                         <Calendar size={14} />
                         {r.date}
@@ -165,7 +165,7 @@ export default function Reports() {
                 <button
                   type="button"
                   onClick={() => handleDownload(r)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-[11px] font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-orange px-4 py-2 text-xs font-extrabold text-white hover:bg-[#d97706] transition shadow-[0_8px_18px_rgba(242,140,27,0.20)]"
                   title="Download report"
                 >
                   <Download size={16} />
@@ -176,14 +176,14 @@ export default function Reports() {
 
             {filtered.length === 0 && (
               <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-                <div className="text-sm font-extrabold text-white">No reports found</div>
-                <div className="mt-1 text-sm font-semibold text-text-muted">Try a different search or filter.</div>
+                <div className="text-base font-extrabold text-white">No reports found</div>
+                <div className="mt-1 text-xs font-semibold text-text-muted">Try a different search or filter.</div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-3 text-[15px] font-semibold text-text-muted">
+        <div className="mt-3 text-base font-semibold text-text-muted">
           Tip: Use <span className="text-white/80">Generate</span> to create a new report template, then download it here.
         </div>
       </div>

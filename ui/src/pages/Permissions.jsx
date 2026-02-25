@@ -143,37 +143,36 @@ export default function Permissions() {
   if (!canAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e]">
-      <div className="bg-gradient-to-r from-[#0b1220] to-[#111b2e] p-8 border-b border-gray-700">
-        <h1 className="text-4xl font-bold text-white mb-2">Permissions</h1>
-        <p className="text-gray-400">Grant and revoke operator feature access</p>
-      </div>
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-nav-bg to-nav-bg-soft px-6 py-5">
+      <div className="mx-auto max-w-[1100px]">
+        <div className="mb-4">
+          <h1 className="text-lg font-extrabold text-accent-orange">Permissions</h1>
+          <p className="text-sm font-semibold text-text-muted">Grant and revoke operator feature access</p>
+        </div>
 
-      <div className="p-8">
-        <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-white">Operator Permissions</h3>
-            <p className="text-gray-400 text-sm">
-              Select an operator, then grant/revoke feature permissions (for example:{' '}
-              <span className="text-white font-semibold">ais.view</span>).
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-white">Operator Permissions</h3>
+            <p className="text-xs text-text-muted mt-1">
+              Select an operator, then grant/revoke feature permissions (for example: <span className="text-white font-semibold">ais.view</span>).
             </p>
           </div>
 
           {adminUsersError ? (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <div className="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200 mb-4">
               {adminUsersError}
             </div>
           ) : null}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-lg border border-gray-700 bg-[#0b1220] p-4">
-              <div className="text-white font-semibold mb-3">Operators</div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <div className="text-sm font-extrabold text-white mb-3">Operators</div>
 
               {adminUsersLoading && !adminUsers ? (
-                <div className="text-sm text-gray-400">Loading operators…</div>
+                <div className="text-xs text-text-muted">Loading operators…</div>
               ) : null}
 
-              <div className="space-y-2 max-h-96 overflow-auto pr-1">
+              <div className="space-y-2 max-h-96 overflow-auto">
                 {operators.map((u) => {
                   const active = String(u.user_id) === String(selectedOperatorId);
                   return (
@@ -181,68 +180,68 @@ export default function Permissions() {
                       key={u.user_id}
                       type="button"
                       onClick={() => setSelectedOperatorId(String(u.user_id))}
-                      className={`w-full text-left rounded-lg border px-3 py-2 transition-colors ${
+                      className={`w-full text-left rounded-lg border px-2.5 py-1.5 transition-colors text-[10px] ${
                         active
-                          ? 'border-[#f28c1b]/50 bg-[#243b78]'
-                          : 'border-gray-800 bg-[#111b2e] hover:bg-[#162341]'
+                          ? 'border-accent-orange/30 bg-accent-orange/10'
+                          : 'border-white/10 bg-white/5 hover:bg-white/10'
                       }`}
                     >
-                      <div className="text-sm font-semibold text-white truncate">
+                      <div className="font-semibold text-white truncate">
                         {u.first_name} {u.last_name}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">{u.email}</div>
+                      <div className="text-[9px] text-text-muted truncate">{u.email}</div>
                     </button>
                   );
                 })}
                 {!adminUsersLoading && operators.length === 0 ? (
-                  <div className="text-sm text-gray-400">No operators found.</div>
+                      <div className="text-xs text-text-muted">No operators found.</div>
                 ) : null}
               </div>
             </div>
 
-            <div className="rounded-lg border border-gray-700 bg-[#0b1220] p-4">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <div className="text-white font-semibold">Permissions</div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-sm font-extrabold text-white">Permissions</div>
+                  <div className="text-[10px] text-text-muted">
                     {selectedOperator
-                      ? `Managing: ${selectedOperator.first_name} ${selectedOperator.last_name}`
-                      : 'Select an operator to manage permissions.'}
+                      ? `${selectedOperator.first_name} ${selectedOperator.last_name}`
+                      : 'Select an operator'}
                   </div>
                 </div>
               </div>
 
               {operatorPermsError ? (
-                <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                <div className="mb-3 rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">
                   {operatorPermsError}
                 </div>
               ) : null}
 
               {selectedOperator && operatorPermsLoading && !operatorPermissions ? (
-                <div className="text-sm text-gray-400">Loading permissions…</div>
+                <div className="text-xs text-text-muted">Loading permissions…</div>
               ) : null}
 
               {selectedOperator && Array.isArray(operatorPermissions) ? (
-                <div className="space-y-4 max-h-96 overflow-auto pr-1">
+                <div className="space-y-3 max-h-96 overflow-auto">
                   {operatorPermsByModule.map(({ module, perms }) => (
-                    <div key={module} className="rounded-lg border border-gray-800 bg-[#111b2e] p-3">
-                      <div className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
+                    <div key={module} className="rounded-lg border border-white/10 bg-white/5 p-2">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2">
                         {module}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {perms.map((p) => {
                           const assigned = Number(p.assigned) === 1;
                           const busy = Number(permBusyId) === Number(p.permission_id);
                           return (
                             <div
                               key={p.permission_id}
-                              className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-[#0b1220] px-3 py-2"
+                              className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-2 py-1"
                             >
-                              <div className="min-w-0">
-                                <div className="text-sm font-semibold text-white truncate">{p.name}</div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-semibold text-white truncate">{p.name}</div>
                                 {p.description ? (
-                                  <div className="text-xs text-gray-400 truncate">{p.description}</div>
+                                  <div className="text-[10px] text-text-muted truncate">{p.description}</div>
                                 ) : null}
                               </div>
 
@@ -250,13 +249,13 @@ export default function Permissions() {
                                 type="button"
                                 disabled={busy || operatorPermsLoading}
                                 onClick={() => togglePermission(p)}
-                                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-60 ${
+                                  className={`text-[10px] font-bold px-2 py-1 rounded border transition-colors disabled:opacity-50 whitespace-nowrap ${
                                   assigned
-                                    ? 'text-red-200 border-red-500/30 bg-red-500/10 hover:bg-red-500/20'
-                                    : 'text-green-200 border-green-500/30 bg-green-500/10 hover:bg-green-500/20'
+                                    ? 'text-red-200 border-red-400/20 bg-red-500/10 hover:bg-red-500/20'
+                                    : 'text-green-200 border-green-400/20 bg-green-500/10 hover:bg-green-500/20'
                                 }`}
                               >
-                                {busy ? 'Working…' : assigned ? 'Revoke' : 'Grant'}
+                                {busy ? '…' : assigned ? 'Revoke' : 'Grant'}
                               </button>
                             </div>
                           );
