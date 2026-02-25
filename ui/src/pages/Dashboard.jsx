@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import RequestAccessGate from "../components/RequestAccessGate.jsx";
 import { AlertOctagon, AlertTriangle, Info } from "lucide-react";
+import PermissionGate from "../auth/PermissionGate.jsx";
 
 const severityStyles = {
   Critical: {
@@ -71,7 +72,7 @@ const Dashboard = () => {
         action: "View",
       },
     ],
-    []
+    [],
   );
 
   const filteredAlerts = useMemo(() => {
@@ -83,7 +84,9 @@ const Dashboard = () => {
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-[#0b1220] to-[#111b2e] px-6 py-5">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">Dashboard</h1>
+            <h1 className="text-xl font-bold text-white">
+              Dashboard 
+            </h1>
           <p className="text-xs text-[#9aa8c7]">
             Real-time vessel monitoring & alerts
           </p>
@@ -100,11 +103,16 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
-        <RequestAccessGate permission="dashboard.map.view" featureName="Maritime Map">
+        <RequestAccessGate
+          permission="dashboard.map.view"
+          featureName="Maritime Map"
+        >
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
             <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white">Maritime Map</span>
+                <span className="text-sm font-semibold text-white">
+                  Maritime Map
+                </span>
                 <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
                   LIVE
                 </span>
@@ -129,7 +137,9 @@ const Dashboard = () => {
 
               <div className="absolute left-4 top-4 w-[240px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur">
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="text-xs font-bold text-white">Filters & Search</div>
+                  <div className="text-xs font-bold text-white">
+                    Filters & Search
+                  </div>
                   <button className="text-[10px] font-semibold text-[#9aa8c7] hover:text-white">
                     Reset
                   </button>
@@ -148,7 +158,9 @@ const Dashboard = () => {
 
               <div className="absolute bottom-4 left-4 w-[260px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur">
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="text-xs font-bold text-white">MV Ocean Star</div>
+                  <div className="text-xs font-bold text-white">
+                    MV Ocean Star
+                  </div>
                   <span className="rounded-md border border-sky-400/20 bg-sky-400/10 px-2 py-0.5 text-[10px] font-bold text-sky-200">
                     Cargo
                   </span>
@@ -182,11 +194,16 @@ const Dashboard = () => {
           </div>
         </RequestAccessGate>
 
-        <RequestAccessGate permission="dashboard.active_alerts.view" featureName="Active Alerts">
+        <RequestAccessGate
+          permission="dashboard.active_alerts.view"
+          featureName="Active Alerts"
+        >
           <aside className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
             <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
               <div>
-                <div className="text-sm font-bold text-white">Active Alerts</div>
+                <div className="text-sm font-bold text-white">
+                  Active Alerts
+                </div>
                 <div className="text-[11px] text-[#9aa8c7]">
                   {filteredAlerts.length} showing
                 </div>
@@ -216,16 +233,26 @@ const Dashboard = () => {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
-                          <div className={`mt-1 h-2.5 w-2.5 rounded-full ${s.dot}`} />
+                          <div
+                            className={`mt-1 h-2.5 w-2.5 rounded-full ${s.dot}`}
+                          />
                           <div>
                             <div className="flex items-center gap-2">
-                              <div className="text-xs font-bold text-white">{a.title}</div>
-                              <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold ${s.pill}`}>
+                              <div className="text-xs font-bold text-white">
+                                {a.title}
+                              </div>
+                              <span
+                                className={`rounded-md border px-2 py-0.5 text-[10px] font-bold ${s.pill}`}
+                              >
                                 {a.severity}
                               </span>
                             </div>
-                            <div className="mt-1 text-[11px] text-[#c9d3ee]">{a.vessel}</div>
-                            <div className="mt-1 text-[11px] text-[#7f8db3]">{a.meta}</div>
+                            <div className="mt-1 text-[11px] text-[#c9d3ee]">
+                              {a.vessel}
+                            </div>
+                            <div className="mt-1 text-[11px] text-[#7f8db3]">
+                              {a.meta}
+                            </div>
                           </div>
                         </div>
 
