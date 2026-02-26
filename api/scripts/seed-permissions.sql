@@ -1,51 +1,82 @@
--- Script to seed all permissions and assign them to roles
--- This script should be run after the initial schema and seed data are loaded
+-- Postgres: seed the only grantable permissions.
+-- Run after schema + base seed (roles/users) are loaded.
 
-USE maritime_surveillance_db;
+BEGIN;
 
--- Define all permissions from the system
-SET @all_perms = 'user.list,user.view,user.update,user.status.update,user.role.update,permission.list,permission.assign,permission.revoke,role.list,role.view,role.create,role.update,role.delete,vessel.create,vessel.list,vessel.view,vessel.update,vessel.delete,position.create,position.list,position.view,alert.create,alert.list,alert.view,alert.update,alert.updateStatus,alert.assign,notification.list,notification.view,notification.read,notification.delete,activity.list,activity.view';
-
--- Insert all permissions if they don't exist
-DROP TEMPORARY TABLE IF EXISTS tmp_all_perms;
-CREATE TEMPORARY TABLE tmp_all_perms (name VARCHAR(100) UNIQUE);
-SET @sql = CONCAT('INSERT IGNORE INTO permissions (name) VALUES ', REPLACE(@all_perms, ',', "'), ('"), "('");
-SET @sql = REPLACE(@sql, "VALUES ", "VALUES ('");
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Assign all permissions to admin role (role_id = 1)
-INSERT IGNORE INTO role_permissions (role_id, permission_id)
-SELECT 1, permission_id FROM permissions;
-
--- Assign basic read permissions to user role (role_id = 2) for common operations
-INSERT IGNORE INTO role_permissions (role_id, permission_id)
-SELECT 2, p.permission_id
-FROM permissions p
-WHERE p.name IN (
-    'user.list',
-    'division.list',
-    'divisionType.list',
-    'machine.list',
-    'meter.list',
-    'parameter.list',
-    'breakdown.list',
-    'breakdown.view',
-    'breakdownCategory.list',
-    'breakdownStatus.list',
-    'notification.list',
-    'notification.view',
-    'notification.read',
-    'dashboard.view',
-    'kaizen.view',
-    'kaizen.create'
+-- Delete assignments and permissions not in the allowed list
+DELETE FROM role_permissions
+WHERE permission_id IN (
+    SELECT permission_id
+    FROM permissions
+    WHERE name NOT IN (
+        'dashboard.view',
+        'alert.view',
+        'alert.status.view',
+        'reports.view',
+        'report.download',
+        'users.list',
+        'users.view',
+        'user.status.update'
+    )
 );
 
--- Output results
-SELECT 'Permissions seeded successfully' as status;
-SELECT COUNT(*) as total_permissions FROM permissions;
-SELECT r.name as role_name, COUNT(rp.permission_id) as permission_count
+DELETE FROM user_permissions
+WHERE permission_id IN (
+    SELECT permission_id
+    FROM permissions
+    WHERE name NOT IN (
+        'dashboard.view',
+        'alert.view',
+        'alert.status.view',
+        'reports.view',
+        'report.download',
+        'users.list',
+        'users.view',
+        'user.status.update'
+    )
+);
+
+DELETE FROM permissions
+WHERE name NOT IN (
+    'dashboard.view',
+    'alert.view',
+    'alert.status.view',
+    'reports.view',
+    'report.download',
+    'users.list',
+    'users.view',
+    'user.status.update'
+);
+
+-- Upsert allowed permissions
+INSERT INTO permissions (name, module, is_active)
+VALUES
+    ('dashboard.view', 'dashboard', 1),
+    ('alert.view', 'alert', 1),
+    ('alert.status.view', 'alert', 1),
+    ('reports.view', 'reports', 1),
+    ('report.download', 'report', 1),
+    ('users.list', 'users', 1),
+    ('users.view', 'users', 1),
+    ('user.status.update', 'user', 1)
+ON CONFLICT (name) DO UPDATE
+SET module = EXCLUDED.module,
+        is_active = 1;
+
+-- Assign all permissions to super_admin role
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.role_id, p.permission_id
 FROM roles r
-LEFT JOIN role_permissions rp ON r.role_id = rp.role_id
-GROUP BY r.role_id, r.name;
+JOIN permissions p ON TRUE
+WHERE r.name = 'super_admin'
+ON CONFLICT DO NOTHING;
+
+-- Assign minimal defaults to operator role (optional)
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.role_id, p.permission_id
+FROM roles r
+JOIN permissions p ON p.name IN ('dashboard.view', 'alert.view', 'reports.view')
+WHERE r.name = 'operator'
+ON CONFLICT DO NOTHING;
+
+COMMIT;

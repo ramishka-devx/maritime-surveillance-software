@@ -15,7 +15,7 @@ const router = Router();
  *     summary: List all vessels
  *     tags: [Vessels]
  */
-router.get('/', authMiddleware, permissionMiddleware('vessels.list'), validate(listSchema), VesselController.list);
+router.get('/', authMiddleware, permissionMiddleware('dashboard.view'), validate(listSchema), VesselController.list);
 
 /**
  * @openapi
@@ -24,7 +24,7 @@ router.get('/', authMiddleware, permissionMiddleware('vessels.list'), validate(l
  *     summary: Get vessel by ID
  *     tags: [Vessels]
  */
-router.get('/:vessel_id', authMiddleware, permissionMiddleware('vessels.view'), validate(getByIdSchema), VesselController.getById);
+router.get('/:vessel_id', authMiddleware, permissionMiddleware('dashboard.view'), validate(getByIdSchema), VesselController.getById);
 
 /**
  * @openapi

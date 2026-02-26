@@ -6,7 +6,7 @@ import { LegendRow } from "./LegendRow.jsx";
 export function MapPanel() {
   return (
     <RequestAccessGate
-      permission="dashboard.map.view"
+      permission="dashboard.view"
       featureName="Maritime Map"
     >
       <div className="relative overflow-hidden rounded-sm border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">

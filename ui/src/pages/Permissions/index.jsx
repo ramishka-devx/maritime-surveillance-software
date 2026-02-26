@@ -4,26 +4,71 @@ import { useAuth } from '../../auth/AuthContext.jsx';
 import { usePermissions } from './hooks/usePermissions.js';
 import { OperatorsList } from './components/OperatorsList.jsx';
 import { PermissionsList } from './components/PermissionsList.jsx';
+import { OperatorActivityModal } from './components/OperatorActivityModal.jsx';
+import { apiRequest } from '../../lib/api.js';
 
 export default function Permissions() {
   const { token, isSuperAdmin } = useAuth();
   const canAdmin = isSuperAdmin();
+
+  const [activityOpen, setActivityOpen] = React.useState(false);
+  const [activities, setActivities] = React.useState([]);
+  const [activityLoading, setActivityLoading] = React.useState(false);
+  const [activityError, setActivityError] = React.useState('');
 
   const {
     operators,
     selectedOperator,
     selectedOperatorId,
     setSelectedOperatorId,
-    adminUsers,
     adminUsersLoading,
     adminUsersError,
-    operatorPermissions,
     operatorPermsLoading,
     operatorPermsError,
     permBusyId,
     operatorPermsByModule,
     togglePermission,
   } = usePermissions(token, canAdmin);
+
+  const openActivity = React.useCallback(() => {
+    if (!selectedOperatorId) return;
+    setActivityOpen(true);
+  }, [selectedOperatorId]);
+
+  const closeActivity = React.useCallback(() => {
+    setActivityOpen(false);
+  }, []);
+
+  React.useEffect(() => {
+    if (!activityOpen) return;
+    if (!token) return;
+    if (!selectedOperatorId) return;
+
+    let cancelled = false;
+    setActivityLoading(true);
+    setActivityError('');
+    setActivities([]);
+
+    (async () => {
+      try {
+        const data = await apiRequest(
+          `/api/activities?page=1&limit=50&user_id=${encodeURIComponent(String(selectedOperatorId))}`,
+          { token },
+        );
+
+        const rows = Array.isArray(data?.data) ? data.data : [];
+        if (!cancelled) setActivities(rows);
+      } catch (e) {
+        if (!cancelled) setActivityError(e?.message || 'Failed to load activity');
+      } finally {
+        if (!cancelled) setActivityLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activityOpen, selectedOperatorId, token]);
 
   if (!canAdmin) return <Navigate to="/" replace />;
 
@@ -40,7 +85,7 @@ export default function Permissions() {
             <h3 className="text-lg font-semibold text-white">Operator Permissions</h3>
             <p className="text-gray-400 text-sm">
               Select an operator, then grant/revoke feature permissions (for example:{' '}
-              <span className="text-white font-semibold">ais.view</span>).
+              <span className="text-white font-semibold">dashboard.view</span>).
             </p>
           </div>
 
@@ -65,10 +110,20 @@ export default function Permissions() {
               permBusyId={permBusyId}
               error={operatorPermsError}
               onTogglePermission={togglePermission}
+              onViewActivity={openActivity}
             />
           </div>
         </div>
       </div>
+
+      <OperatorActivityModal
+        isOpen={activityOpen}
+        operator={selectedOperator}
+        activities={activities}
+        loading={activityLoading}
+        error={activityError}
+        onClose={closeActivity}
+      />
     </div>
   );
 }
