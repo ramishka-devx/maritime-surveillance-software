@@ -1,9 +1,12 @@
 import React, { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { AlertFilters } from "./components/AlertFilters.jsx";
 import { AlertItem } from "./components/AlertItem.jsx";
+import { AlertDetailModal } from "./components/AlertDetailModal.jsx";
 import { useAlerts } from "./hooks/useAlerts.js";
 
 export default function AlertsPage() {
+  const { id } = useParams();
   const [severityFilter, setSeverityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("All");
   const [query, setQuery] = useState("");
@@ -88,6 +91,12 @@ export default function AlertsPage() {
           )}
         </div>
       </div>
+
+      {id && (
+        <AlertDetailModal
+          alert={alerts.find((a) => String(a.id) === String(id))}
+        />
+      )}
     </div>
   );
 }

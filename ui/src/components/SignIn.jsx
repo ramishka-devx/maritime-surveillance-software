@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SerenGuardLogo from '../assets/SerenGuard.png';
+import loginVideo from '../assets/video1.mp4';
 import { useAuth } from '../auth/AuthContext.jsx';
 
 function splitFullName(fullName) {
@@ -102,7 +103,7 @@ const SignIn = () => {
         playsInline
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="/video1.mp4" type="video/mp4" />
+        <source src={loginVideo} type="video/mp4" />
       </video>
       
       {/* Overlay */}
