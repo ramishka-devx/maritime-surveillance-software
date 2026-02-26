@@ -6,7 +6,7 @@ export function AlertCard({ alert }) {
   const SeverityIcon = severityStyle.icon;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition">
+    <div className="rounded-sm border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           {/* Severity indicator dot */}

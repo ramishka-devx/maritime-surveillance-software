@@ -15,7 +15,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 // =============================================================================
 
 export function UsersManagement() {
-  const { can, canAny } = usePermission();
+  const { can } = usePermission();
 
   return (
     <div className="p-6">
@@ -177,7 +177,7 @@ export function VesselsManagement() {
 // =============================================================================
 
 export function AlertsPanel() {
-  const { can, canAny } = usePermission();
+  const { can } = usePermission();
 
   return (
     <div className="p-6">
@@ -299,7 +299,7 @@ export function AdminPanel() {
 // =============================================================================
 
 export function Dashboard() {
-  const { can, canAccessModule, getModulePermissions } = usePermission();
+  const { canAccessModule } = usePermission();
   const { user } = useAuth();
 
   return (
@@ -416,8 +416,6 @@ export function ActionButtonExample() {
 // =============================================================================
 
 export function Navigation() {
-  const { can, canAccessModule } = usePermission();
-
   return (
     <nav className="bg-gray-800 text-white p-4">
       <ul className="flex gap-4">
@@ -492,8 +490,7 @@ export function Navigation() {
 // EXAMPLE 8: Form with Conditional Fields
 // =============================================================================
 
-export function UserEditForm({ userId }) {
-  const { can, canAll } = usePermission();
+export function UserEditForm() {
 
   return (
     <form className="p-6 border rounded max-w-md">
