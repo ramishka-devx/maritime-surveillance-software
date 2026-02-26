@@ -1,3 +1,5 @@
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,4 +80,47 @@
   .status-crit {
     background: var(--danger);
   }
+}
+
+/* Leaflet Map Dark Theme Customization */
+.maritime-map {
+  border-radius: 0;
+}
+
+.leaflet-container {
+  background: #0f1a2d;
+  font-family: 'Urbanist', system-ui, sans-serif;
+}
+
+/* Dark theme for Leaflet controls */
+.leaflet-control-zoom a {
+  background-color: rgba(11, 18, 32, 0.9);
+  color: #c9d3ee;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Dark theme for attribution */
+.leaflet-control-attribution {
+  background-color: rgba(11, 18, 32, 0.8);
+  color: #7f8db3;
+  font-size: 10px;
+}
+
+.leaflet-control-attribution a {
+  color: #9aa8c7;
+}
+
+/* Popup styling to match theme */
+.leaflet-popup-content-wrapper {
+  background-color: white;
+  border-radius: 8px;
+}
+
+.leaflet-popup-tip {
+  background-color: white;
 }

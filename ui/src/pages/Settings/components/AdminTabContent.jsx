@@ -21,39 +21,31 @@ export function AdminTabContent({ token, canAdmin }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-6">Admin</h2>
+      <h2 className="text-base font-extrabold text-white mb-4">Operator Permissions</h2>
+      <p className="text-xs text-text-muted mb-4">Select an operator, then grant/revoke feature permissions</p>
 
-      <div className="bg-[#1a2942] border border-gray-700 rounded-lg p-6 space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold text-white">Operator Permissions</h3>
-          <p className="text-gray-400 text-sm">
-            Select an operator, then grant/revoke feature permissions (for example: <span className="text-white font-semibold">ais.view</span>).
-          </p>
+      {adminUsersError ? (
+        <div className="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200 mb-4">
+          {adminUsersError}
         </div>
+      ) : null}
 
-        {adminUsersError ? (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-            {adminUsersError}
-          </div>
-        ) : null}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <OperatorsList
+          operators={operators}
+          selectedOperatorId={selectedOperatorId}
+          onSelectOperator={setSelectedOperatorId}
+          isLoading={adminUsersLoading}
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <OperatorsList
-            operators={operators}
-            selectedOperatorId={selectedOperatorId}
-            onSelectOperator={setSelectedOperatorId}
-            isLoading={adminUsersLoading}
-          />
-
-          <PermissionsList
-            selectedOperator={selectedOperator}
-            operatorPermsByModule={operatorPermsByModule}
-            isLoading={operatorPermsLoading}
-            permBusyId={permBusyId}
-            error={operatorPermsError}
-            onTogglePermission={togglePermission}
-          />
-        </div>
+        <PermissionsList
+          selectedOperator={selectedOperator}
+          operatorPermsByModule={operatorPermsByModule}
+          isLoading={operatorPermsLoading}
+          permBusyId={permBusyId}
+          error={operatorPermsError}
+          onTogglePermission={togglePermission}
+        />
       </div>
     </div>
   );
