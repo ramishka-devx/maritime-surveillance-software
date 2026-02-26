@@ -1,7 +1,7 @@
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import { AlertCard } from "./AlertCard.jsx";
 
-export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter }) {
+export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter, onAlertClick }) {
   return (
     <RequestAccessGate
       permission="dashboard.view"
@@ -34,7 +34,7 @@ export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter }) {
         <div className="max-h-[72vh] min-h-[520px] overflow-y-auto p-3">
           <div className="space-y-3">
             {filteredAlerts.map((alert) => (
-              <AlertCard key={alert.id} alert={alert} />
+              <AlertCard key={alert.id} alert={alert} onAlertClick={onAlertClick} />
             ))}
           </div>
         </div>

@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { RotateCw, Maximize2 } from "lucide-react";
 import { MapPanel } from "./components/MapPanel.jsx";
 import { AlertsPanel } from "./components/AlertsPanel.jsx";
@@ -41,9 +40,8 @@ const DETAIL_FIELDS = {
 };
 
 const Dashboard = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
   const [alertFilter, setAlertFilter] = useState("All");
+  const [selectedAlertId, setSelectedAlertId] = useState(null);
 
   const alerts = useMemo(
     () => [
@@ -126,6 +124,7 @@ const Dashboard = () => {
             <Maximize2 size={16} />
           </button>
         </div>
+        </div>
       </div>
 
       {/* Content Grid */}
@@ -138,12 +137,13 @@ const Dashboard = () => {
             filteredAlerts={filteredAlerts}
             alertFilter={alertFilter}
             setAlertFilter={setAlertFilter}
+            onAlertClick={(id) => setSelectedAlertId(id)}
           />
         </div>
       </div>
 
-      {id && (() => {
-        const raw = alerts.find((a) => String(a.id) === String(id));
+      {selectedAlertId && (() => {
+        const raw = alerts.find((a) => String(a.id) === String(selectedAlertId));
         if (!raw) return null;
         const extra = DETAIL_FIELDS[raw.title] || {};
         const normalized = {
@@ -160,7 +160,7 @@ const Dashboard = () => {
         return (
           <AlertDetailModal
             alert={normalized}
-            onClose={() => navigate("/", { replace: true })}
+            onClose={() => setSelectedAlertId(null)}
           />
         );
       })()}
