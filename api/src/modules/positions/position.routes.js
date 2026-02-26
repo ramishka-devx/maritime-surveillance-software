@@ -39,7 +39,7 @@ router.post(
 router.get(
   '/vessels/:vessel_id/positions',
   authMiddleware,
-  permissionMiddleware(['vessels.positions.view', 'vessels.history.view']),
+  permissionMiddleware('dashboard.view'),
   validate(listForVesselSchema),
   PositionController.listForVessel
 );
@@ -54,7 +54,7 @@ router.get(
 router.get(
   '/vessels/:vessel_id/positions/latest',
   authMiddleware,
-  permissionMiddleware('vessels.positions.view'),
+  permissionMiddleware('dashboard.view'),
   validate(latestForVesselSchema),
   PositionController.latestForVessel
 );
@@ -69,7 +69,7 @@ router.get(
 router.get(
   '/positions/:position_id',
   authMiddleware,
-  permissionMiddleware('vessels.positions.view'),
+  permissionMiddleware('dashboard.view'),
   validate(getByIdSchema),
   PositionController.getById
 );

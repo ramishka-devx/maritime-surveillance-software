@@ -1,10 +1,10 @@
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import { AlertCard } from "./AlertCard.jsx";
 
-export function AlertsPanel({ alerts, filteredAlerts, alertFilter, setAlertFilter }) {
+export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter }) {
   return (
     <RequestAccessGate
-      permission="dashboard.active_alerts.view"
+      permission="dashboard.view"
       featureName="Active Alerts"
     >
       <aside className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">

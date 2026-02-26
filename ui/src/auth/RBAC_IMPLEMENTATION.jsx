@@ -29,10 +29,11 @@
 import { usePermission } from '../auth/usePermission.js';
 import { PermissionGate } from '../auth/PermissionGate.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
+import React from 'react';
 
 export function UsersPage() {
-  const { user } = useAuth();
-  const { can, canAny } = usePermission();
+  const { user: _user } = useAuth();
+  const { can, canAny: _canAny } = usePermission();
 
   // If user doesn't have basic users.list permission, deny access
   if (!can('users.list')) {
@@ -116,8 +117,8 @@ export function UsersPage() {
 // STEP 3: Form Component with Permission-Based Fields
 // =============================================================================
 
-export function UserEditForm({ userId, onSave }) {
-  const { can, canAll } = usePermission();
+export function UserEditForm({ onSave }) {
+  const { can, canAll: _canAll } = usePermission();
   const [formData, setFormData] = React.useState({});
 
   // If user can't update, disable form
@@ -179,7 +180,7 @@ export function UserEditForm({ userId, onSave }) {
 
 export function VesselsList() {
   const { can } = usePermission();
-  const [vessels, setVessels] = React.useState([
+  const [vessels, _setVessels] = React.useState([
     // Your vessels data
   ]);
 

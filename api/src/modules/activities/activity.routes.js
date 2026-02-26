@@ -16,7 +16,7 @@ const router = Router();
  */
 router.get('/',
   authMiddleware,
-  permissionMiddleware(['activities.logs.list', 'users.activity.view']),
+  permissionMiddleware('reports.view'),
   validate(listSchema),
   ActivityController.list
 );
@@ -30,7 +30,7 @@ router.get('/',
  */
 router.get('/:activity_id',
   authMiddleware,
-  permissionMiddleware(['activities.logs.view', 'users.activity.view']),
+  permissionMiddleware('reports.view'),
   validate(getByIdSchema),
   ActivityController.getById
 );
