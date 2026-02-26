@@ -177,7 +177,7 @@ export function Example4_UsePermissionHook() {
 // ============================================================================
 
 export function UserManagementPanel() {
-  const { can, canAny } = usePermission();
+  const { canAny } = usePermission();
 
   return (
     <div className="p-6">

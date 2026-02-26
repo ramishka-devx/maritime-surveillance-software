@@ -48,8 +48,8 @@ export default function Reports() {
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
           <div className="mb-3">
-            <div className="text-sm font-extrabold text-white">Recent Reports</div>
-            <div className="text-[11px] font-semibold text-text-muted">
+            <div className="text-base font-extrabold text-white">Recent Reports</div>
+            <div className="text-xs font-semibold text-text-muted">
               {filtered.length} report{filtered.length === 1 ? "" : "s"}
             </div>
           </div>

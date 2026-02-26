@@ -118,7 +118,9 @@ export default function App() {
             navLinks={navLinks}
             onLogout={handleLogout}
           >
-            <Dashboard user={session} />
+            <RequestAccessGate permission="dashboard.view" featureName="Dashboard">
+              <Dashboard user={session} />
+            </RequestAccessGate>
           </ProtectedLayout>
         }
       />
@@ -131,7 +133,7 @@ export default function App() {
             navLinks={navLinks}
             onLogout={handleLogout}
           >
-            <RequestAccessGate permission="alerts.list" featureName="Alerts">
+            <RequestAccessGate permission="alert.view" featureName="Alerts">
               <Alerts />
             </RequestAccessGate>
           </ProtectedLayout>
@@ -161,7 +163,7 @@ export default function App() {
             navLinks={navLinks}
             onLogout={handleLogout}
           >
-            <RequestAccessGate permission="analytics.dashboard.view" featureName="Reports">
+            <RequestAccessGate permission="reports.view" featureName="Reports">
               <Reports />
             </RequestAccessGate>
           </ProtectedLayout>

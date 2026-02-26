@@ -56,7 +56,7 @@ router.get('/', authMiddleware, permissionMiddleware('users.list'), UserControll
  *   get:
  *     summary: Get user analytics counts
  */
-router.get('/analytics', authMiddleware, permissionMiddleware('analytics.dashboard.view'), UserController.analytics);
+router.get('/analytics', authMiddleware, permissionMiddleware('dashboard.view'), UserController.analytics);
 
 /**
  * @openapi
@@ -64,7 +64,7 @@ router.get('/analytics', authMiddleware, permissionMiddleware('analytics.dashboa
  *   put:
  *     summary: Update user details
  */
-router.put('/:user_id', authMiddleware, permissionMiddleware('users.update'), activityLogger('users.update'), validate(updateSchema), UserController.update);
+router.put('/:user_id', authMiddleware, permissionMiddleware('user.status.update'), activityLogger('users.update'), validate(updateSchema), UserController.update);
 
 /**
  * @openapi
@@ -72,7 +72,7 @@ router.put('/:user_id', authMiddleware, permissionMiddleware('users.update'), ac
  *   put:
  *     summary: Update user status (verify/suspend)
  */
-router.put('/:user_id/status', authMiddleware, permissionMiddleware(['users.verify', 'users.suspend']), activityLogger('users.verify'), validate(updateStatusSchema), UserController.updateStatus);
+router.put('/:user_id/status', authMiddleware, permissionMiddleware('user.status.update'), activityLogger('users.verify'), validate(updateStatusSchema), UserController.updateStatus);
 
 /**
  * @openapi
@@ -80,7 +80,7 @@ router.put('/:user_id/status', authMiddleware, permissionMiddleware(['users.veri
  *   put:
  *     summary: Update user's primary role (legacy)
  */
-router.put('/:user_id/role', authMiddleware, permissionMiddleware('users.roles.assign'), activityLogger('users.roles.assign'), validate(updateRoleSchema), UserController.updateRole);
+router.put('/:user_id/role', authMiddleware, permissionMiddleware('user.status.update'), activityLogger('users.roles.assign'), validate(updateRoleSchema), UserController.updateRole);
 
 // ==========================================
 // Multi-Role Management Routes
@@ -95,7 +95,7 @@ router.put('/:user_id/role', authMiddleware, permissionMiddleware('users.roles.a
 router.get(
 	'/:user_id/roles',
 	authMiddleware,
-	permissionMiddleware('users.view'),
+		permissionMiddleware('users.view'),
 	validate(userPermissionListSchema),
 	UserController.getUserRoles
 );
@@ -109,7 +109,7 @@ router.get(
 router.post(
 	'/:user_id/roles/assign',
 	authMiddleware,
-	permissionMiddleware('users.roles.assign'),
+	permissionMiddleware('user.status.update'),
 	activityLogger('users.roles.assign'),
 	validate(userRoleMutateSchema),
 	UserController.assignRole
@@ -124,7 +124,7 @@ router.post(
 router.post(
 	'/:user_id/roles/remove',
 	authMiddleware,
-	permissionMiddleware('users.roles.assign'),
+	permissionMiddleware('user.status.update'),
 	activityLogger('users.roles.remove'),
 	validate(userRoleMutateSchema),
 	UserController.removeRole
@@ -139,7 +139,7 @@ router.post(
 router.post(
 	'/:user_id/roles/sync',
 	authMiddleware,
-	permissionMiddleware('users.roles.assign'),
+	permissionMiddleware('user.status.update'),
 	activityLogger('users.roles.sync'),
 	validate(userRoleSyncSchema),
 	UserController.syncRoles
@@ -158,7 +158,7 @@ router.post(
 router.get(
 	'/:user_id/permissions',
 	authMiddleware,
-	permissionMiddleware('users.permissions.view'),
+	permissionMiddleware('users.view'),
 	validate(userPermissionListSchema),
 	UserController.listUserPermissions
 );
@@ -172,7 +172,7 @@ router.get(
 router.get(
 	'/:user_id/permissions/direct',
 	authMiddleware,
-	permissionMiddleware('users.permissions.view'),
+	permissionMiddleware('users.view'),
 	validate(userPermissionListSchema),
 	UserController.getDirectPermissions
 );
@@ -186,7 +186,7 @@ router.get(
 router.get(
 	'/:user_id/permissions/effective',
 	authMiddleware,
-	permissionMiddleware('users.permissions.view'),
+	permissionMiddleware('users.view'),
 	validate(userPermissionListSchema),
 	UserController.getEffectivePermissions
 );
@@ -200,7 +200,7 @@ router.get(
 router.post(
 	'/:user_id/permissions/assign',
 	authMiddleware,
-	permissionMiddleware('users.permissions.assign'),
+	permissionMiddleware('user.status.update'),
 	activityLogger('users.permissions.assign'),
 	validate(userPermissionMutateSchema),
 	UserController.assignUserPermission
@@ -215,7 +215,7 @@ router.post(
 router.post(
 	'/:user_id/permissions/revoke',
 	authMiddleware,
-	permissionMiddleware('users.permissions.assign'),
+	permissionMiddleware('user.status.update'),
 	activityLogger('users.permissions.revoke'),
 	validate(userPermissionMutateSchema),
 	UserController.revokeUserPermission

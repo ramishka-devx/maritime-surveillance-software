@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Calendar, Ship } from "lucide-react";
 import { SEVERITY, STATUS } from "../constants.js";
+import { usePermission } from "../../../auth/usePermission.js";
 
 export function AlertItem({
   alert,
@@ -13,6 +14,8 @@ export function AlertItem({
   const navigate = useNavigate();
   const s = SEVERITY[alert.level] || SEVERITY.info;
   const st = STATUS[alert.status] || STATUS.Active;
+  const { can } = usePermission();
+  const canManageStatus = can('alert.status.view');
 
   return (
     <div
@@ -79,7 +82,14 @@ export function AlertItem({
           <button
             type="button"
             onClick={() => onResolve(alert.id)}
-            className="rounded-lg bg-accent-orange px-3 py-2 text-[11px] font-extrabold text-white hover:bg-[#d97706] transition"
+            disabled={!canManageStatus}
+            className={[
+              "rounded-lg px-3 py-2 text-[11px] font-extrabold transition",
+              canManageStatus
+                ? "bg-accent-orange text-white hover:bg-[#d97706]"
+                : "cursor-not-allowed border border-white/10 bg-white/5 text-white/60",
+            ].join(" ")}
+            title={canManageStatus ? "Resolve alert" : "Requires permission: alert.status.view"}
           >
             {alert.status === "Resolved" ? "Resolved" : "Resolve"}
           </button>
@@ -104,7 +114,14 @@ export function AlertItem({
               <button
                 type="button"
                 onClick={() => onAcknowledge(alert.id)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/90 hover:bg-white/10 transition"
+                disabled={!canManageStatus}
+                className={[
+                  "rounded-xl border border-white/10 px-3 py-2 text-[11px] font-extrabold transition",
+                  canManageStatus
+                    ? "bg-white/5 text-white/90 hover:bg-white/10"
+                    : "cursor-not-allowed bg-white/5 text-white/50",
+                ].join(" ")}
+                title={canManageStatus ? "Acknowledge alert" : "Requires permission: alert.status.view"}
               >
                 {alert.acknowledged ? "Acknowledged ✓" : "Acknowledge"}
               </button>
@@ -112,7 +129,14 @@ export function AlertItem({
               <select
                 value={alert.assignedTo}
                 onChange={(e) => onAssignTo(alert.id, e.target.value)}
-                className="rounded-xl border border-white/10 bg-[#0b1220] px-3 py-2 text-[11px] font-extrabold text-white/90 outline-none"
+                disabled={!canManageStatus}
+                className={[
+                  "rounded-xl border border-white/10 px-3 py-2 text-[11px] font-extrabold outline-none",
+                  canManageStatus
+                    ? "bg-[#0b1220] text-white/90"
+                    : "cursor-not-allowed bg-white/5 text-white/50",
+                ].join(" ")}
+                title={canManageStatus ? "Assign alert" : "Requires permission: alert.status.view"}
               >
                 <option value="—">Unassigned</option>
                 <option value="Operator 1">Operator 1</option>

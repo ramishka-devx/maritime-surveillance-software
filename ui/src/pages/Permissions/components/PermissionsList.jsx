@@ -5,6 +5,7 @@ export function PermissionsList({
   permBusyId,
   error,
   onTogglePermission,
+  onViewActivity,
 }) {
   return (
     <div className="rounded-lg border border-gray-700 bg-[#0b1220] p-4">
@@ -17,6 +18,16 @@ export function PermissionsList({
               : 'Select an operator to manage permissions.'}
           </div>
         </div>
+
+        {selectedOperator ? (
+          <button
+            type="button"
+            onClick={onViewActivity}
+            className="rounded-lg border border-gray-600 bg-[#111b2e] px-3 py-2 text-xs font-semibold text-white hover:bg-[#162341] transition-colors"
+          >
+            View activity
+          </button>
+        ) : null}
       </div>
 
       {error ? (

@@ -27,20 +27,21 @@ const Settings = ({ user }) => {
   }, [activeTab, canAdmin, setActiveTab]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e]">
-      <div className="bg-gradient-to-r from-[#0b1220] to-[#111b2e] p-8 border-b border-gray-700">
-        <h1 className="text-4xl font-bold text-white mb-2">Settings</h1>
-        <p className="text-gray-400">Manage your account and system preferences</p>
-      </div>
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-nav-bg to-nav-bg-soft px-6 py-5">
+      <div className="mx-auto max-w-[1100px]">
+        <div className="mb-4">
+          <h1 className="text-lg font-extrabold text-accent-orange">Settings</h1>
+          <p className="text-sm font-semibold text-text-muted">Manage your account and system preferences</p>
+        </div>
 
-      <div className="flex flex-col md:flex-row">
-        <TabNavigation
-          tabs={settingsTabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+          <TabNavigation
+            tabs={settingsTabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
 
-        <div className="flex-1 p-8">
+          <div className="flex-1 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
           {activeTab === 'general' && <GeneralSettings />}
           {activeTab === 'profile' && <ProfileSettings user={user} />}
           {activeTab === 'notifications' && (
@@ -54,6 +55,7 @@ const Settings = ({ user }) => {
           {activeTab === 'admin' && canAdmin && (
             <AdminTabContent token={token} canAdmin={canAdmin} />
           )}
+          </div>
         </div>
       </div>
     </div>

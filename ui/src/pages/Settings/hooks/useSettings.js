@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, User, Bell, Lock, Monitor, Shield } from 'lucide-react';
+import { Settings, User, Bell, Lock, Cpu, Shield } from 'lucide-react';
 
 export function useSettings(isSuperAdmin) {
   const [activeTab, setActiveTab] = useState('general');
@@ -17,7 +17,7 @@ export function useSettings(isSuperAdmin) {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Lock },
-    { id: 'system', label: 'System', icon: Monitor },
+    { id: 'system', label: 'System', icon: Cpu },
   ];
 
   if (isSuperAdmin) {

@@ -2,62 +2,47 @@ import { pool, query } from '../src/config/db.config.js';
 
 // Permission names used by permissionMiddleware() across api/src
 const permissions = [
-  'activities.logs.list',
-  'activities.logs.view',
-  'ais.view',
-  'alerts.acknowledge',
-  'alerts.assign',
-  'alerts.create',
-  'alerts.dismiss',
-  'alerts.list',
-  'alerts.resolve',
-  'alerts.update',
-  'alerts.view',
-  'analytics.dashboard.view',
-  'dashboard.active_alerts.view',
-  'dashboard.map.view',
-  'notifications.delete',
-  'notifications.view',
-  'permissions.create',
-  'permissions.delete',
-  'permissions.list',
-  'permissions.view',
-  'roles.create',
-  'roles.delete',
-  'roles.list',
-  'roles.permissions.assign',
-  'roles.permissions.revoke',
-  'roles.permissions.view',
-  'roles.update',
-  'roles.view',
-  'users.activity.view',
+  'dashboard.view',
+  'alert.view',
+  'alert.status.view',
+  'reports.view',
+  'report.download',
   'users.list',
-  'users.permissions.assign',
-  'users.permissions.view',
-  'users.roles.assign',
-  'users.suspend',
-  'users.update',
-  'users.verify',
   'users.view',
-  'vessels.create',
-  'vessels.delete',
-  'vessels.history.view',
-  'vessels.list',
-  'vessels.positions.create',
-  'vessels.positions.view',
-  'vessels.update',
-  'vessels.view'
+  'user.status.update'
 ];
 
 async function seedPermissions() {
   try {
     console.log('Starting permission seeding...');
 
+    // Replace existing permission vocabulary with the current, allowed set.
+    // This intentionally removes older permissions so super admins can only grant
+    // the permissions defined above.
+    const inList = permissions.map(() => '?').join(', ');
+    await query('BEGIN');
+
+    await query(
+      `DELETE FROM role_permissions WHERE permission_id IN (SELECT permission_id FROM permissions WHERE name NOT IN (${inList}))`,
+      permissions,
+    );
+    await query(
+      `DELETE FROM user_permissions WHERE permission_id IN (SELECT permission_id FROM permissions WHERE name NOT IN (${inList}))`,
+      permissions,
+    );
+    await query(`DELETE FROM permissions WHERE name NOT IN (${inList})`, permissions);
+
     // Insert all permissions (also store module prefix for grouping)
     const rows = permissions.map(name => ({ name, module: name.split('.')[0] || null }));
     const placeholders = rows.map(() => '(?, ?)').join(', ');
     const params = rows.flatMap(p => [p.name, p.module]);
-    const insertPermissionsQuery = `INSERT IGNORE INTO permissions (name, module) VALUES ${placeholders}`;
+    const insertPermissionsQuery = `
+      INSERT INTO permissions (name, module)
+      VALUES ${placeholders}
+      ON CONFLICT (name) DO UPDATE
+      SET module = EXCLUDED.module,
+          is_active = 1
+    `;
     await query(insertPermissionsQuery, params);
     console.log(`Inserted ${permissions.length} permissions`);
 
@@ -66,34 +51,35 @@ async function seedPermissions() {
     if (!superAdminRole) throw new Error('Role super_admin not found. Run db:seed first.');
 
     // Assign all permissions to admin role
-    await query(`
-      INSERT IGNORE INTO role_permissions (role_id, permission_id)
-      SELECT ?, permission_id FROM permissions
-    `, [superAdminRole.role_id]);
+    await query(
+      `
+        INSERT INTO role_permissions (role_id, permission_id)
+        SELECT ?, permission_id FROM permissions
+        ON CONFLICT DO NOTHING
+      `,
+      [superAdminRole.role_id],
+    );
     console.log('Assigned all permissions to super_admin role');
 
-    // Operator role gets operational permissions
+    // Operator role gets basic operational permissions
     const [operatorRole] = await query('SELECT role_id FROM roles WHERE name = ? LIMIT 1', ['operator']);
     if (operatorRole) {
       const operatorPermissions = [
-        // Keep this intentionally minimal: operators can view the operational data,
-        // while admins can grant additional permissions as needed.
-        'ais.view',
-        'vessels.list',
-        'vessels.view',
-        'vessels.positions.view',
-        'alerts.list',
-        'alerts.view',
-        'notifications.view'
+        'dashboard.view',
+        'alert.view',
+        'reports.view'
       ];
 
       const placeholders = operatorPermissions.map(() => '?').join(',');
       await query(`
-        INSERT IGNORE INTO role_permissions (role_id, permission_id)
+        INSERT INTO role_permissions (role_id, permission_id)
         SELECT ?, permission_id FROM permissions WHERE name IN (${placeholders})
+        ON CONFLICT DO NOTHING
       `, [operatorRole.role_id, ...operatorPermissions]);
       console.log('Assigned operator permissions');
     }
+
+    await query('COMMIT');
 
     // Show results
     const [permissionCount] = await query('SELECT COUNT(*) as count FROM permissions');
@@ -115,6 +101,11 @@ async function seedPermissions() {
 
   } catch (error) {
     console.error('Error seeding permissions:', error);
+    try {
+      await query('ROLLBACK');
+    } catch {
+      // ignore
+    }
     process.exitCode = 1;
   } finally {
     try {
