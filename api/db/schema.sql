@@ -140,6 +140,7 @@ CREATE TABLE activities (
   method VARCHAR(10) NOT NULL,
   path VARCHAR(255) NOT NULL,
   status_code INTEGER NOT NULL,
+  details JSONB NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_activities_user ON activities(user_id);

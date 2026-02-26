@@ -63,7 +63,21 @@ export const ActivityModel = {
     const offset = (page - 1) * limit;
     params.push(limit, offset);
 
-    const sql = `
+    const sqlWithDetails = `
+      SELECT
+        a.activity_id, a.user_id, a.permission_id, a.method, a.path,
+        a.status_code, a.details, a.created_at,
+        u.first_name, u.last_name, u.email,
+        p.name as permission_name
+      FROM activities a
+      LEFT JOIN users u ON a.user_id = u.user_id
+      LEFT JOIN permissions p ON a.permission_id = p.permission_id
+      ${whereClause}
+      ORDER BY a.${sortColumn} ${sortDirection}
+      LIMIT ? OFFSET ?
+    `;
+
+    const sqlLegacy = `
       SELECT
         a.activity_id, a.user_id, a.permission_id, a.method, a.path,
         a.status_code, a.created_at,
@@ -77,7 +91,12 @@ export const ActivityModel = {
       LIMIT ? OFFSET ?
     `;
 
-    const activities = await query(sql, params);
+    let activities;
+    try {
+      activities = await query(sqlWithDetails, params);
+    } catch {
+      activities = await query(sqlLegacy, params);
+    }
 
     return {
       data: activities.map((row) => ({
@@ -95,6 +114,7 @@ export const ActivityModel = {
         method: row.method,
         path: row.path,
         status_code: row.status_code,
+        details: row.details ?? null,
         created_at: row.created_at
       })),
       pagination: {
@@ -107,7 +127,19 @@ export const ActivityModel = {
   },
 
   async getById(activity_id) {
-    const sql = `
+    const sqlWithDetails = `
+      SELECT
+        a.activity_id, a.user_id, a.permission_id, a.method, a.path,
+        a.status_code, a.details, a.created_at,
+        u.first_name, u.last_name, u.email,
+        p.name as permission_name
+      FROM activities a
+      LEFT JOIN users u ON a.user_id = u.user_id
+      LEFT JOIN permissions p ON a.permission_id = p.permission_id
+      WHERE a.activity_id = ?
+    `;
+
+    const sqlLegacy = `
       SELECT
         a.activity_id, a.user_id, a.permission_id, a.method, a.path,
         a.status_code, a.created_at,
@@ -119,7 +151,12 @@ export const ActivityModel = {
       WHERE a.activity_id = ?
     `;
 
-    const [activity] = await query(sql, [activity_id]);
+    let activity;
+    try {
+      [activity] = await query(sqlWithDetails, [activity_id]);
+    } catch {
+      [activity] = await query(sqlLegacy, [activity_id]);
+    }
 
     if (!activity) return null;
 
@@ -138,6 +175,7 @@ export const ActivityModel = {
       method: activity.method,
       path: activity.path,
       status_code: activity.status_code,
+      details: activity.details ?? null,
       created_at: activity.created_at
     };
   }

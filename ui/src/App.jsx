@@ -83,7 +83,7 @@ export default function App() {
       { label: 'Reports', to: '/reports' },
       { label: 'Settings', to: '/settings' },
     ];
-    if (canAdmin) base.splice(3, 0, { label: 'Permissions', to: '/permissions' });
+    if (canAdmin) base.splice(3, 0, { label: 'Users', to: '/permissions' });
     return base;
   }, [canAdmin]);
 
