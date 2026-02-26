@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { RotateCw, Maximize2 } from "lucide-react";
 import { MapPanel } from "./components/MapPanel.jsx";
 import { AlertsPanel } from "./components/AlertsPanel.jsx";
 
@@ -69,11 +70,19 @@ const Dashboard = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
-            Refresh
+          <button 
+            type="button"
+            title="Refresh dashboard"
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10 transition-colors"
+          >
+            <RotateCw size={16} />
           </button>
-          <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
-            Fullscreen
+          <button 
+            type="button"
+            title="Toggle fullscreen"
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10 transition-colors"
+          >
+            <Maximize2 size={16} />
           </button>
         </div>
       </div>

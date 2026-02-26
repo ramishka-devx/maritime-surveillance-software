@@ -9,7 +9,7 @@ export function MapPanel() {
       permission="dashboard.map.view"
       featureName="Maritime Map"
     >
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <div className="relative overflow-hidden rounded-sm border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-white">

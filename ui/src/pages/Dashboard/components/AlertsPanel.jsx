@@ -7,7 +7,7 @@ export function AlertsPanel({ alerts, filteredAlerts, alertFilter, setAlertFilte
       permission="dashboard.active_alerts.view"
       featureName="Active Alerts"
     >
-      <aside className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <aside className="overflow-hidden rounded-sm border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
           <div>
             <div className="text-sm font-bold text-white">
