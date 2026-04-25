@@ -1,0 +1,56 @@
+meta {
+  name: Get Role Permissions
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/roles/:role_id/permissions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 2
+}
+
+docs {
+  # Get Role Permissions
+  
+  Returns all permissions currently assigned to a role.
+  
+  ## Permission Required
+  - `roles.permissions.view`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "permission_id": 1,
+        "name": "map.view",
+        "module": "map",
+        "description": "Access live maritime map",
+        "granted_at": "2026-01-21T00:00:00.000Z",
+        "granted_by": 1
+      },
+      {
+        "permission_id": 2,
+        "name": "vessels.list",
+        "module": "vessels",
+        "description": "View vessel list"
+      }
+    ]
+  }
+  ```
+}

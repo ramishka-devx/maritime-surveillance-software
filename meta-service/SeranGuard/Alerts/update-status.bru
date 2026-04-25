@@ -1,0 +1,27 @@
+meta {
+  name: Alerts - Update Status
+  type: http
+  seq: 31
+}
+
+put {
+  url: {{baseUrl}}/api/alerts/1/status
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "status": "acknowledged"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

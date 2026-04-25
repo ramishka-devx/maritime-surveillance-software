@@ -1,0 +1,170 @@
+### Kaizen API Test File
+
+@baseUrl = http://localhost:3000/api
+@authToken = your_jwt_token_here
+
+### 1. Get Kaizen Categories
+GET {{baseUrl}}/kaizens/categories
+Authorization: Bearer {{authToken}}
+
+### 2. Get Kaizen Statuses
+GET {{baseUrl}}/kaizens/statuses
+Authorization: Bearer {{authToken}}
+
+### 3. Create a new Kaizen
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Reduce Machine Downtime",
+  "description": "Implement predictive maintenance to reduce unexpected machine failures",
+  "problem_statement": "Machine XYZ experiences frequent unexpected downtime causing production delays",
+  "proposed_solution": "Install vibration sensors and implement predictive maintenance schedule",
+  "expected_benefits": "Reduce downtime by 40%, increase productivity, reduce maintenance costs",
+  "implementation_plan": "1. Purchase sensors 2. Install monitoring system 3. Train staff 4. Implement schedule",
+  "category_id": 1,
+  "priority": "high",
+  "machine_id": 1,
+  "division_id": 1,
+  "estimated_cost": 5000.00,
+  "estimated_savings": 15000.00,
+  "estimated_implementation_days": 30
+}
+
+### 4. Get all Kaizens
+GET {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+
+### 5. Get Kaizens with filters
+GET {{baseUrl}}/kaizens?status_id=1&category_id=1&priority=high&page=1&limit=10
+Authorization: Bearer {{authToken}}
+
+### 6. Search Kaizens
+GET {{baseUrl}}/kaizens?q=machine&page=1&limit=5
+Authorization: Bearer {{authToken}}
+
+### 7. Get specific Kaizen by ID
+GET {{baseUrl}}/kaizens/1
+Authorization: Bearer {{authToken}}
+
+### 8. Update Kaizen
+PATCH {{baseUrl}}/kaizens/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Reduce Machine Downtime - Updated",
+  "estimated_cost": 4500.00,
+  "actual_cost": 4200.00
+}
+
+### 9. Update Kaizen Status
+PATCH {{baseUrl}}/kaizens/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status_id": 3,
+  "notes": "Approved for implementation after management review"
+}
+
+### 10. Assign Kaizen to User
+PATCH {{baseUrl}}/kaizens/1/assign
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "assigned_to": 2,
+  "notes": "Assigned to John Doe for implementation"
+}
+
+### 11. Add Comment to Kaizen
+POST {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "comment": "Initial assessment looks promising. We should proceed with pilot testing.",
+  "is_internal": false
+}
+
+### 12. Add Internal Comment
+POST {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "comment": "Budget approved by finance department",
+  "is_internal": true
+}
+
+### 13. Get Kaizen Comments
+GET {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+
+### 14. Get Kaizen History
+GET {{baseUrl}}/kaizens/1/history
+Authorization: Bearer {{authToken}}
+
+### 15. Get Kaizen Statistics
+GET {{baseUrl}}/kaizens/stats
+Authorization: Bearer {{authToken}}
+
+### 16. Get Kaizens by Machine
+GET {{baseUrl}}/kaizens?machine_id=1
+Authorization: Bearer {{authToken}}
+
+### 17. Get Kaizens by Division
+GET {{baseUrl}}/kaizens?division_id=1
+Authorization: Bearer {{authToken}}
+
+### 18. Get My Submitted Kaizens
+GET {{baseUrl}}/kaizens?submitted_by=1
+Authorization: Bearer {{authToken}}
+
+### 19. Get Kaizens Assigned to Me
+GET {{baseUrl}}/kaizens?assigned_to=1
+Authorization: Bearer {{authToken}}
+
+### 20. Delete Kaizen
+DELETE {{baseUrl}}/kaizens/1
+Authorization: Bearer {{authToken}}
+
+### 21. Create Safety Improvement Kaizen
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Improve Safety Guards on Press Machine",
+  "description": "Add additional safety guards to prevent operator injuries",
+  "problem_statement": "Current safety guards are insufficient and pose risk to operators",
+  "proposed_solution": "Install additional light curtains and pressure mats",
+  "expected_benefits": "Eliminate safety risks, comply with new regulations",
+  "category_id": 2,
+  "priority": "critical",
+  "machine_id": 2,
+  "estimated_cost": 2000.00,
+  "estimated_savings": 0,
+  "estimated_implementation_days": 7
+}
+
+### 22. Create Process Improvement Kaizen
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Optimize Material Flow in Assembly Line",
+  "description": "Reorganize workstation layout to reduce waste and improve efficiency",
+  "problem_statement": "Current layout causes excessive movement and delays",
+  "proposed_solution": "Implement 5S methodology and reorganize workstations",
+  "expected_benefits": "Reduce cycle time by 15%, improve ergonomics",
+  "category_id": 5,
+  "priority": "medium",
+  "division_id": 2,
+  "estimated_cost": 500.00,
+  "estimated_savings": 8000.00,
+  "estimated_implementation_days": 14
+}

@@ -1,0 +1,229 @@
+### Division API Test Collection
+### This file contains comprehensive tests for the Division API endpoints
+### Make sure to update the @authToken variable with a valid JWT token
+
+### Configuration
+@baseUrl = http://localhost:3000
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### Prerequisites: User Authentication
+### Before testing division endpoints, you need to authenticate and get a token
+### Run this first to get your auth token:
+
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "your-email@example.com",
+  "password": "your-password"
+}
+
+# Copy the token from the response and update the @authToken variable above
+
+###
+
+### DIVISION CRUD OPERATIONS
+
+### 1. Create a new division (Root level)
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Main Engineering Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 2. Create a sub-division
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Backend Development Team",
+  "parent_id": 1,
+  "division_type_id": 2
+}
+
+###
+
+### 3. Create another sub-division
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Frontend Development Team", 
+  "parent_id": 1,
+  "division_type_id": 2
+}
+
+###
+
+### 4. List all divisions
+GET {{baseUrl}}/api/divisions
+Authorization: Bearer {{authToken}}
+
+###
+
+### 5. Update a division
+PUT {{baseUrl}}/api/divisions/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Updated Engineering Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 6. Update a sub-division
+PUT {{baseUrl}}/api/divisions/2
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Senior Backend Development Team",
+  "parent_id": 1,
+  "division_type_id": 2
+}
+
+###
+
+### 7. Delete a division
+DELETE {{baseUrl}}/api/divisions/3
+Authorization: Bearer {{authToken}}
+
+###
+
+### VALIDATION TESTS
+
+### 8. Test validation - Missing title
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 9. Test validation - Title too long (over 100 characters)
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "This is a very long division title that exceeds the maximum allowed length of 100 characters and should fail validation",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 10. Test validation - Missing division_type_id
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Test Division",
+  "parent_id": null
+}
+
+###
+
+### 11. Test validation - Invalid data types
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": 123,
+  "parent_id": "not-a-number",
+  "division_type_id": "also-not-a-number"
+}
+
+###
+
+### 12. Test update validation - Missing division_id parameter
+PUT {{baseUrl}}/api/divisions/abc
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Test Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### AUTHENTICATION & AUTHORIZATION TESTS
+
+### 13. Test without authentication token
+GET {{baseUrl}}/api/divisions
+
+###
+
+### 14. Test with invalid authentication token
+GET {{baseUrl}}/api/divisions
+Authorization: Bearer invalid.jwt.token
+
+###
+
+### 15. Test with malformed authorization header
+GET {{baseUrl}}/api/divisions
+Authorization: InvalidHeader
+
+###
+
+### ERROR HANDLING TESTS
+
+### 16. Try to update non-existent division
+PUT {{baseUrl}}/api/divisions/99999
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Non-existent Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 17. Try to delete non-existent division
+DELETE {{baseUrl}}/api/divisions/99999
+Authorization: Bearer {{authToken}}
+
+###
+
+### 18. Test with empty request body
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{}
+
+###
+
+### 19. Test with null values where required
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": null,
+  "parent_id": null,
+  "division_type_id": null
+}
+
+###

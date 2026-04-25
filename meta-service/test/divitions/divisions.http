@@ -1,0 +1,148 @@
+### Variables
+@baseUrl = http://localhost:3000
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlX2lkIjo0LCJlbWFpbCI6InJhbWlzaGthQGdtYWlsLmNvbSIsImlhdCI6MTc1Nzg2MzY1NSwiZXhwIjoxNzYwNDU1NjU1fQ.K6UmNCcpck6jNy4dZv4N-8awiW7l2ODDk7IlsRvrY7c
+
+### 1. User Login (to get auth token)
+# POST {{baseUrl}}/api/users/login
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "password123"
+}
+
+###
+
+### 2. Create Division
+# POST {{baseUrl}}/api/divisions
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "PC",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 3. Create Sub-Division
+# POST {{baseUrl}}/api/divisions
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Software Engineering",
+  "parent_id": 1,
+  "division_type_id": 2
+}
+
+###
+
+### 4. List All Divisions
+# GET {{baseUrl}}/api/divisions
+GET {{baseUrl}}/api/divisions
+Authorization: Bearer {{authToken}}
+
+###
+
+### 5. Update Division
+# PUT {{baseUrl}}/api/divisions/1
+PUT {{baseUrl}}/api/divisions/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Engineering Department (Updated)",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 6. Update Division with Parent
+# PUT {{baseUrl}}/api/divisions/2
+PUT {{baseUrl}}/api/divisions/2
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Software Development Team",
+  "parent_id": 1,
+  "division_type_id": 2
+}
+
+###
+
+### 7. Delete Division
+# DELETE {{baseUrl}}/api/divisions/2
+DELETE {{baseUrl}}/api/divisions/2
+Authorization: Bearer {{authToken}}
+
+###
+
+### Error Test Cases
+
+### 8. Create Division - Missing Required Field
+# POST {{baseUrl}}/api/divisions
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 9. Create Division - Invalid Data Type
+# POST {{baseUrl}}/api/divisions
+POST {{baseUrl}}/api/divisions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Test Division",
+  "parent_id": "invalid",
+  "division_type_id": "invalid"
+}
+
+###
+
+### 10. Unauthorized Access - No Token
+# GET {{baseUrl}}/api/divisions
+GET {{baseUrl}}/api/divisions
+
+###
+
+### 11. Unauthorized Access - Invalid Token
+# GET {{baseUrl}}/api/divisions
+GET {{baseUrl}}/api/divisions
+Authorization: Bearer invalid-token
+
+###
+
+### 12. Update Non-existent Division
+# PUT {{baseUrl}}/api/divisions/999
+PUT {{baseUrl}}/api/divisions/999
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Non-existent Division",
+  "parent_id": null,
+  "division_type_id": 1
+}
+
+###
+
+### 13. Delete Non-existent Division
+# DELETE {{baseUrl}}/api/divisions/999
+DELETE {{baseUrl}}/api/divisions/999
+Authorization: Bearer {{authToken}}
+
+###

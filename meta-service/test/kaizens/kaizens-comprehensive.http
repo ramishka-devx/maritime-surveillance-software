@@ -1,0 +1,219 @@
+### Kaizen API Comprehensive Tests
+
+@baseUrl = http://localhost:3000/api
+@authToken = your_jwt_token_here
+
+### Setup: Login to get token first
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "password123"
+}
+
+### Test 1: Get Categories (should work for all authenticated users)
+GET {{baseUrl}}/kaizens/categories
+Authorization: Bearer {{authToken}}
+
+### Test 2: Get Statuses (should work for all authenticated users)
+GET {{baseUrl}}/kaizens/statuses
+Authorization: Bearer {{authToken}}
+
+### Test 3: Create Equipment Improvement Kaizen
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Upgrade CNC Machine Coolant System",
+  "description": "Replace old coolant system with high-efficiency filtration system",
+  "problem_statement": "Current coolant system is inefficient and requires frequent maintenance",
+  "proposed_solution": "Install new filtration system with automatic monitoring",
+  "expected_benefits": "Reduce coolant costs by 30%, improve machining quality, reduce maintenance",
+  "implementation_plan": "1. Source new equipment 2. Schedule downtime 3. Install system 4. Test and calibrate",
+  "category_id": 1,
+  "priority": "medium",
+  "machine_id": 1,
+  "estimated_cost": 12000.00,
+  "estimated_savings": 8000.00,
+  "estimated_implementation_days": 21
+}
+
+### Test 4: Create Safety Enhancement Kaizen
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Install Emergency Stop Buttons",
+  "description": "Add additional emergency stop buttons throughout the production floor",
+  "problem_statement": "Insufficient emergency stops pose safety risks",
+  "proposed_solution": "Install wireless emergency stop buttons at strategic locations",
+  "expected_benefits": "Improve emergency response time, enhance worker safety",
+  "category_id": 2,
+  "priority": "high",
+  "division_id": 1,
+  "estimated_cost": 3000.00,
+  "estimated_savings": 0,
+  "estimated_implementation_days": 10
+}
+
+### Test 5: List all Kaizens with pagination
+GET {{baseUrl}}/kaizens?page=1&limit=5
+Authorization: Bearer {{authToken}}
+
+### Test 6: Filter by category
+GET {{baseUrl}}/kaizens?category_id=1
+Authorization: Bearer {{authToken}}
+
+### Test 7: Filter by priority
+GET {{baseUrl}}/kaizens?priority=high
+Authorization: Bearer {{authToken}}
+
+### Test 8: Search by keyword
+GET {{baseUrl}}/kaizens?q=safety
+Authorization: Bearer {{authToken}}
+
+### Test 9: Get specific Kaizen (use ID from create response)
+GET {{baseUrl}}/kaizens/1
+Authorization: Bearer {{authToken}}
+
+### Test 10: Add comment to Kaizen
+POST {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "comment": "This is a great idea! We should prioritize this for Q1 implementation.",
+  "is_internal": false
+}
+
+### Test 11: Add internal comment
+POST {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "comment": "Budget has been pre-approved by finance team",
+  "is_internal": true
+}
+
+### Test 12: Update Kaizen status to "Under Review"
+PATCH {{baseUrl}}/kaizens/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status_id": 2,
+  "notes": "Moving to review phase after initial assessment"
+}
+
+### Test 13: Assign Kaizen to a user
+PATCH {{baseUrl}}/kaizens/1/assign
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "assigned_to": 2,
+  "notes": "Assigned to maintenance team lead for implementation"
+}
+
+### Test 14: Update Kaizen status to "Approved"
+PATCH {{baseUrl}}/kaizens/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status_id": 3,
+  "notes": "Approved after technical and financial review"
+}
+
+### Test 15: Update Kaizen status to "In Progress"
+PATCH {{baseUrl}}/kaizens/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status_id": 4,
+  "notes": "Implementation started"
+}
+
+### Test 16: Update Kaizen with actual values
+PATCH {{baseUrl}}/kaizens/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "actual_cost": 11500.00,
+  "actual_implementation_days": 18
+}
+
+### Test 17: Update Kaizen status to "Completed"
+PATCH {{baseUrl}}/kaizens/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status_id": 6,
+  "notes": "Implementation completed successfully. All objectives met."
+}
+
+### Test 18: Add completion comment
+POST {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "comment": "Implementation completed successfully. Machine efficiency improved by 25%.",
+  "is_internal": false
+}
+
+### Test 19: Get Kaizen comments
+GET {{baseUrl}}/kaizens/1/comments
+Authorization: Bearer {{authToken}}
+
+### Test 20: Get Kaizen history
+GET {{baseUrl}}/kaizens/1/history
+Authorization: Bearer {{authToken}}
+
+### Test 21: Get statistics
+GET {{baseUrl}}/kaizens/stats
+Authorization: Bearer {{authToken}}
+
+### Test 22: Test error handling - Invalid category
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Test Invalid Category",
+  "description": "This should fail",
+  "proposed_solution": "Test solution",
+  "category_id": 999,
+  "priority": "low"
+}
+
+### Test 23: Test error handling - Missing required field
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Test Missing Description",
+  "proposed_solution": "Test solution",
+  "category_id": 1
+}
+
+### Test 24: Test error handling - Invalid priority
+POST {{baseUrl}}/kaizens
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Test Invalid Priority",
+  "description": "This should fail",
+  "proposed_solution": "Test solution",
+  "category_id": 1,
+  "priority": "invalid_priority"
+}

@@ -1,0 +1,67 @@
+meta {
+  name: Create Permission
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/permissions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "name": "drones.control",
+    "module": "drones",
+    "description": "Control and manage surveillance drones"
+  }
+}
+
+docs {
+  # Create Permission
+  
+  Creates a new permission in the system.
+  
+  ## Permission Required
+  - `permissions.create`
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | Yes | Unique permission name in format: module.resource.action |
+  | module | string | No | Module category for grouping |
+  | description | string | No | Human-readable description |
+  
+  ## Permission Naming Convention
+  Format: `module.resource.action` or `module.action`
+  
+  Examples:
+  - `users.list` - List users
+  - `vessels.positions.create` - Create vessel position records
+  - `analytics.reports.generate` - Generate analytics reports
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Permission created",
+    "data": {
+      "permission_id": 75,
+      "name": "drones.control",
+      "module": "drones",
+      "description": "Control and manage surveillance drones",
+      "is_active": 1
+    }
+  }
+  ```
+  
+  ## Notes
+  - Permission names must be unique
+  - Use lowercase, dot-separated format
+  - After creating, assign to roles using role permission endpoints
+}
