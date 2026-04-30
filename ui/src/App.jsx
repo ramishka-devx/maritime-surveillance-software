@@ -30,6 +30,7 @@ function formatRoleName(roles) {
 
 function ProtectedLayout({ isAuthed, session, navLinks, onLogout, children }) {
   if (!isAuthed) return <Navigate to="/auth" replace />;
+
   return (
     <div style={{ minHeight: '100vh', background: '#ffffff' }}>
       <Navbar user={session} links={navLinks} onLogout={onLogout} />

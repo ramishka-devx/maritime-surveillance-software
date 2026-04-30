@@ -69,24 +69,24 @@ export function MapPanel() {
     >
       <div
         ref={panelRef}
-        className="relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl"
+        className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 bg-gray-50 px-4 sm:px-5 py-3 sm:py-4 flex-shrink-0 gap-3 sm:gap-0">
+        <div className="flex flex-shrink-0 flex-col items-start justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
           <div className="flex items-center gap-3">
             <span className="text-sm font-extrabold text-[#08244a]">
               Maritime Map
             </span>
-            <span className="rounded-md border border-[#0b74c9]/20 bg-[#0b74c9]/10 px-2 py-0.5 text-[10px] font-bold text-[#0b74c9]">
+            <span className="rounded-md border border-emerald-400/30 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
               LIVE
             </span>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+          <div className="hide-scrollbar flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
             <button
               type="button"
               onClick={loadVessels}
               disabled={isLoading}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors shadow-sm whitespace-nowrap hover:bg-gray-50 hover:text-[#0b74c9] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RotateCw size={14} className={isLoading ? "animate-spin" : ""} />
               Refresh
@@ -94,32 +94,32 @@ export function MapPanel() {
             <button
               type="button"
               onClick={handleFullscreenToggle}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors shadow-sm whitespace-nowrap hover:bg-gray-50 hover:text-[#0b74c9]"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9]"
             >
               {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
               {isFullscreen ? "Exit full screen" : "Full screen"}
             </button>
             
-            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-gray-50 hover:text-[#0b74c9] transition-colors shadow-sm whitespace-nowrap">
+            <button className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9]">
               Filters
             </button>
           </div>
         </div>
 
-        <div className="relative flex-1 min-h-[300px] sm:min-h-0 bg-slate-100 w-full z-0">
+        <div className="relative z-0 min-h-[300px] w-full flex-1 bg-slate-100 sm:min-h-0">
           {/* Leaflet Map - Always rendered to maintain view state */}
           <MapView vessels={vessels} />
 
           {/* Loading Overlay - Only show on first load */}
           {isLoading && vessels.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-100/80 backdrop-blur-sm z-[999]">
-              <div className="text-slate-800 text-sm font-semibold">Loading vessels...</div>
+            <div className="absolute inset-0 z-[999] flex items-center justify-center bg-slate-100/85 backdrop-blur-sm">
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-lg">Loading vessels...</div>
             </div>
           )}
 
           {/* Refreshing Indicator - Show during updates */}
           {isLoading && vessels.length > 0 && (
-            <div className="absolute top-4 right-4 rounded-lg border border-[#0b74c9]/20 bg-[#0b74c9]/10 px-3 py-1.5 backdrop-blur z-[1001] shadow-sm">
+            <div className="absolute right-4 top-4 z-[1001] rounded-lg border border-[#0b74c9]/20 bg-[#0b74c9]/10 px-3 py-1.5 shadow-sm backdrop-blur">
               <span className="text-xs font-bold text-[#0b74c9]">
                 Updating...
               </span>
@@ -128,14 +128,14 @@ export function MapPanel() {
 
           {/* Error State */}
           {error && !isLoading && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg border border-red-200 bg-red-50/90 px-4 py-2 backdrop-blur z-[1000] shadow-md">
-              <div className="text-red-600 text-xs font-semibold">Error: {error}</div>
+            <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 rounded-lg border border-red-200 bg-red-50/95 px-4 py-2 shadow-md backdrop-blur">
+              <div className="text-xs font-semibold text-red-600">Error: {error}</div>
             </div>
           )}
 
           {/* Vessel Count Badge */}
           {!isLoading && vessels.length > 0 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg border border-gray-200 bg-white/95 px-4 py-2 backdrop-blur z-[1000] shadow-sm">
+            <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 rounded-lg border border-slate-200 bg-white/95 px-4 py-2 shadow-sm backdrop-blur">
               <span className="text-xs font-extrabold text-[#08244a]">
                 {vessels.length} vessels tracked
               </span>
@@ -143,18 +143,18 @@ export function MapPanel() {
           )}
 
           {/* Filters & Search - Top Right */}
-          <div className="hidden md:block absolute right-4 top-4 w-[240px] rounded-xl border border-gray-200 bg-white/95 p-4 backdrop-blur z-10 shadow-lg">
+          <div className="absolute right-4 top-4 z-10 hidden w-[240px] rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-md md:block">
             <div className="mb-3 flex items-center justify-between">
               <div className="text-xs font-extrabold text-[#08244a]">
                 Filters & Search
               </div>
-              <button className="text-[10px] font-bold text-[#0b74c9] hover:text-[#08244a] transition-colors">
+              <button className="text-[10px] font-bold text-[#0b74c9] transition-colors hover:text-[#08244a]">
                 Reset
               </button>
             </div>
             <input
               placeholder="Search MMSI / Vessel"
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-[#0b74c9] focus:ring-2 focus:ring-[#0b74c9]/20 transition-all"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-xs text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#0b74c9] focus:ring-2 focus:ring-[#0b74c9]/20"
             />
             <div className="mt-3 flex flex-wrap gap-2">
               <Chip label="All" active />
@@ -167,7 +167,7 @@ export function MapPanel() {
 
 
           {/* Legend - Bottom Right */}
-          <div className="hidden sm:block absolute right-4 bottom-4 w-[170px] rounded-xl border border-gray-200 bg-white/95 p-4 backdrop-blur z-10 shadow-lg">
+          <div className="absolute bottom-4 right-4 z-10 hidden w-[170px] rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-md sm:block">
             <div className="mb-3 text-xs font-extrabold text-[#08244a]">Legend</div>
             <LegendRow label="Normal" dot="bg-emerald-500" />
             <LegendRow label="Warning" dot="bg-amber-500" />
