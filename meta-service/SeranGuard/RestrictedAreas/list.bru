@@ -1,0 +1,35 @@
+meta {
+  name: Restricted Areas - List
+  type: http
+  seq: 41
+}
+
+get {
+  url: {{baseUrl}}/api/restricted-areas?type=coral
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:query {
+  type: coral
+}
+
+docs {
+  # List Restricted Areas
+  
+  Returns all restricted areas. You can optionally filter by area `type`.
+  
+  ## Query Params
+  | Param | Required | Description |
+  |-------|----------|-------------|
+  | type | No | Filter by area type |
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

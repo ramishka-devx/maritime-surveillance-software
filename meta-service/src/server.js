@@ -4,6 +4,7 @@ import { logger } from './config/logger.js';
 import { startDbConnectionCheck } from './config/db.config.js';
 import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
+import '../cron/partition-cron.js';
 
 (async () => {
   try {

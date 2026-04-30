@@ -23,9 +23,9 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
-    "pg": "^8.13.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.6",
+    "pg": "^8.20.0",
     "pino": "^9.3.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

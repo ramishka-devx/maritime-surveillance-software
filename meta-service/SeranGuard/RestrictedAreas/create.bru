@@ -1,0 +1,67 @@
+meta {
+  name: Restricted Areas - Create
+  type: http
+  seq: 40
+}
+
+post {
+  url: {{baseUrl}}/api/restricted-areas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "name": "Coral Reef Zone A",
+    "type": "coral",
+    "coordinates": [
+      {
+        "lon": 79.820,
+        "lat": 6.930
+      },
+      {
+        "lon": 79.880,
+        "lat": 6.930
+      },
+      {
+        "lon": 79.880,
+        "lat": 6.970
+      },
+      {
+        "lon": 79.820,
+        "lat": 6.970
+      }
+    ]
+  }
+}
+
+docs {
+  # Create Restricted Area
+  
+  Creates a new restricted area polygon using manual coordinates sent by the user.
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | Yes | Restricted area name |
+  | type | string | Yes | Area type such as `coral`, `military`, `protected_zone` |
+  | coordinates | array | Yes | Polygon vertices in `{ lon, lat }` format |
+  
+  ## Notes
+  - At least 3 coordinate points are required
+  - The API closes the polygon automatically if the first point is not repeated at the end
+  - Coordinates use WGS84 order: longitude first, latitude second
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
