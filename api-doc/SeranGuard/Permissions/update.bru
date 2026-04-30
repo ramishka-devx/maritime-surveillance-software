@@ -1,0 +1,66 @@
+meta {
+  name: Update Permission
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/permissions/:permission_id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  permission_id: 1
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "description": "View and list all system users",
+    "is_active": true
+  }
+}
+
+docs {
+  # Update Permission
+  
+  Updates an existing permission's details.
+  
+  ## Permission Required
+  - `permissions.update`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | permission_id | integer | The permission ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | description | string | No | Human-readable description |
+  | module | string | No | Module category |
+  | is_active | boolean | No | Active status |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Permission updated",
+    "data": {
+      "permission_id": 1,
+      "name": "users.list",
+      "module": "users",
+      "description": "View and list all system users",
+      "is_active": 1
+    }
+  }
+  ```
+  
+  ## Notes
+  - Permission name cannot be changed after creation
+  - Deactivating a permission (is_active: false) does not revoke it from roles
+}

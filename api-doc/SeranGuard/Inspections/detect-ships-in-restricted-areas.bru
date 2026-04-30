@@ -1,0 +1,63 @@
+meta {
+  name: Inspections - Detect Ships In Restricted Areas
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{analyticBaseUrl}}/inspections/restricted_areas/detected_ships
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  content-type: application/json
+}
+
+docs {
+  # Detect Ships In Restricted Areas
+
+  Returns ships that intersect restricted areas and have low speed over ground.
+
+  ## Endpoint
+  - Method: GET
+  - Path: /inspections/restricted_areas/detected_ships
+  - Service: analytic-service
+
+  ## SQL Used
+  ```sql
+  SELECT *
+  FROM ships s
+  JOIN restricted_areas r
+  ON ST_Intersects(s.position, r.geom)
+  WHERE s.sog < 5;
+  ```
+
+  ## Success Response (200)
+  ```json
+  {
+    "columns": ["mmsi", "name", "sog", "id", "type"],
+    "rows": [
+      ["123456789", "Sea Runner", 3.2, 42, "coral"]
+    ],
+    "count": 1
+  }
+  ```
+
+  ## Notes
+  - `columns` reflects the database SELECT output order.
+  - `rows` contain matched ship + restricted area data.
+  - `count` is total matched rows.
+
+  ## Error Responses
+  - 500: failed to run restricted-area detection query
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

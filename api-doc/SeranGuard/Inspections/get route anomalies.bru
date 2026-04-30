@@ -1,0 +1,19 @@
+meta {
+  name: get route anomalies
+  type: ws
+  seq: 7
+}
+
+ws {
+  url: {{analyticBaseUrl}}/inspections/restricted_areas/detected_ships/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {}
+  '''
+}

@@ -1,0 +1,88 @@
+meta {
+  name: Inspections - Create Restricted Area
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{analyticBaseUrl}}/inspections/restricted_areas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "name": "North Reef Protection",
+    "type": "coral",
+    "coordinates": [
+      [
+        [74.5, 8.1],
+        [74.8, 8.1],
+        [74.8, 8.3],
+        [74.5, 8.1]
+      ]
+    ]
+  }
+}
+
+docs {
+  # Create Restricted Area
+
+  Creates a restricted maritime area as a PostGIS polygon in the analytic service.
+
+  ## Endpoint
+  - Method: POST
+  - Path: /inspections/restricted_areas
+  - Service: analytic-service
+
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | Yes | Restricted area display name |
+  | type | enum | Yes | One of: coral, military, restricted |
+  | coordinates | number[][][] | Yes | GeoJSON Polygon ring array in [lon, lat] order |
+
+  ## Coordinate Rules
+  - First ring only (single polygon ring)
+  - Minimum 4 points
+  - Ring must be closed (first point equals last point)
+  - lon in [-180, 180], lat in [-90, 90]
+
+  ## Success Response (201)
+  ```json
+  {
+    "id": 42,
+    "name": "North Reef Protection",
+    "type": "coral",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [74.5, 8.1],
+          [74.8, 8.1],
+          [74.8, 8.3],
+          [74.5, 8.1]
+        ]
+      ]
+    }
+  }
+  ```
+
+  ## Error Responses
+  - 422: validation errors (enum, structure, coordinate bounds, open ring)
+  - 400: geometry rejected by PostGIS
+  - 500: unexpected DB/storage failure
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

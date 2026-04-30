@@ -1,0 +1,55 @@
+meta {
+  name: List Roles
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/roles
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+query {
+  page: 1
+  limit: 10
+}
+
+docs {
+  # List Roles
+  
+  Returns a paginated list of all roles in the system.
+  
+  ## Permission Required
+  - `roles.list`
+  
+  ## Query Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | page | integer | Page number (default: 1) |
+  | limit | integer | Items per page (default: 10, max: 100) |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "rows": [
+        {
+          "role_id": 1,
+          "name": "super_admin",
+          "description": "Full system access with all permissions",
+          "is_system": 1,
+          "is_active": 1,
+          "permission_count": 50
+        }
+      ],
+      "total": 5
+    }
+  }
+  ```
+}

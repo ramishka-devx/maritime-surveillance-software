@@ -1,0 +1,68 @@
+meta {
+  name: Sync User Roles
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/users/:user_id/roles/sync
+  body: json
+  auth: bearer
+}
+
+params:path {
+  user_id: 15
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "role_ids": [3, 4]
+  }
+}
+
+docs {
+  # Sync User Roles
+  
+  Replaces all of a user's roles with the provided role set.
+  This is a bulk operation that removes unlisted roles and adds listed ones.
+  
+  ## Permission Required
+  - `users.roles.assign` AND `users.roles.revoke`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | role_ids | integer[] | Yes | Array of role IDs to assign |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "User roles synced",
+    "data": {
+      "user_id": 15,
+      "added": [3],
+      "removed": [5],
+      "roles": [
+        { "role_id": 3, "name": "analyst" },
+        { "role_id": 4, "name": "operator" }
+      ]
+    }
+  }
+  ```
+  
+  ## Notes
+  - At least one role must be provided
+  - All provided role IDs must exist
+  - This is the preferred method for role management UIs
+  - User's token must be refreshed to get updated permissions
+}

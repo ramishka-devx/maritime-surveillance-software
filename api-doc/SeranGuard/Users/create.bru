@@ -1,0 +1,67 @@
+meta {
+  name: Create User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "name": "Jane Operator",
+    "email": "jane@maritime.gov",
+    "password": "SecureP@ss123!",
+    "role_id": 4,
+    "role_ids": [4, 5]
+  }
+}
+
+docs {
+  # Create User
+  
+  Creates a new user account in the system.
+  
+  ## Permission Required
+  - `users.create`
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | name | string | Yes | User's full name |
+  | email | string | Yes | Unique email address |
+  | password | string | Yes | Min 8 chars, requires uppercase, lowercase, number |
+  | role_id | integer | No | Primary role ID (legacy) |
+  | role_ids | integer[] | No | Array of role IDs for multi-role assignment |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "User created",
+    "data": {
+      "user_id": 15,
+      "name": "Jane Operator",
+      "email": "jane@maritime.gov",
+      "is_active": 1,
+      "roles": [
+        { "role_id": 4, "name": "operator" },
+        { "role_id": 5, "name": "viewer" }
+      ]
+    }
+  }
+  ```
+  
+  ## Notes
+  - Email must be unique in the system
+  - Use `role_ids` array for multi-role assignment
+  - `role_id` is maintained for backward compatibility
+  - Password is hashed using bcrypt before storage
+}

@@ -1,0 +1,78 @@
+meta {
+  name: Get User Permissions
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/users/:user_id/permissions
+  body: none
+  auth: bearer
+}
+
+params:path {
+  user_id: 1
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+query {
+  ~type: effective
+}
+
+docs {
+  # Get User Permissions
+  
+  Returns permissions for a specific user.
+  
+  ## Permission Required
+  - `users.view`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID |
+  
+  ## Query Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | type | string | `effective` (default) or `direct` |
+  
+  ## Permission Types
+  - **effective**: All permissions (from roles + direct assignments)
+  - **direct**: Only directly assigned permissions (not from roles)
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "user_id": 1,
+      "user_name": "John Smith",
+      "permission_type": "effective",
+      "permissions": [
+        "users.list",
+        "users.view",
+        "vessels.list",
+        "vessels.view",
+        "map.view",
+        "alerts.list",
+        "alerts.acknowledge"
+      ],
+      "permissions_by_module": {
+        "users": ["users.list", "users.view"],
+        "vessels": ["vessels.list", "vessels.view"],
+        "map": ["map.view"],
+        "alerts": ["alerts.list", "alerts.acknowledge"]
+      }
+    }
+  }
+  ```
+  
+  ## Use Cases
+  - Audit user capabilities
+  - Debug permission issues
+  - Build user permission reports
+}

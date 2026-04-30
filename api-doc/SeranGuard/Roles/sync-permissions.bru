@@ -1,0 +1,63 @@
+meta {
+  name: Sync Role Permissions
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/roles/:role_id/permissions/sync
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 2
+}
+
+body:json {
+  {
+    "permission_ids": [1, 2, 3, 5, 8, 10]
+  }
+}
+
+docs {
+  # Sync Role Permissions
+  
+  Replaces ALL permissions for a role with the specified set.
+  This is a bulk operation that removes all existing permissions and assigns the new ones.
+  
+  ## Permission Required
+  - `roles.permissions.assign`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID |
+  
+  ## Request Body
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | permission_ids | integer[] | Yes | Array of permission IDs to assign |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Role permissions synchronized",
+    "data": {
+      "role_id": 2,
+      "permission_count": 6,
+      "message": "Permissions synced"
+    }
+  }
+  ```
+  
+  ## Notes
+  - This is a REPLACE operation - all existing permissions are removed first
+  - Pass an empty array to remove all permissions from the role
+  - All permission IDs must be valid and active
+}

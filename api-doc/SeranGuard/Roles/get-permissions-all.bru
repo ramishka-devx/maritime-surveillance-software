@@ -1,0 +1,63 @@
+meta {
+  name: Get Role Permissions (All)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/roles/:role_id/permissions/all
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:path {
+  role_id: 2
+}
+
+docs {
+  # Get All Permissions with Assignment Status
+  
+  Returns ALL permissions in the system with a flag indicating whether each is assigned to the specified role.
+  Useful for building permission management UIs.
+  
+  ## Permission Required
+  - `roles.permissions.view`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | role_id | integer | The role ID |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "permission_id": 1,
+        "name": "map.view",
+        "module": "map",
+        "description": "Access live maritime map",
+        "assigned": 1,
+        "granted_at": "2026-01-21T00:00:00.000Z"
+      },
+      {
+        "permission_id": 2,
+        "name": "users.delete",
+        "module": "users",
+        "description": "Delete users",
+        "assigned": 0,
+        "granted_at": null
+      }
+    ]
+  }
+  ```
+  
+  ## Notes
+  - `assigned: 1` means the permission is assigned to this role
+  - `assigned: 0` means the permission is NOT assigned to this role
+}

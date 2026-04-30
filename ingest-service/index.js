@@ -71,6 +71,8 @@ function connectToAISStream() {
 
       if (!data) return;
 
+      console.log("[AIS] Parsed data:", data);
+
       // Add to buffer
       messageBuffer.push(data);
 

@@ -1,0 +1,49 @@
+meta {
+  name: Get Permission by ID
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/permissions/:permission_id
+  body: none
+  auth: bearer
+}
+
+params:path {
+  permission_id: 1
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # Get Permission by ID
+  
+  Retrieves details of a specific permission including assigned roles.
+  
+  ## Permission Required
+  - `permissions.view`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | permission_id | integer | The permission ID |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "permission_id": 1,
+      "name": "users.list",
+      "module": "users",
+      "description": "View list of all users",
+      "is_active": 1,
+      "created_at": "2026-01-21T00:00:00.000Z",
+      "updated_at": "2026-01-21T00:00:00.000Z"
+    }
+  }
+  ```
+}

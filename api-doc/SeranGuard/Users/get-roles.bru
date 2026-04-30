@@ -1,0 +1,59 @@
+meta {
+  name: Get User Roles
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/users/:user_id/roles
+  body: none
+  auth: bearer
+}
+
+params:path {
+  user_id: 1
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # Get User Roles
+  
+  Returns all roles assigned to a specific user.
+  
+  ## Permission Required
+  - `users.view`
+  
+  ## Path Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | user_id | integer | The user ID |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "user_id": 1,
+      "user_name": "John Smith",
+      "roles": [
+        {
+          "role_id": 2,
+          "name": "admin",
+          "description": "Administrative access",
+          "assigned_at": "2026-01-21T00:00:00.000Z"
+        },
+        {
+          "role_id": 3,
+          "name": "analyst",
+          "description": "Analytics and reporting",
+          "assigned_at": "2026-01-21T00:00:00.000Z"
+        }
+      ],
+      "role_count": 2
+    }
+  }
+  ```
+}

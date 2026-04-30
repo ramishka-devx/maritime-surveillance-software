@@ -1,0 +1,62 @@
+meta {
+  name: List Users
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+query {
+  page: 1
+  limit: 25
+  ~search: john
+  ~role_id: 3
+}
+
+docs {
+  # List Users
+  
+  Returns a paginated list of all users in the system with their roles.
+  
+  ## Permission Required
+  - `users.list`
+  
+  ## Query Parameters
+  | Parameter | Type | Description |
+  |-----------|------|-------------|
+  | page | integer | Page number (default: 1) |
+  | limit | integer | Items per page (default: 25) |
+  | search | string | Search by name or email (optional) |
+  | role_id | integer | Filter by role (optional) |
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "data": {
+      "rows": [
+        {
+          "user_id": 1,
+          "name": "John Smith",
+          "email": "john@example.com",
+          "role_id": 2,
+          "role_name": "admin",
+          "is_active": 1,
+          "created_at": "2026-01-21T00:00:00.000Z"
+        }
+      ],
+      "total": 15,
+      "page": 1,
+      "limit": 25
+    }
+  }
+  ```
+}
