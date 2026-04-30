@@ -34,7 +34,6 @@ export function AlertDetailModal({ alert, onClose }) {
 
   const s = SEVERITY[alert.level] || SEVERITY.info;
   const st = STATUS[alert.status] || STATUS.Active;
-  const SeverityIcon = s.icon;
 
   const handleClose = onClose ?? (() => navigate("/alerts", { replace: true }));
 
@@ -52,11 +51,6 @@ export function AlertDetailModal({ alert, onClose }) {
         {/* Header */}
         <div className="flex items-start justify-between border-b border-gray-100 bg-gray-50 px-6 py-5">
           <div className="flex items-start gap-4">
-            <div
-              className={`mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border shadow-sm ${s.pill.replace('text-white', '').replace('bg-', 'bg-opacity-20 text-')}`}
-            >
-              <SeverityIcon size={20} />
-            </div>
             <div>
               <h2 className="text-base font-extrabold text-[#08244a] leading-snug">
                 {alert.title}
@@ -69,12 +63,12 @@ export function AlertDetailModal({ alert, onClose }) {
 
           <div className="flex items-center gap-2">
             <span
-              className={`rounded-md border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest ${s.pill.replace('text-white', 'text-slate-800 bg-opacity-20')}`}
+              className={`rounded-md border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest ${s.badge}`}
             >
               {s.label}
             </span>
             <span
-              className={`rounded-md border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest ${st.pill.replace('text-white', 'text-slate-800 bg-opacity-20')}`}
+              className={`rounded-md border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest ${st.badge}`}
             >
               {alert.status}
             </span>
