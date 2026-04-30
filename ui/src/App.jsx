@@ -89,8 +89,8 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#111b2e] flex items-center justify-center px-6">
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-[#c9d3ee]">
+      <div className="min-h-screen bg-[#f9fbfd] flex items-center justify-center px-6">
+        <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-slate-500 shadow-sm">
           Loading profile...
         </div>
       </div>

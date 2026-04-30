@@ -7,13 +7,13 @@ export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter, onAle
       permission="dashboard.view"
       featureName="Active Alerts"
     >
-      <aside className="overflow-hidden rounded-sm border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-        <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3">
+      <aside className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl flex flex-col h-full w-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 bg-gray-50 px-4 sm:px-5 py-3 sm:py-4 shrink-0 gap-3 sm:gap-0">
           <div>
-            <div className="text-sm font-bold text-white">
+            <div className="text-sm font-extrabold text-[#08244a]">
               Active Alerts
             </div>
-            <div className="text-[11px] text-[#9aa8c7]">
+            <div className="text-xs font-medium text-slate-500 mt-0.5">
               {filteredAlerts.length} showing
             </div>
           </div>
@@ -21,25 +21,31 @@ export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter, onAle
           <select
             value={alertFilter}
             onChange={(e) => setAlertFilter(e.target.value)}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] outline-none"
+            className="w-full sm:w-auto rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:border-[#0b74c9] focus:border-[#0b74c9] focus:ring-2 focus:ring-[#0b74c9]/20 transition-all shadow-sm cursor-pointer"
           >
-            <option value="All" className="bg-[#0b1220] text-white">All</option>
-            <option value="Critical" className="bg-[#0b1220] text-white">Critical</option>
-            <option value="High" className="bg-[#0b1220] text-white">High</option>
-            <option value="Medium" className="bg-[#0b1220] text-white">Medium</option>
-            <option value="Low" className="bg-[#0b1220] text-white">Low</option>
+            <option value="All">All Severity</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
           </select>
         </div>
 
-        <div className="max-h-[72vh] min-h-[520px] overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-white">
           <div className="space-y-3">
-            {filteredAlerts.map((alert) => (
-              <AlertCard key={alert.id} alert={alert} onAlertClick={onAlertClick} />
-            ))}
+            {filteredAlerts.length > 0 ? (
+              filteredAlerts.map((alert) => (
+                <AlertCard key={alert.id} alert={alert} onAlertClick={onAlertClick} />
+              ))
+            ) : (
+              <div className="text-center text-slate-500 py-10 text-sm font-medium">
+                No active alerts matching filter.
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="border-t border-white/10 bg-white/5 px-4 py-3 text-[11px] text-[#9aa8c7]">
+        <div className="border-t border-gray-100 bg-gray-50 px-4 sm:px-5 py-3 text-xs font-medium text-slate-500 shrink-0 text-center sm:text-left">
           Tip: Click an alert to center the map on the vessel.
         </div>
       </aside>

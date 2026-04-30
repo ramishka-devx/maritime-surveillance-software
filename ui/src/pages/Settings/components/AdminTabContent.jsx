@@ -21,11 +21,11 @@ export function AdminTabContent({ token, canAdmin }) {
 
   return (
     <div>
-      <h2 className="text-base font-extrabold text-white mb-4">Operator Permissions</h2>
-      <p className="text-xs text-text-muted mb-4">Select an operator, then grant/revoke feature permissions</p>
+      <h2 className="text-base font-extrabold text-[#08244a] mb-4">Operator Permissions</h2>
+      <p className="text-xs text-slate-500 mb-4">Select an operator, then grant/revoke feature permissions</p>
 
       {adminUsersError ? (
-        <div className="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200 mb-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600 mb-4">
           {adminUsersError}
         </div>
       ) : null}
