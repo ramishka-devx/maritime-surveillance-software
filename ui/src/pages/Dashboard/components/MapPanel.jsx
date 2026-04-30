@@ -1,49 +1,76 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Maximize2, Minimize2, RotateCw } from "lucide-react";
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import MapView from "../../../components/MapView.jsx";
 import { Chip } from "./FilterChip.jsx";
-import { InfoRow } from "./InfoRow.jsx";
 import { LegendRow } from "./LegendRow.jsx";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import { getLatestVesselPositions, transformVesselData } from "../../../lib/vessels.js";
 
 export function MapPanel() {
   const { token } = useAuth();
+  const panelRef = useRef(null);
   const [vessels, setVessels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const loadVessels = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getLatestVesselPositions(token, 100);
+      const transformed = transformVesselData(data);
+      setVessels(transformed);
+    } catch (err) {
+      console.error("Failed to load vessels:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
-    async function loadVessels() {
-      if (!token) return;
-      
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getLatestVesselPositions(token, 100);
-        const transformed = transformVesselData(data);
-        setVessels(transformed);
-      } catch (err) {
-        console.error('Failed to load vessels:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     loadVessels();
-    
-    // Optional: Refresh every 30 seconds
+
     const interval = setInterval(loadVessels, 30000);
     return () => clearInterval(interval);
-  }, [token]);
+  }, [loadVessels]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === panelRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const handleFullscreenToggle = async () => {
+    try {
+      if (document.fullscreenElement === panelRef.current) {
+        await document.exitFullscreen();
+        return;
+      }
+
+      await panelRef.current?.requestFullscreen();
+    } catch (err) {
+      console.error("Failed to toggle fullscreen:", err);
+      setError("Fullscreen mode is not available right now.");
+    }
+  };
 
   return (
     <RequestAccessGate
       permission="dashboard.view"
       featureName="Maritime Map"
     >
-      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl flex flex-col h-full w-full">
+      <div
+        ref={panelRef}
+        className="relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl"
+      >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 bg-gray-50 px-4 sm:px-5 py-3 sm:py-4 flex-shrink-0 gap-3 sm:gap-0">
           <div className="flex items-center gap-3">
             <span className="text-sm font-extrabold text-[#08244a]">
@@ -55,12 +82,24 @@ export function MapPanel() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
-            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-gray-50 hover:text-[#0b74c9] transition-colors shadow-sm whitespace-nowrap">
-              Layers
+            <button
+              type="button"
+              onClick={loadVessels}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors shadow-sm whitespace-nowrap hover:bg-gray-50 hover:text-[#0b74c9] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RotateCw size={14} className={isLoading ? "animate-spin" : ""} />
+              Refresh
             </button>
-            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-gray-50 hover:text-[#0b74c9] transition-colors shadow-sm whitespace-nowrap">
-              Zones
+            <button
+              type="button"
+              onClick={handleFullscreenToggle}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors shadow-sm whitespace-nowrap hover:bg-gray-50 hover:text-[#0b74c9]"
+            >
+              {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+              {isFullscreen ? "Exit full screen" : "Full screen"}
             </button>
+            
             <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-gray-50 hover:text-[#0b74c9] transition-colors shadow-sm whitespace-nowrap">
               Filters
             </button>
