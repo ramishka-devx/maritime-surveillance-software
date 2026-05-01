@@ -19,14 +19,15 @@ export const AisService = {
   async listVessels({ limit } = {}) {
     const safeLimit = normalizeLimit(limit, { fallback: 500, max: 5000 });
 
-    // Latest known ship_name per MMSI.
+    // Latest known ship_name per MMSI from joined ships table.
     const rows = await query(
-      `SELECT DISTINCT ON (mmsi)
-         mmsi,
-         ship_name,
-         time_utc
-       FROM ais_positions
-       ORDER BY mmsi, time_utc DESC
+      `SELECT DISTINCT ON (a.mmsi)
+         a.mmsi,
+         s.ship_name,
+         a.time_utc
+       FROM ais_positions a
+       LEFT JOIN ships s ON a.mmsi = s.mmsi
+       ORDER BY a.mmsi, a.time_utc DESC
        LIMIT ?`,
       [safeLimit],
     );
@@ -37,20 +38,21 @@ export const AisService = {
   async latestPositions({ limit } = {}) {
     const safeLimit = normalizeLimit(limit, { fallback: 500, max: 5000 });
 
-    // Latest position per MMSI. Requires PostGIS (position geography).
+    // Latest position per MMSI with ship_name joined from ships table.
     const rows = await query(
-      `SELECT DISTINCT ON (mmsi)
-         mmsi,
-         ship_name,
-         sog,
-         cog,
-         heading,
-         nav_status,
-         time_utc,
-         ST_Y(position::geometry) AS lat,
-         ST_X(position::geometry) AS lon
-       FROM ais_positions
-       ORDER BY mmsi, time_utc DESC
+      `SELECT DISTINCT ON (a.mmsi)
+         a.mmsi,
+         s.ship_name,
+         a.sog,
+         a.cog,
+         a.heading,
+         a.nav_status,
+         a.time_utc,
+         ST_Y(a.position::geometry) AS lat,
+         ST_X(a.position::geometry) AS lon
+       FROM ais_positions a
+       LEFT JOIN ships s ON a.mmsi = s.mmsi
+       ORDER BY a.mmsi, a.time_utc DESC
        LIMIT ?`,
       [safeLimit],
     );
@@ -64,18 +66,19 @@ export const AisService = {
 
     const rows = await query(
       `SELECT
-         mmsi,
-         ship_name,
-         sog,
-         cog,
-         heading,
-         nav_status,
-         time_utc,
-         ST_Y(position::geometry) AS lat,
-         ST_X(position::geometry) AS lon
-       FROM ais_positions
-       WHERE mmsi = ?
-       ORDER BY time_utc DESC
+         a.mmsi,
+         s.ship_name,
+         a.sog,
+         a.cog,
+         a.heading,
+         a.nav_status,
+         a.time_utc,
+         ST_Y(a.position::geometry) AS lat,
+         ST_X(a.position::geometry) AS lon
+       FROM ais_positions a
+       LEFT JOIN ships s ON a.mmsi = s.mmsi
+       WHERE a.mmsi = ?
+       ORDER BY a.time_utc DESC
        LIMIT ?`,
       [safeMmsi, safeLimit],
     );
