@@ -180,6 +180,26 @@ export const userPermissionMutateSchema = Joi.object({
   })
 });
 
+export const userPermissionMutateByNameSchema = Joi.object({
+  params: Joi.object({
+    user_id: Joi.number().integer().required().messages({
+      'number.base': 'User ID must be a number.',
+      'number.integer': 'User ID must be an integer.',
+      'any.required': 'User ID is required.'
+    })
+  }),
+  body: Joi.object({
+    permission: Joi.string()
+      .max(100)
+      .pattern(/^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'Permission name must be in format: module.resource.action (e.g., alerts.list)',
+        'any.required': 'Permission name is required.'
+      })
+  })
+});
+
 export const userRoleMutateSchema = Joi.object({
   params: Joi.object({
     user_id: Joi.number().integer().positive().required().messages({

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Settings, User, Bell, Lock, Cpu, Shield } from 'lucide-react';
+import { Settings, User, Bell, Lock, Cpu } from 'lucide-react';
 
-export function useSettings(isSuperAdmin) {
+export function useSettings() {
   const [activeTab, setActiveTab] = useState('general');
   const [notifications, setNotifications] = useState({
     email: true,
@@ -19,10 +19,6 @@ export function useSettings(isSuperAdmin) {
     { id: 'security', label: 'Security', icon: Lock },
     { id: 'system', label: 'System', icon: Cpu },
   ];
-
-  if (isSuperAdmin) {
-    settingsTabs.push({ id: 'admin', label: 'Admin', icon: Shield });
-  }
 
   const handleNotificationChange = (key) => {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));

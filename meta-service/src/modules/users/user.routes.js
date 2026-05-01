@@ -9,6 +9,7 @@ import {
 	updateRoleSchema,
 	userPermissionListSchema,
 	userPermissionMutateSchema,
+	userPermissionMutateByNameSchema,
 	userRoleMutateSchema,
 	userRoleSyncSchema,
 } from './user.validation.js';
@@ -204,6 +205,23 @@ router.post(
 	activityLogger('users.permissions.assign'),
 	validate(userPermissionMutateSchema),
 	UserController.assignUserPermission
+);
+
+/**
+ * @openapi
+ * /api/users/{user_id}/permissions/assign-by-name:
+ *   post:
+ *     summary: Assign a direct permission to a user by permission name
+ */
+router.post(
+	'/:user_id/permissions/assign-by-name',
+	authMiddleware,
+	permissionMiddleware('user.status.update'),
+	activityLogger('users.permissions.assign', {
+		details: (req) => ({ user_id: req.params?.user_id, permission: req.body?.permission }),
+	}),
+	validate(userPermissionMutateByNameSchema),
+	UserController.assignUserPermissionByName
 );
 
 /**
