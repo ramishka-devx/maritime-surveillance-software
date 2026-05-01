@@ -1,0 +1,30 @@
+meta {
+  name: Anomalies - Update
+  type: http
+  seq: 43
+}
+
+put {
+  url: {{baseUrl}}/api/anomalies/1
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "anomaly_type": "route",
+    "details": {
+      "note": "updated classification"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

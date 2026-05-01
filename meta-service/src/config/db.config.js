@@ -114,6 +114,7 @@ function getInsertReturningClause(sql) {
     notifications: 'notification_id',
     activities: 'activity_id',
     vessel_positions: 'position_id',
+    anomalies: 'anomaly_id',
   };
 
   const pk = tableToPk[table];
