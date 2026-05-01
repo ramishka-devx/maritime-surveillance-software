@@ -135,6 +135,23 @@ export function usePermissions(token, canAdmin) {
     }
   }
 
+  function markOperatorPermissionAssignedByName(permissionName) {
+    const raw = String(permissionName || '').trim();
+    if (!raw) return;
+
+    setOperatorPermissions((prev) => {
+      if (!Array.isArray(prev)) return prev;
+      let changed = false;
+      const next = prev.map((p) => {
+        if (String(p?.name || '') !== raw) return p;
+        if (Number(p?.assigned) === 1) return p;
+        changed = true;
+        return { ...p, assigned: 1 };
+      });
+      return changed ? next : prev;
+    });
+  }
+
   return {
     operators,
     selectedOperator,
@@ -149,5 +166,6 @@ export function usePermissions(token, canAdmin) {
     permBusyId,
     operatorPermsByModule,
     togglePermission,
+    markOperatorPermissionAssignedByName,
   };
 }

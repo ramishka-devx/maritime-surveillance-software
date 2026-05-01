@@ -28,6 +28,7 @@ export default function Permissions() {
     permBusyId,
     operatorPermsByModule,
     togglePermission,
+    markOperatorPermissionAssignedByName,
   } = usePermissions(token, canAdmin);
 
   const openActivity = React.useCallback(() => {
@@ -123,6 +124,8 @@ export default function Permissions() {
         loading={activityLoading}
         error={activityError}
         onClose={closeActivity}
+        token={token}
+        onPermissionGranted={markOperatorPermissionAssignedByName}
       />
     </div>
   );

@@ -215,6 +215,25 @@ export const UserService = {
     return { user_id: target_user_id, permission_id };
   },
 
+  async assignPermissionToUserByName(target_user_id, permissionName) {
+    const target = await UserModel.findById(target_user_id);
+    if (!target) throw notFound('User not found');
+
+    const raw = String(permissionName || '').trim();
+    if (!raw) throw badRequest('Permission name is required');
+
+    const rows = await query(
+      'SELECT permission_id, name FROM permissions WHERE name = ? AND is_active = 1 LIMIT 1',
+      [raw],
+    );
+
+    const permission_id = rows[0]?.permission_id;
+    if (!permission_id) throw badRequest('Permission not found');
+
+    await UserModel.assignUserPermission(target_user_id, Number(permission_id));
+    return { user_id: target_user_id, permission_id: Number(permission_id), permission: raw };
+  },
+
   async revokePermissionFromUser(target_user_id, permission_id) {
     if (!Number.isInteger(permission_id)) throw badRequest('Invalid permission id');
     const target = await UserModel.findById(target_user_id);

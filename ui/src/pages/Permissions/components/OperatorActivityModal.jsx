@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiRequest } from '../../../lib/api.js';
 
 function safeParseUrl(value) {
   if (!value) return null;
@@ -168,11 +169,27 @@ function formatWhen(value) {
   return d.toLocaleString();
 }
 
-export function OperatorActivityModal({ isOpen, operator, activities, loading, error, onClose }) {
+export function OperatorActivityModal({
+  isOpen,
+  operator,
+  activities,
+  loading,
+  error,
+  onClose,
+  token,
+  onPermissionGranted,
+}) {
   const navigate = useNavigate();
+
+  const [grantingId, setGrantingId] = React.useState(null);
+  const [grantError, setGrantError] = React.useState('');
+  const [grantedActivityIds, setGrantedActivityIds] = React.useState(() => new Set());
 
   useEffect(() => {
     if (!isOpen) return;
+
+    setGrantError('');
+    setGrantingId(null);
 
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose?.();
@@ -215,6 +232,12 @@ export function OperatorActivityModal({ isOpen, operator, activities, loading, e
           </div>
 
           <div className="max-h-[70vh] overflow-y-auto p-5">
+            {grantError ? (
+              <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200">
+                {grantError}
+              </div>
+            ) : null}
+
             {error ? (
               <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200">
                 {error}
@@ -251,6 +274,13 @@ export function OperatorActivityModal({ isOpen, operator, activities, loading, e
                     const touchedLabel = touched.length > 0 ? touched.join(' • ') : null;
                     const details = explicitDetails || touchedLabel || '—';
                     const action = inferAdminAction(a);
+                    const detailsObj = a?.details && typeof a.details === 'object' ? a.details : null;
+
+                    const isAccessRequest = type === 'Access request';
+                    const requestedPermission = isAccessRequest ? String(detailsObj?.permission || '').trim() : '';
+                    const canGrant = Boolean(token && requestedPermission && operator?.user_id);
+                    const isGranting = grantingId && Number(grantingId) === Number(a.activity_id);
+                    const alreadyGranted = grantedActivityIds?.has?.(a.activity_id);
 
                     return (
                   <div
@@ -265,19 +295,63 @@ export function OperatorActivityModal({ isOpen, operator, activities, loading, e
                       {details}
                     </div>
                     <div className="col-span-2">
-                      <button
-                        type="button"
-                        className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-extrabold text-white/85 hover:bg-white/10 transition disabled:opacity-60"
-                        disabled={!action?.to}
-                        title={action?.to ? `Go to ${action.to}` : undefined}
-                        onClick={() => {
-                          if (!action?.to) return;
-                          navigate(action.to);
-                          onClose?.();
-                        }}
-                      >
-                        {action?.label || 'Review'}
-                      </button>
+                      {isAccessRequest ? (
+                        <button
+                          type="button"
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-extrabold text-white/85 hover:bg-white/10 transition disabled:opacity-60"
+                          disabled={!canGrant || isGranting || alreadyGranted}
+                          title={
+                            !requestedPermission
+                              ? 'Missing permission details for this request'
+                              : alreadyGranted
+                                ? 'Already granted'
+                                : undefined
+                          }
+                          onClick={async () => {
+                            if (!canGrant) return;
+                            setGrantError('');
+                            setGrantingId(a.activity_id);
+                            try {
+                              await apiRequest(`/api/users/${operator.user_id}/permissions/assign-by-name`, {
+                                token,
+                                method: 'POST',
+                                body: { permission: requestedPermission },
+                              });
+                            } catch (e) {
+                              setGrantError(e?.message || 'Failed to grant permission');
+                              return;
+                            } finally {
+                              setGrantingId(null);
+                            }
+
+                            setGrantedActivityIds((prev) => {
+                              const next = new Set(prev);
+                              next.add(a.activity_id);
+                              return next;
+                            });
+
+                            if (typeof onPermissionGranted === 'function') {
+                              onPermissionGranted(requestedPermission);
+                            }
+                          }}
+                        >
+                          {alreadyGranted ? 'Granted' : isGranting ? 'Granting…' : 'Review & grant'}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-extrabold text-white/85 hover:bg-white/10 transition disabled:opacity-60"
+                          disabled={!action?.to}
+                          title={action?.to ? `Go to ${action.to}` : undefined}
+                          onClick={() => {
+                            if (!action?.to) return;
+                            navigate(action.to);
+                            onClose?.();
+                          }}
+                        >
+                          {action?.label || 'Review'}
+                        </button>
+                      )}
                     </div>
                   </div>
                     );
