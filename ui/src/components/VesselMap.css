@@ -1,0 +1,68 @@
+/* MapLibre GL overrides — these target library-generated DOM that Tailwind can't reach */
+
+.maplibregl-canvas {
+  outline: none;
+}
+
+/* Popup animation & overrides */
+.maplibregl-popup {
+  animation: popupIn 0.2s ease-out;
+}
+
+@keyframes popupIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.maplibregl-popup-content {
+  padding: 0 !important;
+  border-radius: 8px;
+  max-width: 280px;
+}
+
+/* Spinner keyframe (referenced by Tailwind animate-spin alternative) */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Vessel Popup Styling */
+.vessel-popup {
+  padding: 12px;
+  color: #1a1a1a;
+  font-family: inherit;
+  min-width: 180px;
+}
+
+.popup-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.popup-header strong {
+  display: block;
+  font-size: 14px;
+  color: #1e40af;
+}
+
+.popup-header .mmsi {
+  font-size: 11px;
+  color: #666;
+}
+
+.popup-body .stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.popup-body .stat label {
+  color: #666;
+  font-weight: 500;
+}
+
+.popup-body .stat span {
+  color: #1a1a1a;
+  font-weight: 600;
+}
