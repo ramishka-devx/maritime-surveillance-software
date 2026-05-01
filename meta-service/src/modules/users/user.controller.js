@@ -109,6 +109,18 @@ export const UserController = {
     }
   },
 
+  async assignUserPermissionByName(req, res, next) {
+    try {
+      const data = await UserService.assignPermissionToUserByName(
+        Number(req.params.user_id),
+        req.body.permission
+      );
+      return success(res, data, 'Permission granted');
+    } catch (e) {
+      next(e);
+    }
+  },
+
   // ==========================================
   // Multi-Role Management
   // ==========================================

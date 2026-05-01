@@ -1,0 +1,40 @@
+meta {
+  name: Anomalies - Create
+  type: http
+  seq: 41
+}
+
+post {
+  url: {{baseUrl}}/api/anomalies
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "mmsi": 123456789,
+    "anomaly_type": "speed",
+    "sog": 23.5,
+    "cog": 88.1,
+    "heading": 90,
+    "nav_status": 0,
+    "p99_speed": 19.2,
+    "details": {
+      "threshold": 19.2,
+      "window": "1h"
+    },
+    "lon": 79.8612,
+    "alt": 5.4,
+    "detected_at": "2026-05-01T00:00:00.000Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

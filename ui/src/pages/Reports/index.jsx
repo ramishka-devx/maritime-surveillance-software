@@ -20,7 +20,69 @@ export default function Reports() {
   );
 
   const handleDownload = (report) => {
-    alert(`Downloading: ${report.title}`);
+    const encoder = new TextEncoder();
+
+    const escapePdfString = (value) =>
+      String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/\(/g, "\\(")
+        .replace(/\)/g, "\\)");
+
+    const makeFileName = (value) => {
+      const base = String(value || "report").trim() || "report";
+      return base.replace(/[\\/:*?\"<>|]+/g, "-");
+    };
+
+    const makeSimplePdfBytes = (text) => {
+      const safeText = escapePdfString(text);
+      const content = `BT\n/F1 24 Tf\n72 720 Td\n(${safeText}) Tj\nET\n`;
+      const contentLength = encoder.encode(content).length;
+
+      const header = "%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n";
+      const objects = [
+        null,
+        "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+        "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+        "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n",
+        `4 0 obj\n<< /Length ${contentLength} >>\nstream\n${content}endstream\nendobj\n`,
+        "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+      ];
+
+      const parts = [header];
+      const offsets = new Array(6).fill(0);
+
+      let offset = encoder.encode(header).length;
+      for (let i = 1; i <= 5; i += 1) {
+        offsets[i] = offset;
+        parts.push(objects[i]);
+        offset += encoder.encode(objects[i]).length;
+      }
+
+      const xrefStart = offset;
+      const pad10 = (n) => String(n).padStart(10, "0");
+      let xref = "xref\n0 6\n0000000000 65535 f \n";
+      for (let i = 1; i <= 5; i += 1) {
+        xref += `${pad10(offsets[i])} 00000 n \n`;
+      }
+
+      xref += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+      parts.push(xref);
+
+      return encoder.encode(parts.join(""));
+    };
+
+    const bytes = makeSimplePdfBytes("trst dummy");
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${makeFileName(report?.title)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
   };
 
   const handleGenerate = () => {

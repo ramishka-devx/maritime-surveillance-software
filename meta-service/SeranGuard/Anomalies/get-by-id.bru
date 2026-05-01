@@ -1,0 +1,20 @@
+meta {
+  name: Anomalies - Get By ID
+  type: http
+  seq: 42
+}
+
+get {
+  url: {{baseUrl}}/api/anomalies/1
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

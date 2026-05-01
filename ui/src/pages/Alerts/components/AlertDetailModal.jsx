@@ -34,7 +34,6 @@ export function AlertDetailModal({ alert, onClose }) {
 
   const s = SEVERITY[alert.level] || SEVERITY.info;
   const st = STATUS[alert.status] || STATUS.Active;
-  const SeverityIcon = s.icon;
 
   const handleClose = onClose ?? (() => navigate("/alerts", { replace: true }));
 

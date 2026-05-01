@@ -1,4 +1,3 @@
-import { FileText, Download, Calendar } from "lucide-react";
 import { TYPE_STYLES } from "../constants.js";
 import { usePermission } from "../../../auth/usePermission.js";
 
@@ -48,7 +47,6 @@ export function ReportItem({ report, onDownload }) {
         ].join(" ")}
         title={canDownload ? "Download report" : "Requires permission: report.download"}
       >
-        <Download size={16} />
         Download
       </button>
     </div>

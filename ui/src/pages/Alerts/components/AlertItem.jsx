@@ -29,23 +29,19 @@ export function AlertItem({
         <button
           type="button"
           onClick={() => navigate(`/alerts/${alert.id}`)}
-          className="flex flex-1 items-start gap-3 text-left"
+          className="flex flex-1 items-start gap-2 text-left"
         >
-          <div className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl border ${s.pill}`}>
-            <s.icon size={16} />
-          </div>
-
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               {alert.unread && <span className="h-2 w-2 rounded-full bg-accent-orange" />}
 
               <span className="text-sm font-extrabold text-white">{alert.title}</span>
 
-              <span className={`rounded-md border px-2 py-0.5 text-[10px] font-extrabold ${s.pill}`}>
+              <span className={`rounded-md border px-2 py-0.5 text-[10px] font-extrabold ${s.badge}`}>
                 {s.label}
               </span>
 
-              <span className={`rounded-md border px-2 py-0.5 text-[10px] font-extrabold ${st.pill}`}>
+              <span className={`rounded-md border px-2 py-0.5 text-[10px] font-extrabold ${st.badge}`}>
                 {alert.status}
               </span>
             </div>
@@ -75,7 +71,7 @@ export function AlertItem({
         </button>
 
         <div className="flex flex-col items-end gap-2">
-          <span className={`rounded-md border px-2 py-1 text-[10px] font-extrabold ${st.pill}`}>
+          <span className={`rounded-md border px-2 py-1 text-[10px] font-extrabold ${st.badge}`}>
             {alert.status}
           </span>
 
