@@ -30,10 +30,11 @@ function formatRoleName(roles) {
 
 function ProtectedLayout({ isAuthed, session, navLinks, onLogout, children }) {
   if (!isAuthed) return <Navigate to="/auth" replace />;
+
   return (
-    <div style={{ minHeight: '100vh', background: 'transparent' }}>
+    <div style={{ minHeight: '100vh', background: '#ffffff' }}>
       <Navbar user={session} links={navLinks} onLogout={onLogout} />
-      <main style={{ padding: '20px 32px 40px' }}>{children}</main>
+      <main style={{ padding: '20px 32px 40px', background: '#ffffff' }}>{children}</main>
     </div>
   );
 }
@@ -89,8 +90,8 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-page-bg flex items-center justify-center px-6">
-        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-text-muted shadow-card">
+      <div className="min-h-screen bg-[#f9fbfd] flex items-center justify-center px-6">
+        <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-slate-500 shadow-sm">
           Loading profile...
         </div>
       </div>

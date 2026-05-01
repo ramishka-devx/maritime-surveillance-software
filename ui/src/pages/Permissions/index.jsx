@@ -73,24 +73,24 @@ export default function Permissions() {
   if (!canAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-nav-bg to-nav-bg-soft px-6 py-5">
+    <div className="min-h-[calc(100vh-64px)] bg-[#f9fbfd] px-6 py-5">
       <div className="mx-auto max-w-[1100px]">
         <div className="mb-4">
-          <h1 className="text-lg font-extrabold text-accent-orange">Permissions</h1>
-          <p className="text-xs font-semibold text-text-muted">Grant and revoke operator feature access</p>
+          <h1 className="text-xl font-extrabold text-[#08244a]">Permissions</h1>
+          <p className="text-sm font-medium text-slate-500">Grant and revoke operator feature access</p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="mb-4">
-            <h3 className="text-md font-extrabold text-white">Operator Permissions</h3>
-            <p className="mt-1 text-sm font-semibold text-text-muted">
+            <h3 className="text-md font-extrabold text-[#08244a]">Operator Permissions</h3>
+            <p className="mt-1 text-sm font-medium text-slate-500">
               Select an operator, then grant/revoke feature permissions (for example:{' '}
-              <span className="text-white font-semibold">dashboard.view</span>).
+              <span className="text-slate-800 font-semibold">dashboard.view</span>).
             </p>
           </div>
 
           {adminUsersError ? (
-            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-[11px] text-red-200">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[11px] text-red-600">
               {adminUsersError}
             </div>
           ) : null}
