@@ -1,0 +1,42 @@
+meta {
+  name: Restricted Areas - Detections
+  type: http
+  seq: 43
+}
+
+get {
+  url: {{baseUrl}}/api/restricted-areas/detections?restricted_area_id=1&mmsi=123456789&limit=100
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+params:query {
+  restricted_area_id: 1
+  mmsi: 123456789
+  limit: 100
+}
+
+docs {
+  # Detect Ships In Restricted Areas
+  
+  Returns AIS ship positions that intersect restricted area polygons.
+  
+  ## Query Params
+  | Param | Required | Description |
+  |-------|----------|-------------|
+  | restricted_area_id | No | Limit detections to one restricted area |
+  | mmsi | No | Filter detections for one vessel MMSI |
+  | limit | No | Max number of rows to return. Default is `200` |
+  
+  ## Detection Source
+  This endpoint uses the `ais_positions` PostGIS feed and checks intersection against `restricted_areas.geom`.
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

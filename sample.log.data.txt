@@ -1,0 +1,718 @@
+{
+  Message: {
+    PositionReport: {
+      Cog: 360,
+      CommunicationState: 27652,
+      Latitude: 52.36988833333333,
+      Longitude: 4.937191666666666,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: true,
+      Raim: true,
+      RateOfTurn: -128,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 53,
+      TrueHeading: 511,
+      UserID: 244780136,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 244780136,
+    MMSI_String: 244780136,
+    ShipName: 'ANNA MARIA',
+    latitude: 52.36989,
+    longitude: 4.93719,
+    time_utc: '2026-04-30 22:01:53.739748935 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 2,
+      CallSign: 'VRSK3  ',
+      Destination: 'USKAL               ',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 9848522,
+      MaximumStaticDraught: 7,
+      MessageID: 5,
+      Name: 'OCEAN TIME          ',
+      RepeatIndicator: 3,
+      Spare: false,
+      Type: 70,
+      UserID: 477269200,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 477269200,
+    MMSI_String: 477269200,
+    ShipName: 'OCEAN TIME          ',
+    latitude: 46.21248,
+    longitude: -123.78878,
+    time_utc: '2026-04-30 22:01:53.743998383 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 306.5,
+      CommunicationState: 49286,
+      Latitude: 50.79563333333333,
+      Longitude: -1.108805,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: false,
+      Raim: false,
+      RateOfTurn: -128,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 53,
+      TrueHeading: 511,
+      UserID: 235065995,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 235065995,
+    MMSI_String: 235065995,
+    ShipName: 'ALBION',
+    latitude: 50.79563,
+    longitude: -1.10881,
+    time_utc: '2026-04-30 22:01:53.738298454 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 2,
+      CallSign: 'V4BK7',
+      Destination: 'SPURN',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 9015448,
+      MaximumStaticDraught: 4.6,
+      MessageID: 5,
+      Name: 'VULIN',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 70,
+      UserID: 341357002,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 341357002,
+    MMSI_String: 341357002,
+    ShipName: 'VULIN',
+    latitude: 53.73119,
+    longitude: -0.85052,
+    time_utc: '2026-04-30 22:01:53.744960225 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 2,
+      CallSign: 'PB2066',
+      Destination: 'ROTTERDAM MAASHAVEN',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 15,
+      ImoNumber: 0,
+      MaximumStaticDraught: 3.7,
+      MessageID: 5,
+      Name: 'INVICTUS',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 80,
+      UserID: 244690328,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 244690328,
+    MMSI_String: 244690328,
+    ShipName: 'INVICTUS',
+    latitude: 51.91227,
+    longitude: 4.419,
+    time_utc: '2026-04-30 22:01:53.745987199 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 57,
+      CommunicationState: 49951,
+      Latitude: 1.2010333333333334,
+      Longitude: 103.88776666666666,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: true,
+      Raim: false,
+      RateOfTurn: 11,
+      RepeatIndicator: 0,
+      Sog: 12.2,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 54,
+      TrueHeading: 62,
+      UserID: 636093361,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 636093361,
+    MMSI_String: 636093361,
+    ShipName: 'ALS KRONOS          ',
+    latitude: 1.20103,
+    longitude: 103.88777,
+    time_utc: '2026-04-30 22:01:53.750581111 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 0,
+      CallSign: 'CFN5543',
+      Destination: 'TWIN CREEKS         ',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 8020018,
+      MaximumStaticDraught: 4.5,
+      MessageID: 5,
+      Name: 'CAMERON H           ',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 52,
+      UserID: 316003600,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 316003600,
+    MMSI_String: 316003600,
+    ShipName: 'CAMERON H           ',
+    latitude: 50.09203,
+    longitude: -125.31345,
+    time_utc: '2026-04-30 22:01:53.751675259 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 320.9,
+      CommunicationState: 49226,
+      Latitude: 59.961058333333334,
+      Longitude: 19.48106166666667,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: true,
+      Raim: false,
+      RateOfTurn: 0,
+      RepeatIndicator: 0,
+      Sog: 11.6,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 54,
+      TrueHeading: 319,
+      UserID: 255915979,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 255915979,
+    MMSI_String: 255915979,
+    ShipName: 'STEN BERGEN         ',
+    latitude: 59.96106,
+    longitude: 19.48106,
+    time_utc: '2026-04-30 22:01:53.776574518 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 295.3,
+      CommunicationState: 34783,
+      Latitude: 51.94484,
+      Longitude: 4.048965,
+      MessageID: 1,
+      NavigationalStatus: 8,
+      PositionAccuracy: true,
+      Raim: true,
+      RateOfTurn: -128,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 1,
+      Timestamp: 52,
+      TrueHeading: 511,
+      UserID: 244670077,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 244670077,
+    MMSI_String: 244670077,
+    ShipName: 'ATLANTIC PIONEER',
+    latitude: 51.94484,
+    longitude: 4.04897,
+    time_utc: '2026-04-30 22:01:53.777741995 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 348.2,
+      CommunicationState: 85194,
+      Latitude: 57.27939166666667,
+      Longitude: -5.714448333333333,
+      MessageID: 3,
+      NavigationalStatus: 5,
+      PositionAccuracy: true,
+      Raim: false,
+      RateOfTurn: 0,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 52,
+      TrueHeading: 354,
+      UserID: 259662000,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 259662000,
+    MMSI_String: 259662000,
+    ShipName: 'MIGDALE             ',
+    latitude: 57.27939,
+    longitude: -5.71445,
+    time_utc: '2026-04-30 22:01:53.755279255 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 74,
+      CommunicationState: 131072,
+      Latitude: 25.684483333333333,
+      Longitude: 55.09001666666666,
+      MessageID: 3,
+      NavigationalStatus: 1,
+      PositionAccuracy: false,
+      Raim: false,
+      RateOfTurn: 0,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 54,
+      TrueHeading: 96,
+      UserID: 636024935,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 636024935,
+    MMSI_String: 636024935,
+    ShipName: 'ORINOCCO            ',
+    latitude: 25.68448,
+    longitude: 55.09002,
+    time_utc: '2026-04-30 22:01:53.78347487 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 192.8,
+      CommunicationState: 23379,
+      Latitude: 62.534621666666666,
+      Longitude: 7.4453450000000005,
+      MessageID: 3,
+      NavigationalStatus: 4,
+      PositionAccuracy: false,
+      Raim: false,
+      RateOfTurn: 0,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 52,
+      TrueHeading: 160,
+      UserID: 257986700,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 257986700,
+    MMSI_String: 257986700,
+    ShipName: 'FOSNA GARP',
+    latitude: 62.53462,
+    longitude: 7.44535,
+    time_utc: '2026-04-30 22:01:53.801564066 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 200.7,
+      CommunicationState: 27652,
+      Latitude: 51.18093833333333,
+      Longitude: 3.7995533333333333,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: true,
+      Raim: false,
+      RateOfTurn: 0,
+      RepeatIndicator: 0,
+      Sog: 9,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 1,
+      Timestamp: 47,
+      TrueHeading: 201,
+      UserID: 227075560,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 227075560,
+    MMSI_String: 227075560,
+    ShipName: 'MAJESTY',
+    latitude: 51.18094,
+    longitude: 3.79955,
+    time_utc: '2026-04-30 22:01:53.807434783 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 1,
+      CallSign: 'OT4360 ',
+      Destination: 'MARANATHA           ',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 0,
+      MaximumStaticDraught: 2.7,
+      MessageID: 5,
+      Name: 'MADISON             ',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 79,
+      UserID: 205436090,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 205436090,
+    MMSI_String: 205436090,
+    ShipName: 'MADISON             ',
+    latitude: 51.09101,
+    longitude: 3.67454,
+    time_utc: '2026-04-30 22:01:53.808643844 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 360,
+      CommunicationState: 83178,
+      Latitude: 51.084025,
+      Longitude: 3.65876,
+      MessageID: 3,
+      NavigationalStatus: 5,
+      PositionAccuracy: true,
+      Raim: true,
+      RateOfTurn: -128,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 1,
+      Timestamp: 48,
+      TrueHeading: 511,
+      UserID: 244733553,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 244733553,
+    MMSI_String: 244733553,
+    ShipName: 'VALIANT',
+    latitude: 51.08403,
+    longitude: 3.65876,
+    time_utc: '2026-04-30 22:01:53.810144761 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 60.5,
+      CommunicationState: 49309,
+      Latitude: 51.21698666666667,
+      Longitude: 2.098255,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: false,
+      Raim: false,
+      RateOfTurn: 0,
+      RepeatIndicator: 0,
+      Sog: 11.3,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 47,
+      TrueHeading: 62,
+      UserID: 265025000,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 265025000,
+    MMSI_String: 265025000,
+    ShipName: 'FURE VITEN          ',
+    latitude: 51.21699,
+    longitude: 2.09826,
+    time_utc: '2026-04-30 22:01:53.811477088 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 2,
+      CallSign: 'V7GD9  ',
+      Destination: 'GR THI              ',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 9711767,
+      MaximumStaticDraught: 8.6,
+      MessageID: 5,
+      Name: 'URSA MINOR          ',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 70,
+      UserID: 538005698,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 538005698,
+    MMSI_String: 538005698,
+    ShipName: 'URSA MINOR          ',
+    latitude: 51.58253,
+    longitude: 2.1954,
+    time_utc: '2026-04-30 22:01:53.812385423 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 2,
+      CallSign: 'LXGQ   ',
+      Destination: 'BEGNE               ',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 9372250,
+      MaximumStaticDraught: 3.9,
+      MessageID: 5,
+      Name: 'LE GUERRIER         ',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 33,
+      UserID: 253311000,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 253311000,
+    MMSI_String: 253311000,
+    ShipName: 'LE GUERRIER         ',
+    latitude: 51.08838,
+    longitude: 3.73378,
+    time_utc: '2026-04-30 22:01:53.814967897 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 0,
+      CommunicationState: 34609,
+      Latitude: 51.00906333333333,
+      Longitude: 3.74565,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: true,
+      Raim: true,
+      RateOfTurn: -128,
+      RepeatIndicator: 0,
+      Sog: 0,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 49,
+      TrueHeading: 511,
+      UserID: 205501390,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 205501390,
+    MMSI_String: 205501390,
+    ShipName: 'PARTOUT-POURTOUT',
+    latitude: 51.00906,
+    longitude: 3.74565,
+    time_utc: '2026-04-30 22:01:53.816375937 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    ShipStaticData: {
+      AisVersion: 2,
+      CallSign: '5LHD6  ',
+      Destination: 'GHENT               ',
+      Dimension: [Object],
+      Dte: false,
+      Eta: [Object],
+      FixType: 1,
+      ImoNumber: 9955909,
+      MaximumStaticDraught: 9.8,
+      MessageID: 5,
+      Name: 'ROSTRUM CYNIC       ',
+      RepeatIndicator: 0,
+      Spare: false,
+      Type: 70,
+      UserID: 636093237,
+      Valid: true
+    }
+  },
+  MessageType: 'ShipStaticData',
+  MetaData: {
+    MMSI: 636093237,
+    MMSI_String: 636093237,
+    ShipName: 'ROSTRUM CYNIC       ',
+    latitude: 51.07926,
+    longitude: 3.73528,
+    time_utc: '2026-04-30 22:01:53.813693763 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 109.5,
+      CommunicationState: 49828,
+      Latitude: 51.35231833333333,
+      Longitude: 4.2457666666666665,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: false,
+      Raim: false,
+      RateOfTurn: -127,
+      RepeatIndicator: 0,
+      Sog: 5.6,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 50,
+      TrueHeading: 100,
+      UserID: 255915875,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 255915875,
+    MMSI_String: 255915875,
+    ShipName: 'FAIRPLAY I          ',
+    latitude: 51.35232,
+    longitude: 4.24577,
+    time_utc: '2026-04-30 22:01:53.817373472 +0000 UTC'
+  }
+}
+============================================================
+{
+  Message: {
+    PositionReport: {
+      Cog: 225.3,
+      CommunicationState: 67389,
+      Latitude: 51.59345166666667,
+      Longitude: 2.1636,
+      MessageID: 1,
+      NavigationalStatus: 0,
+      PositionAccuracy: true,
+      Raim: false,
+      RateOfTurn: -7,
+      RepeatIndicator: 0,
+      Sog: 13.8,
+      Spare: 0,
+      SpecialManoeuvreIndicator: 0,
+      Timestamp: 49,
+      TrueHeading: 224,
+      UserID: 210340000,
+      Valid: true
+    }
+  },
+  MessageType: 'PositionReport',
+  MetaData: {
+    MMSI: 210340000,
+    MMSI_String: 210340000,
+    ShipName: 'ARABELLA            ',
+    latitude: 51.59345,
+    longitude: 2.1636,
+    time_utc: '2026-04-30 22:01:53.816914348 +0000 UTC'
+  }
+}
+============================================================

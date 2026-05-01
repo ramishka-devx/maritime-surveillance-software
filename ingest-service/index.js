@@ -1,38 +1,43 @@
 const WebSocket = require("ws");
 const config = require("./config");
 const parseAIS = require("./parser");
-const { insertAIS, insertAISBatch } = require("./insert");
+const { processAISMessage } = require("./insert");
+const {
+  ensureTopic,
+  publishAISMessage,
+  startConsumer,
+  disconnectKafka
+} = require("./kafka");
 
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 5000;
 let socket;
 let heartbeatInterval;
-let flushInterval;
 
-
-// Buffer configuration
-const BUFFER_SIZE = 100; // Flush after 100 messages
-const BUFFER_TIMEOUT = 5000; // Or after 5 seconds
-let messageBuffer = [];
-let lastFlushTime = Date.now();
-
-async function flushBuffer() {
-  if (messageBuffer.length === 0) return;
-
-  const batch = [...messageBuffer];
-  messageBuffer = [];
-
-  try {
-    const result = await insertAISBatch(batch);
-    if (result.inserted > 0) {
-      console.log(`[DB] ✓ Inserted ${result.inserted} records${result.failed > 0 ? ` (${result.failed} failed)` : ''}`);
-    }
-  } catch (err) {
-    console.error("[DB] Error flushing buffer:", err.message);
+async function persistParsedMessage(parsed) {
+  const result = await processAISMessage(parsed);
+  if (result.positionsInserted > 0) {
+    console.log(
+      `[DB] ✓ Upserted ship ${parsed.mmsi} and inserted ${result.positionsInserted} AIS position`
+    );
+  } else {
+    console.log(`[DB] ✓ Upserted ship ${parsed.mmsi} without position insert`);
   }
+}
 
-  lastFlushTime = Date.now();
+async function handleKafkaMessage({ message }) {
+  try {
+    if (!message?.value) return;
+
+    const payload = JSON.parse(message.value.toString());
+    const parsed = parseAIS(payload);
+    if (!parsed) return;
+
+    await persistParsedMessage(parsed);
+  } catch (err) {
+    console.error("[Kafka] Error processing queued AIS message:", err.message);
+  }
 }
 
 function connectToAISStream() {
@@ -47,39 +52,34 @@ function connectToAISStream() {
       JSON.stringify({
         Apikey: config.ais.apiKey,
         BoundingBoxes: [[[-90, -180], [90, 180]]],
-        FilterMessageTypes: ["PositionReport"]
+        FilterMessageTypes: ["PositionReport", "ShipStaticData"]
       })
     );
 
-    // Setup heartbeat to keep connection alive
     clearInterval(heartbeatInterval);
     heartbeatInterval = setInterval(() => {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.ping();
       }
-    }, 30000); // Ping every 30 seconds
-
-    // Setup buffer flush timer
-    clearInterval(flushInterval);
-    flushInterval = setInterval(flushBuffer, BUFFER_TIMEOUT);
+    }, 30000);
   };
 
   socket.onmessage = async (event) => {
     try {
       const msg = JSON.parse(event.data);
-      const data = parseAIS(msg);
-
-      if (!data) return;
-
-      // Add to buffer
-      messageBuffer.push(data);
-
-      // Flush if buffer is full
-      if (messageBuffer.length >= BUFFER_SIZE) {
-        await flushBuffer();
+      if (config.kafka.enabled) {
+        await publishAISMessage(msg);
+        return;
       }
+
+      const parsed = parseAIS(msg);
+      if (!parsed) return;
+      await persistParsedMessage(parsed);
     } catch (err) {
-      console.error("[AIS] Error processing message:", err.message);
+      console.error(
+        config.kafka.enabled ? "[AIS] Error queueing message:" : "[AIS] Error persisting message:",
+        err.message
+      );
     }
   };
 
@@ -89,12 +89,13 @@ function connectToAISStream() {
 
   socket.onclose = (code) => {
     clearInterval(heartbeatInterval);
-    clearInterval(flushInterval);
     console.warn(`[AIS] Connection closed (code: ${code}). Attempting to reconnect...`);
 
     if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       reconnectAttempts++;
-      console.log(`[AIS] Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${RECONNECT_DELAY / 1000}s...`);
+      console.log(
+        `[AIS] Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${RECONNECT_DELAY / 1000}s...`
+      );
       setTimeout(connectToAISStream, RECONNECT_DELAY);
     } else {
       console.error("[AIS] ✗ Max reconnection attempts reached. Exiting.");
@@ -103,24 +104,32 @@ function connectToAISStream() {
   };
 }
 
-// Start the AIS stream connection
-connectToAISStream();
+async function start() {
+  if (config.kafka.enabled) {
+    await ensureTopic();
+    await startConsumer(handleKafkaMessage);
+    console.log("[Kafka] Queueing enabled");
+  } else {
+    console.log("[Kafka] Queueing disabled, using direct database writes");
+  }
+  connectToAISStream();
+}
 
-// Graceful shutdown
+start().catch((err) => {
+  console.error("[APP] Failed to start ingest service:", err.message);
+  process.exit(1);
+});
+
 process.on("SIGINT", async () => {
   console.log("\n[APP] Shutting down gracefully...");
   clearInterval(heartbeatInterval);
-  clearInterval(flushInterval);
-
-  // Flush remaining messages before exit
-  if (messageBuffer.length > 0) {
-    console.log("[DB] Flushing remaining messages before shutdown...");
-    await flushBuffer();
-  }
 
   if (socket) {
     socket.close(1000, "Server shutdown");
   }
 
+  if (config.kafka.enabled) {
+    await disconnectKafka();
+  }
   process.exit(0);
 });

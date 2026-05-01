@@ -1,0 +1,26 @@
+meta {
+  name: Restricted Areas - Get By ID
+  type: http
+  seq: 42
+}
+
+get {
+  url: {{baseUrl}}/api/restricted-areas/1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+docs {
+  # Get Restricted Area By ID
+  
+  Fetches one restricted area record together with its geometry details.
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
