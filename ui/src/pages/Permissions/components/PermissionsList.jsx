@@ -8,11 +8,11 @@ export function PermissionsList({
   onViewActivity,
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-lg border border-gray-700 bg-[#0b1220] p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="text-slate-800 font-semibold">Permissions</div>
-          <div className="text-xs font-medium text-slate-500">
+          <div className="text-white font-semibold">Permissions</div>
+          <div className="text-xs text-gray-400">
             {selectedOperator
               ? `Managing: ${selectedOperator.first_name} ${selectedOperator.last_name}`
               : 'Select an operator to manage permissions.'}
@@ -23,7 +23,7 @@ export function PermissionsList({
           <button
             type="button"
             onClick={onViewActivity}
-            className="rounded-lg border border-gray-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+            className="rounded-lg border border-gray-600 bg-[#111b2e] px-3 py-2 text-xs font-semibold text-white hover:bg-[#162341] transition-colors"
           >
             View activity
           </button>
@@ -31,20 +31,20 @@ export function PermissionsList({
       </div>
 
       {error ? (
-        <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
           {error}
         </div>
       ) : null}
 
       {selectedOperator && isLoading ? (
-        <div className="text-sm font-medium text-slate-400">Loading permissions…</div>
+        <div className="text-sm text-gray-400">Loading permissions…</div>
       ) : null}
 
       {selectedOperator && operatorPermsByModule.length > 0 ? (
         <div className="space-y-4 max-h-96 overflow-auto pr-1">
           {operatorPermsByModule.map(({ module, perms }) => (
-            <div key={module} className="rounded-lg border border-gray-200 bg-slate-50 p-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <div key={module} className="rounded-lg border border-gray-800 bg-[#111b2e] p-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
                 {module}
               </div>
 
@@ -55,12 +55,12 @@ export function PermissionsList({
                   return (
                     <div
                       key={p.permission_id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-[#0b1220] px-3 py-2"
                     >
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-slate-800 truncate">{p.name}</div>
+                        <div className="text-sm font-semibold text-white truncate">{p.name}</div>
                         {p.description ? (
-                          <div className="text-xs font-medium text-slate-500 truncate">{p.description}</div>
+                          <div className="text-xs text-gray-400 truncate">{p.description}</div>
                         ) : null}
                       </div>
 
@@ -70,8 +70,8 @@ export function PermissionsList({
                         onClick={() => onTogglePermission(p)}
                         className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-60 ${
                           assigned
-                            ? 'text-red-700 border-red-200 bg-red-50 hover:bg-red-100'
-                            : 'text-[#0b74c9] border-[#0b74c9]/20 bg-[#0b74c9]/5 hover:bg-[#0b74c9]/10'
+                            ? 'text-red-200 border-red-500/30 bg-red-500/10 hover:bg-red-500/20'
+                            : 'text-green-200 border-green-500/30 bg-green-500/10 hover:bg-green-500/20'
                         }`}
                       >
                         {busy ? 'Working…' : assigned ? 'Revoke' : 'Grant'}

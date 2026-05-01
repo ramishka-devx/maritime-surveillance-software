@@ -20,9 +20,9 @@ export function AlertItem({
   return (
     <div
       className={[
-        "rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md",
-        "shadow-sm",
-        alert.unread ? "ring-2 ring-[#0b74c9]/20" : "",
+        "rounded-2xl border border-white/10 bg-white/5 p-4",
+        "shadow-[0_10px_30px_rgba(0,0,0,0.25)]",
+        alert.unread ? "ring-1 ring-accent-orange/25" : "",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-3">
@@ -37,9 +37,9 @@ export function AlertItem({
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              {alert.unread && <span className="h-2 w-2 rounded-full bg-[#0b74c9]" />}
+              {alert.unread && <span className="h-2 w-2 rounded-full bg-accent-orange" />}
 
-              <span className="text-sm font-extrabold text-[#08244a]">{alert.title}</span>
+              <span className="text-sm font-extrabold text-white">{alert.title}</span>
 
               <span className={`rounded-md border px-2 py-0.5 text-[10px] font-extrabold ${s.pill}`}>
                 {s.label}
@@ -50,7 +50,7 @@ export function AlertItem({
               </span>
             </div>
 
-            <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-500">
+            <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] font-semibold text-white/80">
               <div className="flex items-center gap-1">
                 <Calendar size={14} />
                 <span>{alert.when}</span>
@@ -68,7 +68,7 @@ export function AlertItem({
               )}
             </div>
 
-            <div className="mt-2 text-[12px] font-medium text-slate-600">
+            <div className="mt-2 text-[12px] font-semibold text-text-muted">
               {alert.description}
             </div>
           </div>
@@ -86,8 +86,8 @@ export function AlertItem({
             className={[
               "rounded-lg px-3 py-2 text-[11px] font-extrabold transition",
               canManageStatus
-                ? "bg-[#0b74c9] text-white hover:bg-[#095ca5] active:bg-[#074782]"
-                : "cursor-not-allowed border border-gray-200 bg-slate-50 text-slate-400",
+                ? "bg-accent-orange text-white hover:bg-[#d97706]"
+                : "cursor-not-allowed border border-white/10 bg-white/5 text-white/60",
             ].join(" ")}
             title={canManageStatus ? "Resolve alert" : "Requires permission: alert.status.view"}
           >
@@ -98,16 +98,16 @@ export function AlertItem({
 
       {expanded && (
         <div className="mt-4 space-y-3">
-          <div className="rounded-xl border border-gray-200 bg-slate-50 p-3">
-            <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#08244a]">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <div className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">
               Notes
             </div>
-            <div className="mt-1 text-[11px] font-medium text-slate-600">{alert.notes || "—"}</div>
+            <div className="mt-1 text-[11px] font-semibold text-white/85">{alert.notes || "—"}</div>
           </div>
 
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div className="text-[11px] font-semibold text-slate-500">
-              Resolved by <span className="font-extrabold text-[#08244a]">{alert.resolvedBy}</span>
+            <div className="text-[11px] font-semibold text-text-muted">
+              Resolved by <span className="text-white/80 font-extrabold">{alert.resolvedBy}</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -116,10 +116,10 @@ export function AlertItem({
                 onClick={() => onAcknowledge(alert.id)}
                 disabled={!canManageStatus}
                 className={[
-                  "rounded-xl border border-gray-200 px-3 py-2 text-[11px] font-extrabold transition",
+                  "rounded-xl border border-white/10 px-3 py-2 text-[11px] font-extrabold transition",
                   canManageStatus
-                    ? "bg-white text-slate-700 hover:bg-slate-50"
-                    : "cursor-not-allowed bg-slate-50 text-slate-400",
+                    ? "bg-white/5 text-white/90 hover:bg-white/10"
+                    : "cursor-not-allowed bg-white/5 text-white/50",
                 ].join(" ")}
                 title={canManageStatus ? "Acknowledge alert" : "Requires permission: alert.status.view"}
               >
@@ -131,10 +131,10 @@ export function AlertItem({
                 onChange={(e) => onAssignTo(alert.id, e.target.value)}
                 disabled={!canManageStatus}
                 className={[
-                  "rounded-xl border border-gray-200 px-3 py-2 text-[11px] font-extrabold outline-none focus:border-[#0b74c9] focus:ring-1 focus:ring-[#0b74c9]",
+                  "rounded-xl border border-white/10 px-3 py-2 text-[11px] font-extrabold outline-none",
                   canManageStatus
-                    ? "bg-white text-slate-700"
-                    : "cursor-not-allowed bg-slate-50 text-slate-400",
+                    ? "bg-[#0b1220] text-white/90"
+                    : "cursor-not-allowed bg-white/5 text-white/50",
                 ].join(" ")}
                 title={canManageStatus ? "Assign alert" : "Requires permission: alert.status.view"}
               >

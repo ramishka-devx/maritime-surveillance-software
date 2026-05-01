@@ -1,15 +1,15 @@
 export function TabNavigation({ tabs, activeTab, onTabChange }) {
   return (
-    <div className="md:w-48 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm h-fit">
+    <div className="md:w-48 rounded-2xl border border-white/10 bg-white/5 p-3">
       {tabs.map((tab) => {
         const IconComponent = tab.icon;
         return (
           <button
             key={tab.id}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold text-sm transition-all mb-2 ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold text-base transition-all mb-2 ${
               activeTab === tab.id
-                ? 'bg-[#0b74c9]/10 text-[#0b74c9]'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                ? 'bg-accent-orange/15 text-accent-orange'
+                : 'text-text-muted hover:text-white hover:bg-white/5'
             }`}
             onClick={() => onTabChange(tab.id)}
             type="button"

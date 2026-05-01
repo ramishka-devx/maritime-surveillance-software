@@ -13,7 +13,7 @@ const SEVERITY = {
     dot: "bg-amber-300",
     pill: "bg-amber-500/15 text-amber-200 border-amber-400/25",
     icon: "⚠️",
-    actionBg: "bg-[#0b74c9] hover:bg-[#095ca5]",
+    actionBg: "bg-accent-orange hover:bg-[#d97706]",
   },
   info: {
     label: "Info",

@@ -1,64 +1,69 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Maximize2, Minimize2, RotateCw } from "lucide-react";
+import { useState, useEffect } from "react";
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
-import MapView from "../../../components/MapView.jsx";
-import { Chip } from "./FilterChip.jsx";
-import { LegendRow } from "./LegendRow.jsx";
+import VesselMap from "../../../components/VesselMap.jsx";
 import { useAuth } from "../../../auth/AuthContext.jsx";
-import { getLatestVesselPositions, transformVesselData } from "../../../lib/vessels.js";
+import { getRestrictedAreas, createRestrictedArea } from "../../../lib/restrictedAreas.js";
+import { Plus, Check, X } from "lucide-react";
 
 export function MapPanel() {
   const { token } = useAuth();
-  const panelRef = useRef(null);
-  const [vessels, setVessels] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Restricted Areas State
+  const [showRestrictedAreas, setShowRestrictedAreas] = useState(false);
+  const [restrictedAreas, setRestrictedAreas] = useState([]);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawPoints, setDrawPoints] = useState([]);
 
-  const loadVessels = useCallback(async () => {
-    if (!token) return;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await getLatestVesselPositions(token, 100);
-      const transformed = transformVesselData(data);
-      setVessels(transformed);
-    } catch (err) {
-      console.error("Failed to load vessels:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (showRestrictedAreas) {
+      fetchRestrictedAreas();
     }
-  }, [token]);
+  }, [showRestrictedAreas, token]);
 
-  useEffect(() => {
-    loadVessels();
-
-    const interval = setInterval(loadVessels, 30000);
-    return () => clearInterval(interval);
-  }, [loadVessels]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === panelRef.current);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  const handleFullscreenToggle = async () => {
+  const fetchRestrictedAreas = async () => {
     try {
-      if (document.fullscreenElement === panelRef.current) {
-        await document.exitFullscreen();
-        return;
-      }
-
-      await panelRef.current?.requestFullscreen();
+      const data = await getRestrictedAreas(token);
+      setRestrictedAreas(data || []);
     } catch (err) {
-      console.error("Failed to toggle fullscreen:", err);
-      setError("Fullscreen mode is not available right now.");
+      setError("Failed to fetch restricted areas: " + err.message);
+    }
+  };
+
+  const handleAddPoint = (point) => {
+    setDrawPoints(prev => [...prev, point]);
+  };
+
+  const handleCreateArea = () => {
+    setIsDrawing(true);
+    setDrawPoints([]);
+    setShowRestrictedAreas(true);
+  };
+
+  const handleCancelDrawing = () => {
+    setIsDrawing(false);
+    setDrawPoints([]);
+  };
+
+  const handleDoneDrawing = async () => {
+    if (drawPoints.length < 3) {
+      setError("At least 3 points are required to create an area");
+      return;
+    }
+    
+    try {
+      const name = `Restricted Area ${restrictedAreas.length + 1}`;
+      await createRestrictedArea(token, {
+        name,
+        type: "restricted",
+        coordinates: drawPoints
+      });
+      
+      setIsDrawing(false);
+      setDrawPoints([]);
+      fetchRestrictedAreas();
+    } catch (err) {
+      setError("Failed to create restricted area: " + err.message);
     }
   };
 
@@ -67,113 +72,103 @@ export function MapPanel() {
       permission="dashboard.view"
       featureName="Maritime Map"
     >
-      <div
-        ref={panelRef}
-        className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
-      >
-        <div className="flex flex-shrink-0 flex-col items-start justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-[#08244a]">
+      <div className="relative overflow-hidden rounded-sm border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)] flex flex-col h-full">
+        <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-white">
               Maritime Map
             </span>
-            <span className="rounded-md border border-emerald-400/30 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
+            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
               LIVE
             </span>
           </div>
 
-          <div className="hide-scrollbar flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
-            <button
-              type="button"
-              onClick={loadVessels}
-              disabled={isLoading}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RotateCw size={14} className={isLoading ? "animate-spin" : ""} />
-              Refresh
+          <div className="flex items-center gap-2">
+            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+              Layers
             </button>
-            <button
-              type="button"
-              onClick={handleFullscreenToggle}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9]"
+            <button 
+              onClick={() => setShowRestrictedAreas(!showRestrictedAreas)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                showRestrictedAreas 
+                  ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-300" 
+                  : "border-white/10 bg-white/5 text-[#c9d3ee] hover:bg-white/10"
+              }`}
             >
-              {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-              {isFullscreen ? "Exit full screen" : "Full screen"}
+              Restricted Areas
             </button>
-            
-            <button className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9]">
+            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
               Filters
             </button>
           </div>
         </div>
 
-        <div className="relative z-0 min-h-[300px] w-full flex-1 bg-slate-100 sm:min-h-0">
-          {/* Leaflet Map - Always rendered to maintain view state */}
-          <MapView vessels={vessels} />
+        <div className="relative flex-1 min-h-0 bg-[#0f1a2d]">
+          {/* MapLibre GL Map */}
+          <VesselMap 
+            token={token} 
+            options={{ 
+              pollInterval: 10000,
+              center: [0, 20], // World map center
+              zoom: 1          // World map zoom
+            }}
+            onError={(err) => setError(err.message || String(err))}
+            restrictedAreas={restrictedAreas}
+            showRestrictedAreas={showRestrictedAreas}
+            isDrawing={isDrawing}
+            drawPoints={drawPoints}
+            onDrawPoint={handleAddPoint}
+          />
 
-          {/* Loading Overlay - Only show on first load */}
-          {isLoading && vessels.length === 0 && (
-            <div className="absolute inset-0 z-[999] flex items-center justify-center bg-slate-100/85 backdrop-blur-sm">
-              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-lg">Loading vessels...</div>
+          {/* Map Controls */}
+          {showRestrictedAreas && !isDrawing && (
+            <div className="absolute bottom-6 right-6 flex gap-2">
+              <button 
+                onClick={handleCreateArea}
+                className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg hover:bg-blue-700 transition-all active:scale-95"
+              >
+                <Plus size={18} />
+                Create Area
+              </button>
             </div>
           )}
 
-          {/* Refreshing Indicator - Show during updates */}
-          {isLoading && vessels.length > 0 && (
-            <div className="absolute right-4 top-4 z-[1001] rounded-lg border border-[#0b74c9]/20 bg-[#0b74c9]/10 px-3 py-1.5 shadow-sm backdrop-blur">
-              <span className="text-xs font-bold text-[#0b74c9]">
-                Updating...
-              </span>
+          {isDrawing && (
+            <div className="absolute bottom-6 right-6 flex flex-col items-end gap-3">
+              <div className="rounded-lg bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 text-xs text-white">
+                Click on the map to mark points ({drawPoints.length} points)
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleCancelDrawing}
+                  className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 text-sm font-bold text-white hover:bg-white/20 transition-all"
+                >
+                  <X size={18} />
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDoneDrawing}
+                  disabled={drawPoints.length < 3}
+                  className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
+                    drawPoints.length < 3 
+                      ? "bg-emerald-600/40 cursor-not-allowed opacity-50" 
+                      : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20"
+                  }`}
+                >
+                  <Check size={18} />
+                  Done
+                </button>
+              </div>
             </div>
           )}
 
           {/* Error State */}
-          {error && !isLoading && (
-            <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 rounded-lg border border-red-200 bg-red-50/95 px-4 py-2 shadow-md backdrop-blur">
-              <div className="text-xs font-semibold text-red-600">Error: {error}</div>
+          {error && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 backdrop-blur z-[1000]">
+              <div className="text-red-400 text-xs">Error: {error}</div>
             </div>
           )}
 
-          {/* Vessel Count Badge */}
-          {!isLoading && vessels.length > 0 && (
-            <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 rounded-lg border border-slate-200 bg-white/95 px-4 py-2 shadow-sm backdrop-blur">
-              <span className="text-xs font-extrabold text-[#08244a]">
-                {vessels.length} vessels tracked
-              </span>
-            </div>
-          )}
-
-          {/* Filters & Search - Top Right */}
-          <div className="absolute right-4 top-4 z-10 hidden w-[240px] rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-md md:block">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-xs font-extrabold text-[#08244a]">
-                Filters & Search
-              </div>
-              <button className="text-[10px] font-bold text-[#0b74c9] transition-colors hover:text-[#08244a]">
-                Reset
-              </button>
-            </div>
-            <input
-              placeholder="Search MMSI / Vessel"
-              className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-xs text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#0b74c9] focus:ring-2 focus:ring-[#0b74c9]/20"
-            />
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Chip label="All" active />
-              <Chip label="Risk" />
-              <Chip label="AIS Off" />
-              <Chip label="Zone" />
-            </div>
-          </div>
-
-
-
-          {/* Legend - Bottom Right */}
-          <div className="absolute bottom-4 right-4 z-10 hidden w-[170px] rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-md sm:block">
-            <div className="mb-3 text-xs font-extrabold text-[#08244a]">Legend</div>
-            <LegendRow label="Normal" dot="bg-emerald-500" />
-            <LegendRow label="Warning" dot="bg-amber-500" />
-            <LegendRow label="Critical" dot="bg-red-500" />
-            <LegendRow label="Unknown" dot="bg-slate-400" />
-          </div>
         </div>
       </div>
     </RequestAccessGate>

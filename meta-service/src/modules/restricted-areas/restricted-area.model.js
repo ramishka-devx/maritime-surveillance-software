@@ -4,7 +4,7 @@ export const RestrictedAreaModel = {
   async create({ name, type, wktPolygon }) {
     const result = await query(
       `INSERT INTO restricted_areas (name, type, geom)
-       VALUES (?, ?, ST_GeogFromText(?))
+       VALUES ($1, $2, ST_GeomFromText($3, 4326))
        RETURNING id AS insert_id`,
       [name, type, wktPolygon]
     );
@@ -72,7 +72,7 @@ export const RestrictedAreaModel = {
 
     return query(
       `SELECT
-         s.ship_name,
+         sh.ship_name,
          s.mmsi,
          r.id AS restricted_area_id,
          r.name AS restricted_zone,
@@ -81,6 +81,7 @@ export const RestrictedAreaModel = {
          ST_Y(s.position::geometry) AS lat,
          ST_X(s.position::geometry) AS lon
        FROM ais_positions s
+       LEFT JOIN ships sh ON sh.mmsi = s.mmsi
        JOIN restricted_areas r
          ON ST_Intersects(s.position, r.geom)
        ${whereClause}

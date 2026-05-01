@@ -10,21 +10,21 @@ export function AlertFilters({
   onStatusChange,
 }) {
   return (
-    <div className="mb-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-card">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 transition-colors focus-within:border-[#0b74c9] focus-within:bg-white">
-          <Search className="text-slate-400" size={18} />
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+          <Search className="text-text-muted" size={18} />
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Search alerts, vessel, MMSI..."
-            className="w-full md:w-[340px] bg-transparent text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none"
+            className="w-full md:w-[340px] bg-transparent text-xs font-semibold text-text-primary placeholder:text-text-light outline-none"
           />
           {query && (
             <button
               type="button"
               onClick={() => onQueryChange("")}
-              className="rounded flex items-center justify-center bg-slate-200 px-2 py-0.5 text-xs font-extrabold text-slate-600 hover:bg-slate-300"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-extrabold text-text-muted hover:bg-slate-50 hover:text-[#0b74c9] transition-colors"
             >
               Clear
             </button>
@@ -32,7 +32,7 @@ export function AlertFilters({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-2 rounded-xl border border-gray-200 bg-slate-50 p-1">
+          <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
             <Tab
               label="All"
               active={severityFilter === "all"}
@@ -58,7 +58,7 @@ export function AlertFilters({
           <select
             value={statusFilter}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#0b74c9] focus:ring-1 focus:ring-[#0b74c9]"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-text-secondary outline-none focus:border-[#0b74c9] focus:ring-2 focus:ring-[#0b74c9]/15 transition-colors"
           >
             <option value="All">All Status</option>
             <option value="Active">Active</option>
