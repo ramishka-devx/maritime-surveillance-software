@@ -127,13 +127,13 @@ const SignIn = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-center px-6 py-6 bg-[#f9fbfd]">
-          <div className="w-full max-w-md">
+        <div className="flex justify-center px-6 py-8 bg-[#f9fbfd] overflow-y-auto">
+          <div className="w-full max-w-md my-auto">
             <div className="text-center mb-5">
               <img
                 src={SerenGuardLogo}
                 alt="SerenGuard Logo"
-                className="w-16 h-16 object-contain mx-auto mb-2"
+                className="w-16 h-16 object-contain mx-auto mb-2 rounded-lg"
               />
               <h1 className="text-2xl font-bold text-[#08244a]">SerenGuard</h1>
               <p className="text-sm text-gray-500">Maritime Intelligence</p>
@@ -264,14 +264,14 @@ const SignIn = () => {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="w-4 h-4 accent-[#0b74c9]"
                     />
-                    Remember
+                    Remember Me
                   </label>
 
                   <button
                     type="button"
                     className="font-semibold text-[#0b74c9] hover:text-[#064f9e]"
                   >
-                    Forgot?
+                    Forgot Password?
                   </button>
                 </div>
               )}
