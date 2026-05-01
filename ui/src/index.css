@@ -6,11 +6,11 @@
 
 @layer base {
   :root {
-    --bg: #0a1624;
+    --bg: #ffffff;
     --panel: rgba(16, 33, 54, 0.85);
     --accent: #35c2ff;
     --accent-2: #75f7ff;
-    --text: #e8f0fb;
+    --text: #0f172a;
     --muted: #99abc5;
     --border: #1e2f4a;
     --success: #2dd4bf;
@@ -28,17 +28,15 @@
     line-height: 1.5;
     font-weight: 400;
 
-    @apply text-[#e8f0fb];
+    @apply text-slate-900;
 
-    background: radial-gradient(circle at 20% 20%, rgba(53, 194, 255, 0.15), transparent 35%),
-      radial-gradient(circle at 80% 30%, rgba(117, 247, 255, 0.12), transparent 40%),
-      #060e1a;
+    background: #ffffff;
   }
 
   body {
     margin: 0;
     min-height: 100vh;
-    background-color: transparent;
+    background-color: #ffffff;
   }
 
   a {

@@ -1,87 +1,126 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Maximize2, Minimize2, RotateCw } from "lucide-react";
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import MapView from "../../../components/MapView.jsx";
 import { Chip } from "./FilterChip.jsx";
-import { InfoRow } from "./InfoRow.jsx";
 import { LegendRow } from "./LegendRow.jsx";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import { getLatestVesselPositions, transformVesselData } from "../../../lib/vessels.js";
 
 export function MapPanel() {
   const { token } = useAuth();
+  const panelRef = useRef(null);
   const [vessels, setVessels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const loadVessels = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getLatestVesselPositions(token, 100);
+      const transformed = transformVesselData(data);
+      setVessels(transformed);
+    } catch (err) {
+      console.error("Failed to load vessels:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
-    async function loadVessels() {
-      if (!token) return;
-      
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getLatestVesselPositions(token, 100);
-        const transformed = transformVesselData(data);
-        setVessels(transformed);
-      } catch (err) {
-        console.error('Failed to load vessels:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     loadVessels();
-    
-    // Optional: Refresh every 30 seconds
+
     const interval = setInterval(loadVessels, 30000);
     return () => clearInterval(interval);
-  }, [token]);
+  }, [loadVessels]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === panelRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const handleFullscreenToggle = async () => {
+    try {
+      if (document.fullscreenElement === panelRef.current) {
+        await document.exitFullscreen();
+        return;
+      }
+
+      await panelRef.current?.requestFullscreen();
+    } catch (err) {
+      console.error("Failed to toggle fullscreen:", err);
+      setError("Fullscreen mode is not available right now.");
+    }
+  };
 
   return (
     <RequestAccessGate
       permission="dashboard.view"
       featureName="Maritime Map"
     >
-      <div className="relative overflow-hidden rounded-sm border border-white/10 bg-[#0b1220] shadow-[0_12px_40px_rgba(0,0,0,0.35)] flex flex-col h-full">
-        <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent px-4 py-3 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-white">
+      <div
+        ref={panelRef}
+        className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
+      >
+        <div className="flex flex-shrink-0 flex-col items-start justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-extrabold text-[#08244a]">
               Maritime Map
             </span>
-            <span className="rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+            <span className="rounded-md border border-emerald-400/30 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
               LIVE
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
-              Layers
+          <div className="hide-scrollbar flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
+            <button
+              type="button"
+              onClick={loadVessels}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RotateCw size={14} className={isLoading ? "animate-spin" : ""} />
+              Refresh
             </button>
-            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
-              Zones
+            <button
+              type="button"
+              onClick={handleFullscreenToggle}
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9]"
+            >
+              {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+              {isFullscreen ? "Exit full screen" : "Full screen"}
             </button>
-            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
+            
+            <button className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#0b74c9]/35 hover:text-[#0b74c9]">
               Filters
             </button>
           </div>
         </div>
 
-        <div className="relative flex-1 min-h-0 bg-[#0f1a2d]">
+        <div className="relative z-0 min-h-[300px] w-full flex-1 bg-slate-100 sm:min-h-0">
           {/* Leaflet Map - Always rendered to maintain view state */}
           <MapView vessels={vessels} />
 
           {/* Loading Overlay - Only show on first load */}
           {isLoading && vessels.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0f1a2d] z-[999]">
-              <div className="text-white text-sm">Loading vessels...</div>
+            <div className="absolute inset-0 z-[999] flex items-center justify-center bg-slate-100/85 backdrop-blur-sm">
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-lg">Loading vessels...</div>
             </div>
           )}
 
           {/* Refreshing Indicator - Show during updates */}
           {isLoading && vessels.length > 0 && (
-            <div className="absolute top-4 right-4 rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 backdrop-blur z-[1001]">
-              <span className="text-xs font-semibold text-emerald-300">
+            <div className="absolute right-4 top-4 z-[1001] rounded-lg border border-[#0b74c9]/20 bg-[#0b74c9]/10 px-3 py-1.5 shadow-sm backdrop-blur">
+              <span className="text-xs font-bold text-[#0b74c9]">
                 Updating...
               </span>
             </div>
@@ -89,35 +128,35 @@ export function MapPanel() {
 
           {/* Error State */}
           {error && !isLoading && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 backdrop-blur z-[1000]">
-              <div className="text-red-400 text-xs">Error: {error}</div>
+            <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 rounded-lg border border-red-200 bg-red-50/95 px-4 py-2 shadow-md backdrop-blur">
+              <div className="text-xs font-semibold text-red-600">Error: {error}</div>
             </div>
           )}
 
           {/* Vessel Count Badge */}
           {!isLoading && vessels.length > 0 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg border border-white/10 bg-[#0b1220]/90 px-3 py-1.5 backdrop-blur z-[1000]">
-              <span className="text-xs font-semibold text-white">
+            <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 rounded-lg border border-slate-200 bg-white/95 px-4 py-2 shadow-sm backdrop-blur">
+              <span className="text-xs font-extrabold text-[#08244a]">
                 {vessels.length} vessels tracked
               </span>
             </div>
           )}
 
           {/* Filters & Search - Top Right */}
-          <div className="absolute right-4 top-4 w-[240px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur z-[1000]">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-xs font-bold text-white">
+          <div className="absolute right-4 top-4 z-10 hidden w-[240px] rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-md md:block">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-xs font-extrabold text-[#08244a]">
                 Filters & Search
               </div>
-              <button className="text-[10px] font-semibold text-[#9aa8c7] hover:text-white">
+              <button className="text-[10px] font-bold text-[#0b74c9] transition-colors hover:text-[#08244a]">
                 Reset
               </button>
             </div>
             <input
               placeholder="Search MMSI / Vessel"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder:text-[#7f8db3] outline-none focus:border-[#f28c1b]/60"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-xs text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#0b74c9] focus:ring-2 focus:ring-[#0b74c9]/20"
             />
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Chip label="All" active />
               <Chip label="Risk" />
               <Chip label="AIS Off" />
@@ -128,10 +167,10 @@ export function MapPanel() {
 
 
           {/* Legend - Bottom Right */}
-          <div className="absolute right-4 bottom-4 w-[170px] rounded-xl border border-white/10 bg-[#0b1220]/90 p-3 backdrop-blur z-[1000]">
-            <div className="mb-2 text-xs font-bold text-white">Legend</div>
-            <LegendRow label="Normal" dot="bg-emerald-400" />
-            <LegendRow label="Warning" dot="bg-yellow-400" />
+          <div className="absolute bottom-4 right-4 z-10 hidden w-[170px] rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-md sm:block">
+            <div className="mb-3 text-xs font-extrabold text-[#08244a]">Legend</div>
+            <LegendRow label="Normal" dot="bg-emerald-500" />
+            <LegendRow label="Warning" dot="bg-amber-500" />
             <LegendRow label="Critical" dot="bg-red-500" />
             <LegendRow label="Unknown" dot="bg-slate-400" />
           </div>
