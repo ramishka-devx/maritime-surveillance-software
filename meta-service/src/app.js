@@ -19,7 +19,6 @@ import positionRoutes from './modules/positions/position.routes.js';
 import alertRoutes from './modules/alerts/alert.routes.js';
 import aisRoutes from './modules/ais/ais.routes.js';
 import restrictedAreaRoutes from './modules/restricted-areas/restricted-area.routes.js';
-import anomalyRoutes from './modules/anomalies/anomaly.routes.js';
 
 const app = express();
 
@@ -40,7 +39,6 @@ app.use('/api/vessels', vesselRoutes);
 app.use('/api/ais', aisRoutes);
 app.use('/api', positionRoutes);
 app.use('/api/alerts', alertRoutes);
-app.use('/api/anomalies', anomalyRoutes);
 app.use('/api/restricted-areas', restrictedAreaRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/activities', activityRoutes);

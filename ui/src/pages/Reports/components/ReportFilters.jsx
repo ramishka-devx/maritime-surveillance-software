@@ -11,21 +11,21 @@ export function ReportFilters({
   onGenerate,
 }) {
   return (
-    <div className="mb-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-3">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-slate-50 px-3 py-2 transition-colors focus-within:border-[#0b74c9] focus-within:bg-white">
-          <Search size={18} className="text-slate-400" />
+        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+          <Search size={18} className="text-white/70" />
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Search reports..."
-            className="w-full md:w-[320px] bg-transparent text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none"
+            className="w-full md:w-[320px] bg-transparent text-xs font-semibold text-white placeholder:text-text-muted outline-none"
           />
           {query && (
             <button
               type="button"
               onClick={() => onQueryChange("")}
-              className="rounded flex items-center justify-center bg-slate-200 px-2 py-0.5 text-xs font-extrabold text-slate-600 hover:bg-slate-300"
+              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-extrabold text-white/80 hover:bg-white/10"
             >
               Clear
             </button>
@@ -36,10 +36,10 @@ export function ReportFilters({
           <select
             value={typeFilter}
             onChange={(e) => onTypeChange(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#0b74c9] focus:ring-1 focus:ring-[#0b74c9]"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-white/90 outline-none"
           >
             {types.map((t) => (
-              <option key={t} value={t}>
+              <option key={t} value={t} className="bg-[#0b1220] text-white">
                 {t === "All" ? "All Types" : t}
               </option>
             ))}
@@ -48,18 +48,18 @@ export function ReportFilters({
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#0b74c9] focus:ring-1 focus:ring-[#0b74c9]"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-white/90 outline-none"
           >
-            <option value="Newest">Newest</option>
-            <option value="Oldest">Oldest</option>
-            <option value="Title A-Z">Title A-Z</option>
-            <option value="Title Z-A">Title Z-A</option>
+            <option value="Newest" className="bg-[#0b1220] text-white">Newest</option>
+            <option value="Oldest" className="bg-[#0b1220] text-white">Oldest</option>
+            <option value="Title A-Z" className="bg-[#0b1220] text-white">Title A-Z</option>
+            <option value="Title Z-A" className="bg-[#0b1220] text-white">Title Z-A</option>
           </select>
 
           <button
             type="button"
             onClick={onGenerate}
-            className="rounded-xl bg-[#08244a] px-3 py-2 text-sm font-bold text-white hover:bg-[#061c39] transition shadow-sm"
+            className="rounded-xl bg-primary-blue px-3 py-2 text-[11px] font-bold text-white hover:bg-[#1f3570] transition"
           >
             Generate
           </button>

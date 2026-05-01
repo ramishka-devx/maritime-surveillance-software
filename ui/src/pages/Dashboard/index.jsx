@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { RotateCw, Maximize2 } from "lucide-react";
 import { MapPanel } from "./components/MapPanel.jsx";
 import { AlertsPanel } from "./components/AlertsPanel.jsx";
 import { AlertDetailModal } from "../Alerts/components/AlertDetailModal.jsx";
@@ -94,27 +95,50 @@ const Dashboard = () => {
   }, [alerts, alertFilter]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#f1f5f9]">
+    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-b from-nav-bg to-nav-bg-soft">
       {/* Header Section */}
-     
-      
+      <div className="px-6 py-5 border-b border-white/10 flex-shrink-0">
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-extrabold text-accent-orange">
+              Dashboard 
+            </h1>
+            <p className="text-xs font-semibold text-text-muted">
+              Real-time vessel monitoring & alerts
+            </p>
+          </div>
+
+        <div className="flex items-center gap-2">
+          <button 
+            type="button"
+            title="Refresh dashboard"
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10 transition-colors"
+          >
+            <RotateCw size={16} />
+          </button>
+          <button 
+            type="button"
+            title="Toggle fullscreen"
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10 transition-colors"
+          >
+            <Maximize2 size={16} />
+          </button>
+        </div>
+        </div>
+      </div>
 
       {/* Content Grid */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:px-6 lg:py-4 custom-scrollbar lg:overflow-hidden">
-        <div className="flex flex-col lg:flex-row gap-4 h-full min-h-[800px] lg:min-h-0">
-          <div className="flex-1 min-h-[400px] lg:min-h-0 h-full relative">
-            <MapPanel />
-          </div>
+      <div className="flex-1 overflow-hidden px-6 py-4">
+        <div className="gap-4 grid grid-cols-1 lg:grid-cols-[1fr_380px] h-full">
+          <MapPanel />
 
-          <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-[600px] lg:h-full">
-            <AlertsPanel                            
-              alerts={alerts}
-              filteredAlerts={filteredAlerts}
-              alertFilter={alertFilter}
-              setAlertFilter={setAlertFilter}
-              onAlertClick={(id) => setSelectedAlertId(id)}
-            />
-          </div>
+          <AlertsPanel 
+            alerts={alerts}
+            filteredAlerts={filteredAlerts}
+            alertFilter={alertFilter}
+            setAlertFilter={setAlertFilter}
+            onAlertClick={(id) => setSelectedAlertId(id)}
+          />
         </div>
       </div>
 
