@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { Maximize2 } from "lucide-react";
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import VesselMap from "../../../components/VesselMap.jsx";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 
-export function MapPanel() {
+export function MapPanel({ isFullscreen, onToggleFullscreen }) {
   const { token } = useAuth();
   const [error, setError] = useState(null);
 
@@ -32,6 +33,14 @@ export function MapPanel() {
             </button>
             <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#c9d3ee] hover:bg-white/10">
               Filters
+            </button>
+            <button
+              onClick={onToggleFullscreen}
+              aria-pressed={isFullscreen}
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              className="rounded-lg border border-white/10 bg-white/5 p-2 text-[#c9d3ee] transition-colors hover:bg-white/10"
+            >
+              <Maximize2 size={16} />
             </button>
           </div>
         </div>

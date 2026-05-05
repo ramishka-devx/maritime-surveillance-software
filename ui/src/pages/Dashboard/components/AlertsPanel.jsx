@@ -1,13 +1,18 @@
 import RequestAccessGate from "../../../components/RequestAccessGate.jsx";
 import { AlertCard } from "./AlertCard.jsx";
 
-export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter, onAlertClick }) {
+export function AlertsPanel({ filteredAlerts, alertFilter, setAlertFilter, onAlertClick, isOpen }) {
   return (
     <RequestAccessGate
       permission="dashboard.view"
       featureName="Active Alerts"
     >
-      <aside className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
+      <aside
+        aria-hidden={!isOpen}
+        className={`flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.10)] transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+        }`}
+      >
         <div className="flex shrink-0 flex-col gap-4 border-b border-slate-200 bg-slate-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="text-sm font-extrabold text-[#08244a]">

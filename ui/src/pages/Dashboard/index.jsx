@@ -41,6 +41,8 @@ const DETAIL_FIELDS = {
 const Dashboard = () => {
   const [alertFilter, setAlertFilter] = useState("All");
   const [selectedAlertId, setSelectedAlertId] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isAlertsOpen, setIsAlertsOpen] = useState(true);
 
   const alerts = useMemo(
     () => [
@@ -93,28 +95,77 @@ const Dashboard = () => {
     return alerts.filter((a) => a.severity === alertFilter);
   }, [alerts, alertFilter]);
 
+  const handleToggleFullscreen = () => {
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      setIsAlertsOpen(true);
+      return;
+    }
+    setIsFullscreen(true);
+    setIsAlertsOpen(false);
+  };
+
+  const handleToggleAlerts = () => {
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      setIsAlertsOpen(true);
+      return;
+    }
+    setIsAlertsOpen((prev) => !prev);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[#f1f5f9]">
-      {/* Header Section */}
-     
-      
+      <div className="flex items-center justify-between px-4 pt-4 lg:px-6">
+        <div>
+          <div className="text-sm font-semibold text-slate-600">Maritime Dashboard</div>
+          <div className="text-xs text-slate-400">Live situational awareness</div>
+        </div>
+        <button
+          onClick={handleToggleAlerts}
+          aria-pressed={isAlertsOpen}
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
+        >
+          Alerts
+        </button>
+      </div>
 
       {/* Content Grid */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:px-6 lg:py-4 custom-scrollbar lg:overflow-hidden">
-        <div className="flex flex-col lg:flex-row gap-4 h-full min-h-[800px] lg:min-h-0">
-          <div className="flex-1 min-h-[400px] lg:min-h-0 h-full relative">
-            <MapPanel />
+        <div className="relative h-full min-h-[800px] lg:min-h-0">
+          <div
+            className={`transition-all duration-300 ${
+              isFullscreen
+                ? "fixed inset-0 z-50 bg-[#0a192f] p-4"
+                : `relative flex-1 min-h-[400px] lg:min-h-0 h-full ${
+                    isAlertsOpen ? "lg:pr-[420px] xl:pr-[460px]" : ""
+                  }`
+            }`}
+          >
+            <MapPanel isFullscreen={isFullscreen} onToggleFullscreen={handleToggleFullscreen} />
           </div>
 
-          <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-[600px] lg:h-full">
-            <AlertsPanel                            
-              alerts={alerts}
-              filteredAlerts={filteredAlerts}
-              alertFilter={alertFilter}
-              setAlertFilter={setAlertFilter}
-              onAlertClick={(id) => setSelectedAlertId(id)}
-            />
-          </div>
+          {!isFullscreen && (
+            <>
+              {isAlertsOpen && (
+                <button
+                  type="button"
+                  onClick={() => setIsAlertsOpen(false)}
+                  aria-label="Close alerts panel"
+                  className="absolute inset-0 z-30 bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
+                />
+              )}
+              <div className="absolute right-0 top-0 z-40 h-full w-full lg:w-[380px] xl:w-[420px]">
+                <AlertsPanel
+                  filteredAlerts={filteredAlerts}
+                  alertFilter={alertFilter}
+                  setAlertFilter={setAlertFilter}
+                  onAlertClick={(id) => setSelectedAlertId(id)}
+                  isOpen={isAlertsOpen}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
