@@ -16,7 +16,7 @@ module.exports = {
         'nav-bg-soft': '#111b2e',
         'dark-text': '#0f172a',
         'gray-text': '#64748b',
-        'text-muted': '#94a3b8',
+        'text-muted': '#a0b7d8',
         'text-placeholder': '#cbd5e1',
       },
       backgroundColor: {
