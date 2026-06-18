@@ -45,14 +45,14 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-nav-bg to-nav-bg-soft px-6 py-5">
+    <div className="min-h-[calc(100vh-64px)] bg-[#f9fbfd] px-4 md:px-6 py-5">
       <div className="mx-auto max-w-[1100px]">
-        <div className="mb-4">
-          <h1 className="text-lg font-extrabold text-accent-orange">Alerts</h1>
-          <p className="text-xs font-semibold text-text-muted">
+        <div className="mb-5">
+          <h1 className="text-xl font-extrabold text-[#08244a]">Alerts</h1>
+          <p className="text-sm font-medium text-slate-500">
             Complete log of all surveillance alerts
             {unreadCount > 0 && (
-              <span className="ml-2 rounded-full bg-accent-orange px-2 py-0.5 text-[10px] font-extrabold text-white">
+              <span className="ml-2 rounded-full bg-[#0b74c9] px-2 py-0.5 text-[10px] font-extrabold text-white">
                 {unreadCount} new
               </span>
             )}
@@ -82,9 +82,9 @@ export default function AlertsPage() {
           ))}
 
           {filtered.length === 0 && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-              <div className="text-base font-extrabold text-white">No alerts found</div>
-              <div className="mt-2 text-xs font-semibold text-text-muted">
+            <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
+              <div className="text-base font-extrabold text-slate-700">No alerts found</div>
+              <div className="mt-2 text-sm font-medium text-slate-500">
                 Try another filter or search term.
               </div>
             </div>

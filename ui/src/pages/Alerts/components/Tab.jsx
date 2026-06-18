@@ -4,10 +4,10 @@ export function Tab({ label, active, onClick }) {
       type="button"
       onClick={onClick}
       className={[
-        "rounded-lg px-3 py-2 text-[15px] font-extrabold transition",
+        "rounded-lg px-3 py-1.5 text-[15px] font-extrabold transition-colors",
         active
-          ? "bg-accent-orange/15 text-[#ffd7a8]"
-          : "text-text-muted hover:text-white hover:bg-white/5",
+          ? "bg-white text-[#0b74c9] shadow-sm"
+          : "text-slate-500 hover:text-slate-800 hover:bg-white/60",
       ].join(" ")}
     >
       {label}

@@ -61,15 +61,15 @@ export default function RequestAccessGate({
       </div>
 
       <div className="absolute inset-0 flex items-start justify-center px-4 py-10">
-        <div className="w-full max-w-[560px] rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
-          <div className="text-sm font-extrabold text-white">Access required</div>
-          <div className="mt-1 text-xs font-semibold text-text-muted">
-            You don&apos;t have permission to use <span className="text-white/80">{title}</span>.
+        <div className="w-full max-w-[560px] rounded-2xl border border-gray-200 bg-white/90 p-5 backdrop-blur-md shadow-sm">
+          <div className="text-sm font-extrabold text-[#08244a]">Access required</div>
+          <div className="mt-1 text-xs font-semibold text-slate-500">
+            You don&apos;t have permission to use <span className="text-slate-800">{title}</span>.
           </div>
 
           {displayPermission && (
-            <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-extrabold text-white/80">
-              Required permission: <span className="text-white">{displayPermission}</span>
+            <div className="mt-3 rounded-xl border border-gray-200 bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-slate-700">
+              Required permission: <span className="text-slate-900">{displayPermission}</span>
             </div>
           )}
 
@@ -79,22 +79,22 @@ export default function RequestAccessGate({
               onClick={submit}
               disabled={isSubmitting || sent}
               className={[
-                'rounded-xl bg-accent-orange px-4 py-2 text-[12px] font-extrabold text-white transition',
+                'rounded-xl bg-[#0b74c9] px-4 py-2 text-[12px] font-extrabold text-white transition',
                 sent
                   ? 'opacity-70 cursor-not-allowed'
-                  : 'hover:bg-[#d97706] shadow-[0_8px_18px_rgba(242,140,27,0.20)]',
+                  : 'hover:bg-[#095ca5] shadow-sm',
               ].join(' ')}
             >
               {sent ? 'Request sent' : isSubmitting ? 'Requesting...' : 'Request access'}
             </button>
 
-            <div className="text-[11px] font-semibold text-text-muted">
+            <div className="text-[11px] font-medium text-slate-500">
               Your request will be sent to a super admin.
             </div>
           </div>
 
           {error && (
-            <div className="mt-3 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-[11px] font-extrabold text-red-200">
+            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-extrabold text-red-600">
               {error}
             </div>
           )}
