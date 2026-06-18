@@ -54,7 +54,7 @@ export const RestrictedAreaModel = {
     return rows[0];
   },
 
-  async detectEntries({ restricted_area_id, mmsi, limit = 200 } = {}) {
+  async detectEntries({ restricted_area_id, mmsi, minutes, limit = 200 } = {}) {
     const where = [];
     const params = [];
 
@@ -68,12 +68,20 @@ export const RestrictedAreaModel = {
       params.push(mmsi);
     }
 
+    if (minutes !== undefined) {
+      const parsedMinutes = parseInt(minutes, 10) || 5;
+      // Using PostgreSQL interval syntax directly in the query string is tricky with params, 
+      // so we use a safe parsed integer in the literal string.
+      where.push(`s.time_utc >= (SELECT MAX(time_utc) FROM ais_positions) - INTERVAL '${parsedMinutes} minutes'`);
+    }
+
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
     return query(
       `SELECT
-         s.ship_name,
+         COALESCE(v.name, sh.ship_name) AS ship_name,
          s.mmsi,
+         v.vessel_id,
          r.id AS restricted_area_id,
          r.name AS restricted_zone,
          r.type AS restricted_area_type,
@@ -82,7 +90,11 @@ export const RestrictedAreaModel = {
          ST_X(s.position::geometry) AS lon
        FROM ais_positions s
        JOIN restricted_areas r
-         ON ST_Intersects(s.position, r.geom)
+         ON ST_Intersects(s.position::geometry, r.geom::geometry)
+       LEFT JOIN vessels v 
+         ON v.mmsi = CAST(s.mmsi AS TEXT)
+       LEFT JOIN ships sh
+         ON sh.mmsi = s.mmsi
        ${whereClause}
        ORDER BY s.time_utc DESC
        LIMIT ?`,

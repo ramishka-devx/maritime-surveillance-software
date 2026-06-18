@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { MapPanel } from "./components/MapPanel.jsx";
 import { AlertsPanel } from "./components/AlertsPanel.jsx";
 import { AlertDetailModal } from "../Alerts/components/AlertDetailModal.jsx";
+import { useAlerts } from "../Alerts/hooks/useAlerts.js";
 
 const SEVERITY_TO_LEVEL = {
   Critical: "critical",
@@ -42,51 +43,7 @@ const Dashboard = () => {
   const [alertFilter, setAlertFilter] = useState("All");
   const [selectedAlertId, setSelectedAlertId] = useState(null);
 
-  const alerts = useMemo(
-    () => [
-      {
-        id: 1,
-        title: "AIS Spoofing Detected",
-        vessel: "MV Ocean Star • MMSI 563829104",
-        meta: "Last seen near restricted zone • 2 min ago",
-        severity: "High",
-        action: "Locate",
-      },
-      {
-        id: 2,
-        title: "Loitering Behavior",
-        vessel: "SS Neptune • MMSI 441208773",
-        meta: "Speed < 2 knots for 18 min • 7 min ago",
-        severity: "Medium",
-        action: "Locate",
-      },
-      {
-        id: 3,
-        title: "Restricted Zone Violation",
-        vessel: "HMS Guardian • MMSI 271998120",
-        meta: "Entered Zone B-3 • 12 min ago",
-        severity: "Critical",
-        action: "Respond",
-      },
-      {
-        id: 4,
-        title: "Dark Vessel Detected",
-        vessel: "Unknown vessel",
-        meta: "Radar track without AIS • 26 min ago",
-        severity: "High",
-        action: "Investigate",
-      },
-      {
-        id: 5,
-        title: "Speed Anomaly",
-        vessel: "SS Pacific • MMSI 538110022",
-        meta: "Unusual speed change detected • 44 min ago",
-        severity: "Low",
-        action: "View",
-      },
-    ],
-    [],
-  );
+  const { alerts, resolve } = useAlerts();
 
   const filteredAlerts = useMemo(() => {
     if (alertFilter === "All") return alerts;
@@ -94,7 +51,7 @@ const Dashboard = () => {
   }, [alerts, alertFilter]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#f1f5f9]">
+    <div className="h-screen flex flex-col bg-[#f1f5f9] rounded-2xl">
       {/* Header Section */}
      
       
@@ -106,7 +63,7 @@ const Dashboard = () => {
             <MapPanel />
           </div>
 
-          <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-[600px] lg:h-full">
+          <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-[800px] lg:h-full">
             <AlertsPanel                            
               alerts={alerts}
               filteredAlerts={filteredAlerts}
@@ -124,19 +81,23 @@ const Dashboard = () => {
         const extra = DETAIL_FIELDS[raw.title] || {};
         const normalized = {
           ...raw,
-          level: SEVERITY_TO_LEVEL[raw.severity] || "info",
-          when: raw.meta,
-          description: extra.description || "",
-          status: extra.status || "Active",
-          assignedTo: extra.assignedTo || "—",
-          resolvedBy: "—",
-          acknowledged: false,
-          notes: null,
+          level: raw.level || SEVERITY_TO_LEVEL[raw.severity] || "info",
+          when: raw.when || raw.meta,
+          description: raw.description || extra.description || "",
+          status: raw.status || extra.status || "Active",
+          assignedTo: raw.assignedTo && raw.assignedTo !== "—" ? raw.assignedTo : (extra.assignedTo || "—"),
+          resolvedBy: raw.resolvedBy || "—",
+          acknowledged: raw.acknowledged || false,
+          notes: raw.notes || null,
         };
         return (
           <AlertDetailModal
             alert={normalized}
             onClose={() => setSelectedAlertId(null)}
+            onResolve={(id) => {
+              if (resolve) resolve(id);
+              setSelectedAlertId(null);
+            }}
           />
         );
       })()}

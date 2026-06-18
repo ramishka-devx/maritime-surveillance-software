@@ -1,187 +1,112 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../../auth/AuthContext.jsx";
 
 function normalize(s) {
   return String(s || "").toLowerCase().trim();
 }
 
-export function useAlerts(enableSimulation = true) {
-  const [alerts, setAlerts] = useState(() => [
-    {
-      id: "a1",
-      title: "AIS Spoofing Detected",
-      level: "critical",
-      status: "Resolved",
-      when: "2024-01-15 14:23:47",
-      vessel: "MV OrionSkies",
-      mmsi: "563829104",
-      description: "Vessel transmitting false position data",
-      notes: "Vessel identified and tracked. Local authorities notified.",
-      resolvedBy: "Operator 1",
-      assignedTo: "Operator 1",
-      acknowledged: true,
-      unread: false,
-    },
-    {
-      id: "a2",
-      title: "Loitering Behavior",
-      level: "warning",
-      status: "Active",
-      when: "2024-01-15 13:45:12",
-      vessel: "SS Pacific Dawn",
-      mmsi: "441208773",
-      description: "Vessel stationary for extended period",
-      notes: "Possible rendezvous. Monitoring for route deviation.",
-      resolvedBy: "—",
-      assignedTo: "—",
-      acknowledged: false,
-      unread: true,
-    },
-    {
-      id: "a3",
-      title: "Restricted Zone Violation",
-      level: "critical",
-      status: "Investigating",
-      when: "2024-01-15 12:10:22",
-      vessel: "Unknown Vessel",
-      mmsi: "—",
-      description: "Unauthorized entry into protected area",
-      notes: "Coast guard dispatched to intercept.",
-      resolvedBy: "—",
-      assignedTo: "Operator 1",
-      acknowledged: false,
-      unread: true,
-    },
-    {
-      id: "a4",
-      title: "Dark Vessel Detected",
-      level: "warning",
-      status: "Resolved",
-      when: "2024-01-15 11:05:33",
-      vessel: "N/A",
-      mmsi: "—",
-      description: "Vessel detected without AIS transmission",
-      notes: "Fishing vessel with malfunctioning AIS transponder.",
-      resolvedBy: "Operator 2",
-      assignedTo: "Operator 2",
-      acknowledged: true,
-      unread: false,
-    },
-    {
-      id: "a5",
-      title: "Speed Anomaly",
-      level: "info",
-      status: "Resolved",
-      when: "2024-01-15 09:48:18",
-      vessel: "HMS Guardian",
-      mmsi: "271998120",
-      description: "Unusual speed pattern detected",
-      notes: "Routine patrol operations confirmed.",
-      resolvedBy: "Operator 2",
-      assignedTo: "Operator 3",
-      acknowledged: true,
-      unread: false,
-    },
-  ]);
+export function useAlerts() {
+  const { token } = useAuth();
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const simCounterRef = useRef(100);
+  const fetchAlerts = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/alerts?limit=100", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to fetch alerts");
+      const data = await res.json();
+      
+      // Map API response to UI expected format
+      const mapped = data.data.rows.map(a => ({
+        id: a.alert_id,
+        title: a.title,
+        level: a.severity === 'critical' ? 'critical' : a.severity === 'high' ? 'warning' : 'info',
+        severity: a.severity.charAt(0).toUpperCase() + a.severity.slice(1),
+        status: a.status.charAt(0).toUpperCase() + a.status.slice(1),
+        when: new Date(a.created_at).toLocaleString(),
+        vessel: a.vessel_name || "Unknown Vessel",
+        mmsi: a.mmsi || "—",
+        description: a.description || "",
+        notes: null,
+        resolvedBy: "—",
+        assignedTo: a.assigned_to ? `User ${a.assigned_to}` : "—",
+        acknowledged: a.status === 'acknowledged' || a.status === 'resolved',
+        unread: a.status === 'open',
+      }));
+
+      setAlerts(mapped);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!enableSimulation) return;
-
-    const candidates = [
-      {
-        title: "AIS Dropout",
-        level: "warning",
-        status: "Active",
-        vessel: "TS Meridian",
-        mmsi: "566210772",
-        description: "AIS signal lost for 6 minutes",
-        notes: "Attempt radar correlation and identify track.",
-      },
-      {
-        title: "Geofence Proximity",
-        level: "info",
-        status: "Active",
-        vessel: "MV Seabird",
-        mmsi: "412009331",
-        description: "Approaching Zone A-2 boundary",
-        notes: "Monitor for entry; notify if crossing threshold.",
-      },
-      {
-        title: "Restricted Zone Entry",
-        level: "critical",
-        status: "Active",
-        vessel: "Unknown Vessel",
-        mmsi: "—",
-        description: "Entered Zone C-1",
-        notes: "Immediate response recommended. Verify via sensors.",
-      },
-    ];
-
-    const t = setInterval(() => {
-      const pick = candidates[Math.floor(Math.random() * candidates.length)];
-      simCounterRef.current += 1;
-
-      const newAlert = {
-        id: `a${simCounterRef.current}`,
-        ...pick,
-        when: "Just now",
-        resolvedBy: "—",
-        assignedTo: "—",
-        acknowledged: false,
-        unread: true,
-      };
-
-      setAlerts((prev) => [newAlert, ...prev].slice(0, 50));
-    }, 12000);
-
-    return () => clearInterval(t);
-  }, [enableSimulation]);
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 10000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   const unreadCount = useMemo(
     () => alerts.reduce((acc, a) => acc + (a.unread ? 1 : 0), 0),
     [alerts]
   );
 
+  const updateStatus = async (id, status) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/alerts/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        fetchAlerts();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const markRead = (id) => {
+    // Only local update to dismiss the "new" badge
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, unread: false } : a))
     );
   };
 
-  const acknowledge = (id) => {
-    setAlerts((prev) =>
-      prev.map((a) =>
-        a.id === id ? { ...a, acknowledged: true, unread: false } : a
-      )
-    );
-  };
+  const acknowledge = (id) => updateStatus(id, 'acknowledged');
+  const resolve = (id) => updateStatus(id, 'resolved');
 
-  const resolve = (id) => {
-    setAlerts((prev) =>
-      prev.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              status: "Resolved",
-              acknowledged: true,
-              unread: false,
-              resolvedBy: a.resolvedBy === "—" ? "Operator 1" : a.resolvedBy,
-            }
-          : a
-      )
-    );
-  };
-
-  const assignTo = (id, name) => {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, assignedTo: name, unread: false } : a))
-    );
+  const assignTo = async (id, name) => {
+    // We assume name here is a user ID or just local state for now
+    try {
+      const res = await fetch(`http://localhost:5000/api/alerts/${id}/assign`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ assigned_to: parseInt(name, 10) || null })
+      });
+      if (res.ok) {
+        fetchAlerts();
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return {
     alerts,
     unreadCount,
+    loading,
     markRead,
     acknowledge,
     resolve,

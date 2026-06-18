@@ -74,59 +74,61 @@ export default function Permissions() {
   if (!canAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#f9fbfd] px-6 py-5">
-      <div className="mx-auto max-w-[1100px]">
-        <div className="mb-4">
-          <h1 className="text-xl font-extrabold text-[#08244a]">Permissions</h1>
-          <p className="text-sm font-medium text-slate-500">Grant and revoke operator feature access</p>
-        </div>
-
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="flex flex-col bg-[#f1f5f9] rounded-2xl min-h-[calc(100vh-124px)]">
+      <div className="flex-1 px-6 py-5">
+        <div className="mx-auto max-w-[1100px]">
           <div className="mb-4">
-            <h3 className="text-md font-extrabold text-[#08244a]">Operator Permissions</h3>
-            <p className="mt-1 text-sm font-medium text-slate-500">
-              Select an operator, then grant/revoke feature permissions (for example:{' '}
-              <span className="text-slate-800 font-semibold">dashboard.view</span>).
-            </p>
+            <h1 className="text-xl font-extrabold text-[#08244a]">Permissions</h1>
+            <p className="text-sm font-medium text-slate-500">Grant and revoke operator feature access</p>
           </div>
 
-          {adminUsersError ? (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[11px] text-red-600">
-              {adminUsersError}
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="mb-4">
+              <h3 className="text-md font-extrabold text-[#08244a]">Operator Permissions</h3>
+              <p className="mt-1 text-sm font-medium text-slate-500">
+                Select an operator, then grant/revoke feature permissions (for example:{' '}
+                <span className="text-slate-800 font-semibold">dashboard.view</span>).
+              </p>
             </div>
-          ) : null}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <OperatorsList
-              operators={operators}
-              selectedOperatorId={selectedOperatorId}
-              onSelectOperator={setSelectedOperatorId}
-              isLoading={adminUsersLoading}
-            />
+            {adminUsersError ? (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[11px] text-red-600">
+                {adminUsersError}
+              </div>
+            ) : null}
 
-            <PermissionsList
-              selectedOperator={selectedOperator}
-              operatorPermsByModule={operatorPermsByModule}
-              isLoading={operatorPermsLoading}
-              permBusyId={permBusyId}
-              error={operatorPermsError}
-              onTogglePermission={togglePermission}
-              onViewActivity={openActivity}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <OperatorsList
+                operators={operators}
+                selectedOperatorId={selectedOperatorId}
+                onSelectOperator={setSelectedOperatorId}
+                isLoading={adminUsersLoading}
+              />
+
+              <PermissionsList
+                selectedOperator={selectedOperator}
+                operatorPermsByModule={operatorPermsByModule}
+                isLoading={operatorPermsLoading}
+                permBusyId={permBusyId}
+                error={operatorPermsError}
+                onTogglePermission={togglePermission}
+                onViewActivity={openActivity}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <OperatorActivityModal
-        isOpen={activityOpen}
-        operator={selectedOperator}
-        activities={activities}
-        loading={activityLoading}
-        error={activityError}
-        onClose={closeActivity}
-        token={token}
-        onPermissionGranted={markOperatorPermissionAssignedByName}
-      />
+        <OperatorActivityModal
+          isOpen={activityOpen}
+          operator={selectedOperator}
+          activities={activities}
+          loading={activityLoading}
+          error={activityError}
+          onClose={closeActivity}
+          token={token}
+          onPermissionGranted={markOperatorPermissionAssignedByName}
+        />
+      </div>
     </div>
   );
 }

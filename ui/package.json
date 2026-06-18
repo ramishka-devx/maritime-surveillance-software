@@ -10,13 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tmcw/togeojson": "^5.8.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.575.0",
     "maplibre-gl": "^5.24.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-leaflet": "^5.0.0",
-    "react-router-dom": "^7.12.0"
+    "react-router-dom": "^7.12.0",
+    "shpjs": "^4.0.4",
+    "wellknown": "^0.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -45,58 +45,60 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#f9fbfd] px-4 md:px-6 py-5">
-      <div className="mx-auto max-w-[1100px]">
-        <div className="mb-5">
-          <h1 className="text-xl font-extrabold text-[#08244a]">Alerts</h1>
-          <p className="text-sm font-medium text-slate-500">
-            Complete log of all surveillance alerts
-            {unreadCount > 0 && (
-              <span className="ml-2 rounded-full bg-[#0b74c9] px-2 py-0.5 text-[10px] font-extrabold text-white">
-                {unreadCount} new
-              </span>
-            )}
-          </p>
-        </div>
+    <div className="flex flex-col bg-[#f1f5f9] rounded-2xl min-h-[calc(100vh-124px)]">
+      <div className="flex-1 px-4 md:px-6 py-5">
+        <div className="mx-auto max-w-[1100px]">
+          <div className="mb-5">
+            <h1 className="text-xl font-extrabold text-[#08244a]">Alerts</h1>
+            <p className="text-sm font-medium text-slate-500">
+              Complete log of all surveillance alerts
+              {unreadCount > 0 && (
+                <span className="ml-2 rounded-full bg-[#0b74c9] px-2 py-0.5 text-[10px] font-extrabold text-white">
+                  {unreadCount} new
+                </span>
+              )}
+            </p>
+          </div>
 
-        <AlertFilters
-          query={query}
-          onQueryChange={setQuery}
-          severityFilter={severityFilter}
-          onSeverityChange={setSeverityFilter}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-        />
+          <AlertFilters
+            query={query}
+            onQueryChange={setQuery}
+            severityFilter={severityFilter}
+            onSeverityChange={setSeverityFilter}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+          />
 
-        <div className="space-y-4 pb-10">
-          {filtered.map((a) => (
-            <AlertItem
-              key={a.id}
-              alert={a}
-              expanded={expandedId === a.id}
-              onToggleExpand={toggleExpand}
-              onAcknowledge={acknowledge}
-              onResolve={resolve}
-              onAssignTo={assignTo}
-            />
-          ))}
+          <div className="space-y-4 pb-10">
+            {filtered.map((a) => (
+              <AlertItem
+                key={a.id}
+                alert={a}
+                expanded={expandedId === a.id}
+                onToggleExpand={toggleExpand}
+                onAcknowledge={acknowledge}
+                onResolve={resolve}
+                onAssignTo={assignTo}
+              />
+            ))}
 
-          {filtered.length === 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
-              <div className="text-base font-extrabold text-slate-700">No alerts found</div>
-              <div className="mt-2 text-sm font-medium text-slate-500">
-                Try another filter or search term.
+            {filtered.length === 0 && (
+              <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
+                <div className="text-base font-extrabold text-slate-700">No alerts found</div>
+                <div className="mt-2 text-sm font-medium text-slate-500">
+                  Try another filter or search term.
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      {id && (
-        <AlertDetailModal
-          alert={alerts.find((a) => String(a.id) === String(id))}
-        />
-      )}
+        {id && (
+          <AlertDetailModal
+            alert={alerts.find((a) => String(a.id) === String(id))}
+          />
+        )}
+      </div>
     </div>
   );
 }

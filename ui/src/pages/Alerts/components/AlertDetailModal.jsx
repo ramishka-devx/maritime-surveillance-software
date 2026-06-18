@@ -27,7 +27,7 @@ function InfoRow({ icon: Icon, label, value, valueClass = "" }) {
   );
 }
 
-export function AlertDetailModal({ alert, onClose }) {
+export function AlertDetailModal({ alert, onClose, onResolve }) {
   const navigate = useNavigate();
 
   if (!alert) return null;
@@ -139,12 +139,16 @@ export function AlertDetailModal({ alert, onClose }) {
             >
               Close
             </button>
-            {alert.status !== "Resolved" && (
+            {alert.status !== "Resolved" && alert.status !== "Dismissed" && (
               <button
                 type="button"
+                onClick={() => {
+                  if (onResolve) onResolve(alert.id);
+                  else handleClose();
+                }}
                 className="rounded-lg border border-transparent bg-[#0b74c9] px-4 py-2 text-xs font-bold text-white hover:bg-[#08244a] transition-all shadow-sm"
               >
-                Acknowledge / Resolve
+                Resolve
               </button>
             )}
           </div>

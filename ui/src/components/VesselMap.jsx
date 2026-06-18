@@ -175,6 +175,50 @@ const VesselMap = React.forwardRef(
 
           setLoading(false);
           console.log('[VesselMap] Layers and source ready');
+
+          // --- Restricted Zones Feature ---
+          fetch('http://localhost:5000/api/restricted-areas', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              const zones = data.data || [];
+              const geojson = {
+                type: 'FeatureCollection',
+                features: zones.map(z => ({
+                  type: 'Feature',
+                  properties: { name: z.name, type: z.type },
+                  geometry: typeof z.geometry === 'string' ? JSON.parse(z.geometry) : z.geometry
+                }))
+              };
+
+              map.addSource('restricted-zones', {
+                type: 'geojson',
+                data: geojson
+              });
+
+              map.addLayer({
+                id: 'restricted-zones-fill',
+                type: 'fill',
+                source: 'restricted-zones',
+                paint: {
+                  'fill-color': '#ef4444',
+                  'fill-opacity': 0.2
+                }
+              }, layers[0]?.id); // Insert below vessels
+
+              map.addLayer({
+                id: 'restricted-zones-line',
+                type: 'line',
+                source: 'restricted-zones',
+                paint: {
+                  'line-color': '#ef4444',
+                  'line-width': 2,
+                  'line-dasharray': [2, 2]
+                }
+              }, layers[0]?.id);
+            })
+            .catch(err => console.error('[VesselMap] Failed to load restricted zones:', err));
         };
       });
 

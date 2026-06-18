@@ -63,6 +63,7 @@ export const RestrictedAreaService = {
     return RestrictedAreaModel.detectEntries({
       restricted_area_id: params.restricted_area_id,
       mmsi: params.mmsi,
+      minutes: params.minutes,
       limit: params.limit
     });
   }

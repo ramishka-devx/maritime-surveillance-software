@@ -4,6 +4,7 @@ import { logger } from './config/logger.js';
 import { startDbConnectionCheck } from './config/db.config.js';
 import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
+import { processIntrusionAlerts } from './cron/intrusionAlerts.js';
 import '../cron/partition-cron.js';
 
 (async () => {
@@ -56,6 +57,17 @@ import '../cron/partition-cron.js';
     () => {
       logger.info('Running scheduled maintenance notification check...');
       sendDailyMaintenanceNotifications();
+    },
+    {
+      timezone: 'UTC',
+    }
+  );
+
+  // Schedule intrusion alerts detection every minute
+  cron.schedule(
+    '* * * * *',
+    () => {
+      processIntrusionAlerts();
     },
     {
       timezone: 'UTC',
