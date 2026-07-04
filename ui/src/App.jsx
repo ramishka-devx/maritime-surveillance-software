@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import Navbar from './components/Navbar.jsx';
+import { Sidebar } from './components/Sidebar.jsx';
+import { Topbar } from './components/Topbar.jsx';
 import SignIn from './components/SignIn.jsx';
 import Dashboard from './pages/Dashboard/index.jsx';
 import Alerts from './pages/Alerts/index.jsx';
 import Reports from './pages/Reports/index.jsx';
 import Settings from './pages/Settings/index.jsx';
 import Permissions from './pages/Permissions/index.jsx';
+import Help from './pages/Help/index.jsx';
 import RequestAccessGate from './components/RequestAccessGate.jsx';
 import { useAuth } from './auth/AuthContext.jsx';
 
@@ -31,9 +33,12 @@ function formatRoleName(roles) {
 function ProtectedLayout({ isAuthed, session, navLinks, onLogout, children }) {
   if (!isAuthed) return <Navigate to="/auth" replace />;
   return (
-    <div style={{ minHeight: '100vh', background: 'transparent' }}>
-      <Navbar user={session} links={navLinks} onLogout={onLogout} />
-      <main style={{ padding: '20px 32px 40px' }}>{children}</main>
+    <div className="flex h-screen w-full bg-[#f1f5f9] overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <Topbar user={session} />
+        <main className="flex-1 overflow-auto p-6">{children}</main>
+      </div>
     </div>
   );
 }
@@ -192,6 +197,19 @@ export default function App() {
             onLogout={handleLogout}
           >
             <Permissions />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/help"
+        element={
+          <ProtectedLayout
+            isAuthed={isAuthed}
+            session={session}
+            navLinks={navLinks}
+            onLogout={handleLogout}
+          >
+            <Help />
           </ProtectedLayout>
         }
       />

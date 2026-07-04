@@ -74,47 +74,43 @@ export default function Permissions() {
   if (!canAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex flex-col bg-[#f1f5f9] rounded-2xl min-h-[calc(100vh-124px)]">
-      <div className="flex-1 px-6 py-5">
-        <div className="mx-auto max-w-[1100px]">
-          <div className="mb-4">
-            <h1 className="text-xl font-extrabold text-[#08244a]">Permissions</h1>
-            <p className="text-sm font-medium text-slate-500">Grant and revoke operator feature access</p>
+    <div className="flex flex-col h-full bg-[#f1f5f9]">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex h-[calc(100vh-120px)]">
+        
+        {/* Left Sidebar for Operators */}
+        <div className="w-80 border-r border-gray-100 bg-gray-50/30 flex flex-col">
+          <div className="p-6 border-b border-gray-100">
+            <h1 className="text-xl font-extrabold text-[#1b397e]">Permissions</h1>
+            <p className="text-xs font-semibold text-gray-500 mt-1">Grant and revoke feature access</p>
           </div>
+          <div className="flex-1 p-4 overflow-y-auto">
+            <OperatorsList
+              operators={operators}
+              selectedOperatorId={selectedOperatorId}
+              onSelectOperator={setSelectedOperatorId}
+              isLoading={adminUsersLoading}
+            />
+          </div>
+        </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-md font-extrabold text-[#08244a]">Operator Permissions</h3>
-              <p className="mt-1 text-sm font-medium text-slate-500">
-                Select an operator, then grant/revoke feature permissions (for example:{' '}
-                <span className="text-slate-800 font-semibold">dashboard.view</span>).
-              </p>
-            </div>
-
+        {/* Right Content Area for Permissions */}
+        <div className="flex-1 overflow-y-auto p-8 bg-white">
+          <div className="max-w-4xl">
             {adminUsersError ? (
               <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[11px] text-red-600">
                 {adminUsersError}
               </div>
             ) : null}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <OperatorsList
-                operators={operators}
-                selectedOperatorId={selectedOperatorId}
-                onSelectOperator={setSelectedOperatorId}
-                isLoading={adminUsersLoading}
-              />
-
-              <PermissionsList
-                selectedOperator={selectedOperator}
-                operatorPermsByModule={operatorPermsByModule}
-                isLoading={operatorPermsLoading}
-                permBusyId={permBusyId}
-                error={operatorPermsError}
-                onTogglePermission={togglePermission}
-                onViewActivity={openActivity}
-              />
-            </div>
+            <PermissionsList
+              selectedOperator={selectedOperator}
+              operatorPermsByModule={operatorPermsByModule}
+              isLoading={operatorPermsLoading}
+              permBusyId={permBusyId}
+              error={operatorPermsError}
+              onTogglePermission={togglePermission}
+              onViewActivity={openActivity}
+            />
           </div>
         </div>
 

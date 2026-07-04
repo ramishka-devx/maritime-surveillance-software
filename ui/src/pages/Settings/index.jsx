@@ -18,22 +18,24 @@ const Settings = ({ user }) => {
   } = useSettings();
 
   return (
-    <div className="flex flex-col bg-[#f1f5f9] rounded-2xl min-h-[calc(100vh-124px)]">
-      <div className="flex-1 px-6 py-5">
-        <div className="mx-auto max-w-[1100px]">
-          <div className="mb-4">
-            <h1 className="text-xl font-extrabold text-[#08244a]">Settings</h1>
-            <p className="text-sm font-medium text-slate-500">Manage your account and system preferences</p>
-          </div>
-
-          <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+    <div className="flex flex-col h-full bg-[#f1f5f9]">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex h-[calc(100vh-120px)]">
+        
+        {/* Left Sidebar for Tabs */}
+        <div className="w-64 border-r border-gray-100 bg-gray-50/30 flex flex-col">
+          
+          <div className="flex-1 p-4 overflow-y-auto">
             <TabNavigation
               tabs={settingsTabs}
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />
+          </div>
+        </div>
 
-            <div className="flex-1 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        {/* Right Content Area */}
+        <div className="flex-1 overflow-y-auto py-4 px-8 bg-white">
+          <div className="max-w-4xl">
             {activeTab === 'general' && <GeneralSettings />}
             {activeTab === 'profile' && <ProfileSettings user={user} />}
             {activeTab === 'notifications' && (
@@ -45,9 +47,9 @@ const Settings = ({ user }) => {
             {activeTab === 'security' && <SecuritySettings />}
             {activeTab === 'system' && <SystemSettings />}
             {activeTab === 'zones' && <ZoneSettings />}
-            </div>
           </div>
         </div>
+        
       </div>
     </div>
   );

@@ -4,34 +4,34 @@ export const SEVERITY = {
   critical: {
     label: "Critical",
     dot: "bg-red-500",
-    badge: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
-    iconWrap: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
+    badge: "bg-red-100 text-red-700 border-red-200",
+    iconWrap: "bg-red-100 text-red-700 border-red-200",
     icon: AlertOctagon,
   },
   warning: {
     label: "Warning",
-    dot: "bg-amber-500",
-    badge: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
-    iconWrap: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
+    dot: "bg-[#F28C1B]",
+    badge: "bg-orange-100 text-[#d97c18] border-orange-200",
+    iconWrap: "bg-orange-100 text-[#d97c18] border-orange-200",
     icon: AlertTriangle,
   },
   info: {
     label: "Info",
-    dot: "bg-[#0b74c9]",
-    badge: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
-    iconWrap: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
+    dot: "bg-[#1b397e]",
+    badge: "bg-blue-100 text-[#1b397e] border-blue-200",
+    iconWrap: "bg-blue-100 text-[#1b397e] border-blue-200",
     icon: Info,
   },
 };
 
 export const STATUS = {
   Active: {
-    badge: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
+    badge: "bg-green-100 text-green-700 border-green-200",
   },
   Investigating: {
-    badge: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
+    badge: "bg-amber-100 text-amber-700 border-amber-200",
   },
   Resolved: {
-    badge: "bg-[#0b74c9]/10 text-[#08244a] border-[#0b74c9]/25",
+    badge: "bg-slate-100 text-slate-700 border-slate-200",
   },
 };

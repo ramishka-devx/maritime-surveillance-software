@@ -1,7 +1,7 @@
 export function SystemSettings() {
   return (
     <div>
-      <h2 className="text-base font-extrabold text-[#08244a] mb-4">System Settings</h2>
+      <h2 className="text-lg font-extrabold text-[#08244a] mb-4">System Settings</h2>
       <div className="space-y-2">
         <div className="flex items-center justify-between py-3 border-b border-gray-200">
           <div className="flex-1">

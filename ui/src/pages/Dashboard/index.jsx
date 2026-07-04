@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { MapPanel } from "./components/MapPanel.jsx";
 import { AlertsPanel } from "./components/AlertsPanel.jsx";
+import { ChartPanel } from "./components/ChartPanel.jsx";
 import { AlertDetailModal } from "../Alerts/components/AlertDetailModal.jsx";
 import { useAlerts } from "../Alerts/hooks/useAlerts.js";
 
@@ -51,30 +52,33 @@ const Dashboard = () => {
   }, [alerts, alertFilter]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#f1f5f9] rounded-2xl">
-      {/* Header Section */}
-     
+    <div className="flex flex-col h-[calc(100vh-120px)] w-full max-w-[1400px] mx-auto gap-6">
       
-
-      {/* Content Grid */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:px-6 lg:py-4 custom-scrollbar lg:overflow-hidden">
-        <div className="flex flex-col lg:flex-row gap-4 h-full min-h-[800px] lg:min-h-0">
-          <div className="flex-1 min-h-[400px] lg:min-h-0 h-full relative">
-            <MapPanel />
-          </div>
-
-          <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 h-[800px] lg:h-full">
-            <AlertsPanel                            
-              alerts={alerts}
-              filteredAlerts={filteredAlerts}
-              alertFilter={alertFilter}
-              setAlertFilter={setAlertFilter}
-              onAlertClick={(id) => setSelectedAlertId(id)}
-            />
-          </div>
+      {/* Top Row: Map and Alerts */}
+      <div className="flex flex-col lg:flex-row gap-6 h-[65%] min-h-[450px] w-full">
+        {/* Map Panel (takes remaining space) */}
+        <div className="flex-1 h-full">
+          <MapPanel />
+        </div>
+        
+        {/* Alerts Panel (fixed width on large screens) */}
+        <div className="w-full lg:w-[350px] flex-shrink-0 h-full">
+          <AlertsPanel                            
+            alerts={alerts}
+            filteredAlerts={filteredAlerts}
+            alertFilter={alertFilter}
+            setAlertFilter={setAlertFilter}
+            onAlertClick={(id) => setSelectedAlertId(id)}
+          />
         </div>
       </div>
 
+      {/* Bottom Row: Chart */}
+      <div className="h-[30%] min-h-[250px]">
+        <ChartPanel />
+      </div>
+
+      {/* Alert Details Modal */}
       {selectedAlertId && (() => {
         const raw = alerts.find((a) => String(a.id) === String(selectedAlertId));
         if (!raw) return null;

@@ -228,7 +228,16 @@ const VesselMap = React.forwardRef(
         onError?.(e);
       });
 
+      // Ensure the map resizes correctly when the container changes size
+      const resizeObserver = new ResizeObserver(() => {
+        if (mapRef.current) {
+          mapRef.current.resize();
+        }
+      });
+      resizeObserver.observe(containerRef.current);
+
       return () => {
+        resizeObserver.disconnect();
         map.remove();
         mapRef.current = null;
         sourceReadyRef.current = false;
@@ -301,8 +310,8 @@ const VesselMap = React.forwardRef(
     }, [stats]);
 
     return (
-      <div className="relative w-full h-full">
-        <div ref={containerRef} className="w-full h-full" />
+      <div className="relative w-full h-full min-h-[300px]">
+        <div ref={containerRef} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />
 
         {/* Loading spinner */}
         {loading && (
