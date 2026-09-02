@@ -5,15 +5,77 @@ import fs from 'fs';
 const { Client } = pg;
 
 function splitSqlStatements(sql) {
-  // Split on semicolons that are not inside string literals.
+  // Split on semicolons that are not inside string literals, line/block comments,
+  // or dollar-quoted bodies ($$ ... $$ / $tag$ ... $tag$, as used by PL/pgSQL).
   const statements = [];
   let current = '';
   let inSingle = false;
   let inDouble = false;
+  let inLineComment = false;
+  let inBlockComment = false;
+  let dollarTag = null; // e.g. '$$' or '$body$' when inside a dollar-quoted string
   let prevChar = '';
 
   for (let i = 0; i < sql.length; i++) {
     const ch = sql[i];
+    const next = sql[i + 1];
+
+    if (inLineComment) {
+      current += ch;
+      if (ch === '\n') inLineComment = false;
+      prevChar = ch;
+      continue;
+    }
+
+    if (inBlockComment) {
+      current += ch;
+      if (ch === '*' && next === '/') {
+        current += next;
+        i += 1;
+        inBlockComment = false;
+      }
+      prevChar = ch;
+      continue;
+    }
+
+    if (dollarTag) {
+      current += ch;
+      if (ch === '$' && sql.startsWith(dollarTag, i)) {
+        current += dollarTag.slice(1);
+        i += dollarTag.length - 1;
+        dollarTag = null;
+      }
+      prevChar = ch;
+      continue;
+    }
+
+    if (!inSingle && !inDouble) {
+      if (ch === '-' && next === '-') {
+        current += ch + next;
+        i += 1;
+        inLineComment = true;
+        prevChar = next;
+        continue;
+      }
+      if (ch === '/' && next === '*') {
+        current += ch + next;
+        i += 1;
+        inBlockComment = true;
+        prevChar = next;
+        continue;
+      }
+      if (ch === '$') {
+        const match = /^\$[A-Za-z_]\w*\$|^\$\$/.exec(sql.slice(i));
+        if (match) {
+          dollarTag = match[0];
+          current += dollarTag;
+          i += dollarTag.length - 1;
+          prevChar = '$';
+          continue;
+        }
+      }
+    }
+
     if (ch === "'" && !inDouble && prevChar !== '\\') inSingle = !inSingle;
     else if (ch === '"' && !inSingle && prevChar !== '\\') inDouble = !inDouble;
 

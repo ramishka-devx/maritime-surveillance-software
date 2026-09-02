@@ -12,10 +12,10 @@ SET name = EXCLUDED.name,
 		is_active = EXCLUDED.is_active;
 
 -- Default super admin user
--- Password hash is bcrypt (change via API if needed).
+-- Dev credentials: admin@example.com / Password123!  (bcrypt hash below; change via API for real use).
 INSERT INTO users (user_id, first_name, last_name, username, email, password_hash, role_id, status, profile_img)
 VALUES
-	(1, 'System', 'Admin', 'admin', 'admin@example.com', '$2b$10$E80oo.o6cPsgYrSJ46g3uuvWtRlgWPTTpmVfSRy8izo6U9KcCyJq2', 1, 'verified', 'https://res.cloudinary.com/dftbkrs4f/image/upload/v1732101562/avatar2_d0vokh.png')
+	(1, 'System', 'Admin', 'admin', 'admin@example.com', '$2b$10$mgZcLIBtnsmkYlSSAP7ovelNAinyN74jLmaa0sMZaLkJFJkDVHAWW', 1, 'verified', 'https://res.cloudinary.com/dftbkrs4f/image/upload/v1732101562/avatar2_d0vokh.png')
 ON CONFLICT (user_id) DO UPDATE
 SET email = EXCLUDED.email,
 		username = EXCLUDED.username,
@@ -26,9 +26,10 @@ SET email = EXCLUDED.email,
 		profile_img = EXCLUDED.profile_img;
 
 -- Sample operator user (so assigned_to references are valid)
+-- Dev credentials: operator@example.com / Password123!
 INSERT INTO users (user_id, first_name, last_name, username, email, password_hash, role_id, status, profile_img)
 VALUES
-	(2, 'Default', 'Operator', 'operator', 'operator@example.com', '$2b$10$E80oo.o6cPsgYrSJ46g3uuvWtRlgWPTTpmVfSRy8izo6U9KcCyJq2', 2, 'verified', 'https://res.cloudinary.com/dftbkrs4f/image/upload/v1732101562/avatar2_d0vokh.png')
+	(2, 'Default', 'Operator', 'operator', 'operator@example.com', '$2b$10$mgZcLIBtnsmkYlSSAP7ovelNAinyN74jLmaa0sMZaLkJFJkDVHAWW', 2, 'verified', 'https://res.cloudinary.com/dftbkrs4f/image/upload/v1732101562/avatar2_d0vokh.png')
 ON CONFLICT (user_id) DO UPDATE
 SET email = EXCLUDED.email,
 		username = EXCLUDED.username,

@@ -11,7 +11,8 @@
     "format": "prettier --write \"**/*.{js,json,md}\"",
     "db:schema": "node scripts/run-sql.js db/schema.sql",
     "db:seed": "node scripts/run-sql.js db/seed.sql",
-    "db:seed-permissions": "node scripts/seed-permissions.js"
+    "db:seed-permissions": "node scripts/seed-permissions.js",
+    "db:reset": "node scripts/db-reset.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
