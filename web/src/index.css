@@ -1,0 +1,103 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #0B1220;
+    --panel: #111A2B;
+    --accent: #22D3EE;
+    --text: #E6EDF7;
+    --muted: #8A99B3;
+    --border: #1F2A40;
+    --success: #10B981;
+    --warn: #F59E0B;
+    --danger: #EF4444;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    background: #0B1220;
+    color: #E6EDF7;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #0B1220;
+    color: #E6EDF7;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+/* Ambient Grid & Radar Animations */
+.map-grid-bg {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+}
+
+.radar-sweep-subtle {
+  background: radial-gradient(circle at 45% 52%, rgba(34, 211, 238, 0.08) 0%, rgba(11, 18, 32, 0.0) 65%);
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+
+@keyframes ping-subtle {
+  0% { transform: scale(1); opacity: 0.8; }
+  80%, 100% { transform: scale(2.8); opacity: 0; }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.shipping-lane-anim {
+  stroke-dasharray: 4, 8;
+  animation: dash 25s linear infinite;
+}
+
+.pulse-dot {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.ping-ring {
+  animation: ping-subtle 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px -3px rgba(34, 211, 238, 0.35);
+}
+
+.glow-cyan-btn:hover {
+  box-shadow: 0 0 22px rgba(34, 211, 238, 0.5);
+}
+
+/* Dark Maritime filter for OpenStreetMap tiles (100% free, no API key needed) */
+.dark-osm-tiles .leaflet-tile {
+  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.75);
+}
+
