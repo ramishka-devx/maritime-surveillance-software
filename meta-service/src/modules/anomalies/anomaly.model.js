@@ -80,8 +80,13 @@ export const AnomalyModel = {
     const rows = await query(
       `SELECT
         a.anomaly_id, a.mmsi, a.anomaly_type, a.sog, a.cog, a.heading,
-        a.nav_status, a.p99_speed, a.details, a.lon, a.alt, a.detected_at
+        a.nav_status, a.p99_speed, a.details, a.lon, a.alt, a.detected_at,
+        COALESCE(s.ship_name, v.name) as ship_name,
+        COALESCE(s.ship_type::text, v.vessel_type) as ship_type,
+        v.flag, v.callsign, v.imo
       FROM anomalies a
+      LEFT JOIN ships s ON s.mmsi = a.mmsi
+      LEFT JOIN vessels v ON v.mmsi = CAST(a.mmsi AS VARCHAR)
       ${whereClause}
       ORDER BY a.detected_at DESC
       LIMIT ? OFFSET ?`,
@@ -100,8 +105,13 @@ export const AnomalyModel = {
     const rows = await query(
       `SELECT
         a.anomaly_id, a.mmsi, a.anomaly_type, a.sog, a.cog, a.heading,
-        a.nav_status, a.p99_speed, a.details, a.lon, a.alt, a.detected_at
+        a.nav_status, a.p99_speed, a.details, a.lon, a.alt, a.detected_at,
+        COALESCE(s.ship_name, v.name) as ship_name,
+        COALESCE(s.ship_type::text, v.vessel_type) as ship_type,
+        v.flag, v.callsign, v.imo
       FROM anomalies a
+      LEFT JOIN ships s ON s.mmsi = a.mmsi
+      LEFT JOIN vessels v ON v.mmsi = CAST(a.mmsi AS VARCHAR)
       WHERE a.anomaly_id = ?
       LIMIT 1`,
       [anomaly_id]

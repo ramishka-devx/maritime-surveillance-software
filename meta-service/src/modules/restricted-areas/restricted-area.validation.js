@@ -32,3 +32,10 @@ export const detectionsSchema = Joi.object({
     limit: Joi.number().integer().min(1).max(1000).default(200)
   })
 });
+
+export const checkBreachesSchema = Joi.object({
+  body: Joi.object({
+    forceScan: Joi.boolean().default(false),
+    limit: Joi.number().integer().min(1).max(1000).default(100)
+  })
+});

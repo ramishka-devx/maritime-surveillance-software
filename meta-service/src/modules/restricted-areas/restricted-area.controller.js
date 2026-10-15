@@ -44,5 +44,22 @@ export const RestrictedAreaController = {
     } catch (e) {
       next(e);
     }
+  },
+
+  async checkBreaches(req, res, next) {
+    try {
+      const alerts = await RestrictedAreaService.checkAndCreateGeofenceAlerts({
+        forceScan: Boolean(req.body?.forceScan),
+        limit: req.body?.limit ? Number.parseInt(req.body.limit, 10) : undefined
+      });
+
+      return success(
+        res,
+        { count: alerts.length, alerts },
+        'Geofence breach check completed'
+      );
+    } catch (e) {
+      next(e);
+    }
   }
 };

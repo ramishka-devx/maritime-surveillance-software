@@ -7,7 +7,8 @@ import {
   listSchema,
   getByIdSchema,
   createSchema,
-  detectionsSchema
+  detectionsSchema,
+  checkBreachesSchema
 } from './restricted-area.validation.js';
 
 const router = Router();
@@ -38,6 +39,21 @@ router.post('/', authMiddleware, activityLogger('restricted_areas.create'), vali
  *     tags: [Restricted Areas]
  */
 router.get('/detections', authMiddleware, validate(detectionsSchema), RestrictedAreaController.detectEntries);
+
+/**
+ * @openapi
+ * /api/restricted-areas/check-breaches:
+ *   post:
+ *     summary: Run geofence detector and dispatch alerts for breaches
+ *     tags: [Restricted Areas]
+ */
+router.post(
+  '/check-breaches',
+  authMiddleware,
+  activityLogger('restricted_areas.check_breaches'),
+  validate(checkBreachesSchema),
+  RestrictedAreaController.checkBreaches
+);
 
 /**
  * @openapi

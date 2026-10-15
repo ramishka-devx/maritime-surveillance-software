@@ -21,7 +21,7 @@ const router = Router();
  *     summary: List speed anomalies
  *     tags: [Anomalies]
  */
-router.get('/', authMiddleware, permissionMiddleware('anomalies.view'), validate(listSchema), AnomalyController.list);
+router.get('/', authMiddleware, permissionMiddleware(['anomalies.view', 'alert.view', 'dashboard.view']), validate(listSchema), AnomalyController.list);
 
 /**
  * @openapi
@@ -30,7 +30,7 @@ router.get('/', authMiddleware, permissionMiddleware('anomalies.view'), validate
  *     summary: Get anomaly by ID
  *     tags: [Anomalies]
  */
-router.get('/:anomaly_id', authMiddleware, permissionMiddleware('anomalies.view'), validate(getByIdSchema), AnomalyController.getById);
+router.get('/:anomaly_id', authMiddleware, permissionMiddleware(['anomalies.view', 'alert.view', 'dashboard.view']), validate(getByIdSchema), AnomalyController.getById);
 
 /**
  * @openapi
