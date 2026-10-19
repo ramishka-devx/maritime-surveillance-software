@@ -7,6 +7,11 @@
  */
 
 import { query } from '../config/db.config.js';
+import { isMaintenanceRole, isHealthPermission } from './maintenanceAccess.js';
+
+export async function isMaintenance(userId) {
+  return (await getUserRoles(userId)).some(isMaintenanceRole);
+}
 
 /**
  * Get all permissions for a user by aggregating:
@@ -17,6 +22,7 @@ import { query } from '../config/db.config.js';
  * @returns {Promise<string[]>} Array of permission names
  */
 export async function getUserPermissions(userId) {
+  if (await isMaintenance(userId)) return [];
   const sql = `
     SELECT DISTINCT p.name
     FROM permissions p
@@ -47,7 +53,7 @@ export async function getUserPermissions(userId) {
   `;
   
   const rows = await query(sql, [userId, userId, userId]);
-  return rows.map(row => row.name);
+  return rows.map(row => row.name).filter(name => !isHealthPermission(name));
 }
 
 /**
@@ -88,6 +94,8 @@ export async function getUserRoles(userId) {
  * @returns {Promise<boolean>}
  */
 export async function userHasPermission(userId, permissionName) {
+  if (isHealthPermission(permissionName)) return false;
+  if (await isMaintenance(userId)) return false;
   const sql = `
     SELECT 1
     FROM permissions p
@@ -129,7 +137,9 @@ export async function userHasPermission(userId, permissionName) {
  * @returns {Promise<boolean>}
  */
 export async function userHasAnyPermission(userId, permissionNames) {
+  permissionNames = permissionNames?.filter(name => !isHealthPermission(name));
   if (!permissionNames || permissionNames.length === 0) return false;
+  if (await isMaintenance(userId)) return false;
   
   const placeholders = permissionNames.map(() => '?').join(', ');
   const sql = `
@@ -213,6 +223,7 @@ export async function userHasRole(userId, roleName) {
  * @returns {Promise<boolean>}
  */
 export async function isSuperAdmin(userId) {
+  if (await isMaintenance(userId)) return false;
   return userHasRole(userId, 'super_admin');
 }
 

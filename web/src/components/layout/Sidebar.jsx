@@ -2,10 +2,14 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import serenGuardLogo from '../../assets/SerenGuard.png';
 import { useBadgeCounts } from '../../hooks/useBadgeCounts';
+import { useAuth } from '../../auth/AuthContext.jsx';
+import { isMaintenance, isOperator } from '../../auth/roles.js';
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const maintenance = isMaintenance(user);
   const { alertCount, anomalyCount, restrictedAreaCount } = useBadgeCounts();
 
   // Determine active tab based on current URL path
@@ -33,7 +37,7 @@ export default function Sidebar() {
       ? 'map'
       : pathname.slice(1) || 'map';
 
-  const operationsNav = [
+  const operationsNav = maintenance ? [] : [
     { id: 'map', label: 'Map', icon: 'map', path: '/' },
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/Dashboard' },
     { id: 'alerts', label: 'Alerts', icon: 'warning', badge: alertCount, badgeType: 'error', path: '/Alerts' },
@@ -42,10 +46,11 @@ export default function Sidebar() {
     { id: 'my-profile', label: 'My Profile', icon: 'account_circle', path: '/Profile' },
   ];
 
-  const adminNav = [
+  const adminNav = maintenance ? [
+    { id: 'system-health', label: 'System Health', icon: 'health_and_safety', path: '/SystemHealth' },
+  ] : isOperator(user) ? [] : [
     { id: 'users', label: 'Users', icon: 'group', path: '/Users' },
     { id: 'roles-permissions', label: 'Roles & Permissions', icon: 'admin_panel_settings', path: '/RolesPermissions' },
-    { id: 'system-health', label: 'System Health', icon: 'health_and_safety', extra: '99.98%', path: '/SystemHealth' },
   ];
 
   const handleNavClick = (item) => {
@@ -59,7 +64,7 @@ export default function Sidebar() {
       <div className="flex flex-col">
         {/* Logo Brand Header */}
         <div
-          onClick={() => navigate('/')}
+          onClick={() => navigate(maintenance ? '/SystemHealth' : '/')}
           className="h-16 px-4 border-b border-outline-variant/30 flex items-center gap-2.5 bg-surface-container-lowest cursor-pointer hover:bg-surface-container/50 transition-colors"
         >
           <div className="w-8 h-8 rounded-lg border border-cyan-500/40 p-1 flex items-center justify-center shadow-lg shadow-cyan-950/40 bg-surface-container-low">
@@ -76,6 +81,7 @@ export default function Sidebar() {
         </div>
 
         {/* Operations Navigation */}
+        {operationsNav.length > 0 && (
         <div className="py-4">
           <div className="px-4 pb-2 text-[10px] font-mono uppercase tracking-widest text-outline">
             Operations
@@ -115,8 +121,10 @@ export default function Sidebar() {
             })}
           </nav>
         </div>
+        )}
 
         {/* Administration Navigation */}
+        {adminNav.length > 0 && (
         <div className="py-2 border-t border-outline-variant/20">
           <div className="px-4 pb-2 text-[10px] font-mono uppercase tracking-widest text-outline">
             Administration
@@ -150,6 +158,7 @@ export default function Sidebar() {
             })}
           </nav>
         </div>
+        )}
       </div>
 
       {/* System Status / DEFCON Indicator */}

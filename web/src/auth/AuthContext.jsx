@@ -130,6 +130,9 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const hasPermission = useCallback((permission) => {
+    // Diagnostics access is determined exclusively by the Maintenance route guard.
+    if (/^system[._-]health(?:[._-]|$)/i.test(permission)) return false;
+    if (roles.some(role => String(typeof role === 'string' ? role : role?.name).trim().toLowerCase() === 'maintenance')) return false;
     // Super Admin is restricted to diagnostics
     if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
       return /^system[._-]health(?:[._-]|$)/i.test(permission);
@@ -170,6 +173,7 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const isSuperAdmin = useCallback(() => {
+    if (roles.some(role => String(typeof role === 'string' ? role : role?.name).trim().toLowerCase() === 'maintenance')) return false;
     return roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1);
   }, [roles]);
 

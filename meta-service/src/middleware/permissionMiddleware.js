@@ -1,9 +1,11 @@
 import { forbidden } from '../utils/errorHandler.js';
 import { env } from '../config/env.js';
+import { canMaintenanceAccess, isHealthPermission } from '../utils/maintenanceAccess.js';
 import { 
   userHasPermission, 
   userHasAnyPermission, 
-  isSuperAdmin 
+  isSuperAdmin,
+  isMaintenance
 } from '../utils/permissionHelper.js';
 
 /**
@@ -31,6 +33,17 @@ export function permissionMiddleware(requiredPermission, options = {}) {
   
   return async function (req, res, next) {
     try {
+      const maintenance = req.isMaintenance ?? await isMaintenance(req.user?.user_id);
+      const requested = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+      if (requested.some(isHealthPermission) && !maintenance) {
+        return next(forbidden('System Health is restricted to Maintenance'));
+      }
+      // Enforce the restriction before either development or Super Admin bypasses.
+      if (maintenance) {
+        const permissions = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+        if (canMaintenanceAccess(req.method, req.originalUrl) && permissions.every(isHealthPermission)) return next();
+        return next(forbidden('Maintenance can only access System Health'));
+      }
       // Optional bypass for local dev only (explicit opt-in)
       if (env.nodeEnv === 'development' && env.permissionsBypass) {
         return next();

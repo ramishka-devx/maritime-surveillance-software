@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../lib/api';
+import { isMaintenance } from '../auth/roles.js';
 
 export function useBadgeCounts(pollInterval = 10000) {
-  const { token } = useAuth();
+  const { token: authToken, user } = useAuth();
+  const token = isMaintenance(user) ? null : authToken;
   const [counts, setCounts] = useState({
     alertCount: 0,
     anomalyCount: 0,

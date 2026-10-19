@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext.jsx';
 import LoginPage from './pages/Auth/LoginPage.jsx';
 import AppLayout from './components/layout/AppLayout.jsx';
@@ -13,9 +13,11 @@ import UsersPage from './pages/Users/UsersPage.jsx';
 import RolesPermissionsPage from './pages/RolesPermissions/RolesPermissionsPage.jsx';
 import DetectionSettingsPage from './pages/DetectionSettings/DetectionSettingsPage.jsx';
 import SystemHealthPage from './pages/SystemHealth/SystemHealthPage.jsx';
+import { isMaintenance } from './auth/roles.js';
 
 function ProtectedRoute({ children }) {
   const { user, token, isLoading } = useAuth();
+  const { pathname } = useLocation();
 
   if (isLoading) {
     return (
@@ -32,6 +34,9 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
+  if (isMaintenance(user) && !['/systemhealth', '/system-health', '/health'].includes(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    return <Navigate to="/SystemHealth" replace />;
+  }
   return children;
 }
 
@@ -54,7 +59,7 @@ export default function App() {
       {/* Public Login Route */}
       <Route
         path="/login"
-        element={token && user ? <Navigate to="/" replace /> : <LoginPage />}
+        element={token && user ? <Navigate to={isMaintenance(user) ? '/SystemHealth' : '/'} replace /> : <LoginPage />}
       />
 
       {/* Unified Protected Shell Layout (Persistent Top Bar and Sidebar for all pages) */}
@@ -92,8 +97,8 @@ export default function App() {
         {/* Dedicated Admin Detection Settings Route */}
         <Route path="/DetectionSettings" element={<DetectionSettingsPage />} />
 
-        {/* Dedicated Admin System Health Route */}
-        <Route path="/SystemHealth" element={<SystemHealthPage />} />
+        {/* System Health is exclusively available to Maintenance. */}
+        <Route path="/SystemHealth" element={isMaintenance(user) ? <SystemHealthPage /> : <Navigate to="/" replace />} />
       </Route>
 
       {/* Aliased /map to / */}

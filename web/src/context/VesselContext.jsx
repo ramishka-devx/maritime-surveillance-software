@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { useVesselUpdates } from '../hooks/useVesselUpdates.js';
 import { defaultMaritimeFleet } from '../components/map/MapCanvas.jsx';
+import { isMaintenance } from '../auth/roles.js';
 
 const VesselContext = createContext(null);
 
 export function VesselProvider({ children }) {
-  const { token } = useAuth();
+  const { token: authToken, user } = useAuth();
+  const token = isMaintenance(user) ? null : authToken;
   const navigate = useNavigate();
   const location = useLocation();
 

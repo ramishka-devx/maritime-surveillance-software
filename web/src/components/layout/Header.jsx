@@ -2,10 +2,12 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
+import { isMaintenance } from '../../auth/roles.js';
 
 export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
   const navigate = useNavigate();
   const { user, logout, roles } = useAuth();
+  const maintenance = isMaintenance(user);
   const { vessels, focusVessel } = useVesselContext();
   const [slTimestamp, setSlTimestamp] = useState('');
   const [searchValue, setSearchValue] = useState('');
@@ -165,7 +167,7 @@ export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
               }
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Search MMSI, IMO or Vessel name..."
+            placeholder={maintenance ? 'Search' : 'Search MMSI, IMO or Vessel name...'}
             className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded pl-3.5 pr-10 py-1.5 text-on-surface font-mono text-xs placeholder:text-outline focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-colors"
           />
           <button

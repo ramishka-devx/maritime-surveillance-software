@@ -80,7 +80,9 @@ export default function RolesPermissionsPage() {
           roleList = Array.isArray(data) ? data : data?.rows || [];
         }
 
-        const normalized = roleList.map(normalizeRole);
+        const normalized = roleList
+          .filter(role => String(role.name || '').trim().toLowerCase() !== 'maintenance')
+          .map(normalizeRole);
         setRoles(normalized);
         if (normalized.length > 0) {
           setSelectedRoleId((prev) => {
@@ -88,6 +90,8 @@ export default function RolesPermissionsPage() {
             const exists = normalized.some((r) => String(r.id) === String(target));
             return exists ? target : normalized[0].id;
           });
+        } else {
+          setSelectedRoleId(null);
         }
       } catch (err) {
         console.error('Failed to fetch live roles:', err);

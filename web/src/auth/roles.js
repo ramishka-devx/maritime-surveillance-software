@@ -8,6 +8,7 @@ export const Roles = {
   ANALYST: 'analyst',
   OPERATOR: 'operator',
   VIEWER: 'viewer',
+  MAINTENANCE: 'maintenance',
 };
 
 /**
@@ -122,6 +123,13 @@ export function normalizeRole(role) {
   return String(role || '').trim().toLowerCase();
 }
 
+export function isMaintenance(user) {
+  if (!user) return false;
+  return normalizeRole(user.role) === Roles.MAINTENANCE
+    || user.roles?.some(role => normalizeRole(typeof role === 'string' ? role : role?.name) === Roles.MAINTENANCE)
+    || false;
+}
+
 /**
  * Check if user has operator role
  * @param {Object} user - User object
@@ -130,7 +138,7 @@ export function normalizeRole(role) {
 export function isOperator(user) {
   if (!user) return false;
   // Check roles array (new multi-role system)
-  if (user.roles?.some(r => normalizeRole(r.name) === Roles.OPERATOR)) return true;
+  if (user.roles?.some(r => normalizeRole(typeof r === 'string' ? r : r?.name) === Roles.OPERATOR)) return true;
   // Check legacy single role
   if (normalizeRole(user?.role) === Roles.OPERATOR) return true;
   return Number(user?.role_id) === RoleIds.OPERATOR;
