@@ -6,7 +6,6 @@ import DashboardAlertsByTypeDonut from '../../components/dashboard/DashboardAler
 import DashboardTopFlaggedVessels from '../../components/dashboard/DashboardTopFlaggedVessels.jsx';
 import DashboardLiveInterdictionQueue from '../../components/dashboard/DashboardLiveInterdictionQueue.jsx';
 import DashboardDensityHeatmap from '../../components/dashboard/DashboardDensityHeatmap.jsx';
-import DashboardSystemFooter from '../../components/dashboard/DashboardSystemFooter.jsx';
 import { useDashboardData } from '../../hooks/useDashboardData';
 
 function generateCsv(data) {

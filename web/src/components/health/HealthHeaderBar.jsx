@@ -10,31 +10,24 @@ export default function HealthHeaderBar({
   isRefreshing = false,
 }) {
   return (
-    <header className="bg-surface-container-low rounded-xl p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-md border border-outline-variant/30 select-none font-sans">
-      <div className="flex flex-col gap-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-bold uppercase tracking-tight text-on-surface m-0">
-            System Health
+    <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 font-sans select-none">
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-xl font-bold tracking-tight text-on-surface uppercase">
+            System health
           </h1>
-          <span className="px-2 py-0.5 rounded bg-surface-container-high border border-outline-variant/40 text-cyan-400 font-mono text-xs font-semibold">
-            INFRASTRUCTURE TELEMETRY // CLUSTER {clusterName}
-          </span>
         </div>
-        <p className="font-mono text-xs text-on-surface-variant max-w-4xl m-0 leading-relaxed">
-          Live heartbeat diagnostics, telemetry pipeline latency, message broker lag, partition health, and critical node exceptions.
-        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center shrink-0 font-mono text-xs">
         {/* Cluster Uptime Pill */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/30">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
           </span>
-          <div className="flex flex-col">
-            <span className="text-[10px] text-emerald-400 uppercase leading-none font-bold">HEALTHY</span>
-            <span className="text-on-surface-variant text-[11px] leading-none mt-0.5">
+          <div className="flex flex-row items-center">
+            <span className="text-on-surface-variant text-[12px] leading-none">
               {uptime} ({uptimeDuration})
             </span>
           </div>
@@ -43,11 +36,11 @@ export default function HealthHeaderBar({
         {/* Auto Refresh Interval */}
         <div className="relative flex items-center bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-2 py-1.5">
           <span className="h-2 w-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-          <span className="text-[10px] text-outline mr-1 font-semibold">AUTO:</span>
+          <span className="text-[11px] text-outline mr-1 font-semibold">AUTO:</span>
           <select
             value={refreshInterval}
             onChange={(e) => onRefreshIntervalChange(e.target.value)}
-            className="bg-transparent text-cyan-400 focus:outline-none cursor-pointer pr-1 text-xs"
+            className="bg-transparent text-cyan-400 focus:outline-none cursor-pointer pr-1 text-[11px]"
           >
             <option className="bg-surface-container-high text-on-surface" value="5">5s</option>
             <option className="bg-surface-container-high text-on-surface" value="10">10s</option>

@@ -132,9 +132,8 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full bg-surface-container-highest rounded pl-8 pr-8 py-2 text-on-surface text-xs border border-outline-variant/30 focus:outline-none focus:border-cyan-400 appearance-none cursor-pointer"
               >
-                <option value="operator">Watch Operator [Interdiction &amp; Triage]</option>
-                <option value="admin">Administrator [Full Clearance / Root Ops]</option>
-                <option value="analyst">Intelligence Analyst [AIS Models &amp; Anomalies]</option>
+                <option value="operator">Watch Operator</option>
+                <option value="admin">Administrator</option>
               </select>
               <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">
                 arrow_drop_down

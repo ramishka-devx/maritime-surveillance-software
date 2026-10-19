@@ -35,23 +35,11 @@ export default function AlertsHeader({
           </h1>
         </div>
 
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-high border border-cyan-400/40">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="font-mono text-xs font-semibold tracking-wider text-cyan-400 uppercase">
-            LIVE RADAR FEED // DEFCON 3
-          </span>
-        </div>
+        
       </div>
 
       {/* Quick Action Controls */}
       <div className="flex items-center gap-2 font-mono text-xs">
-        {/* Auto Refresh Indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/30 text-outline">
-          <span className="material-symbols-outlined text-[15px] text-emerald-400">sync</span>
-          <span>
-            Auto-refresh: <span className="text-on-surface font-semibold">5s</span>
-          </span>
-        </div>
 
         {/* Export CSV Button */}
         <button

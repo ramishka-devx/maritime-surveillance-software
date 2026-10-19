@@ -14,7 +14,7 @@ export default function AnomaliesHeaderBar({ onExport, onOpenSettings }) {
 
       {/* Right Controls */}
       <div className="flex items-center gap-2">
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/30 text-outline">
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-surface-container-low border border-outline-variant/30 text-outline">
           <span className="material-symbols-outlined text-[15px] text-emerald-400">sync</span>
           <span className="font-mono text-xs">
             Auto-eval: <span className="text-on-surface font-semibold">30s</span>
@@ -23,7 +23,7 @@ export default function AnomaliesHeaderBar({ onExport, onOpenSettings }) {
 
         <button
           onClick={onOpenSettings}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 hover:border-cyan-400/50 text-outline hover:text-on-surface transition-all text-xs font-medium"
+          className="flex items-center gap-1 px-3 py-1.5 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 hover:border-cyan-400/50 text-outline hover:text-on-surface transition-all text-xs font-medium"
         >
           <span className="material-symbols-outlined text-[15px]">tune</span>
           <span>Model Settings (v3.4-alpha)</span>
@@ -31,7 +31,7 @@ export default function AnomaliesHeaderBar({ onExport, onOpenSettings }) {
 
         <button
           onClick={onExport}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-xs font-bold uppercase transition-all shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+          className="flex items-center gap-1 px-3 py-1.5 rounded bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-xs font-bold uppercase transition-all shadow-[0_0_10px_rgba(34,211,238,0.3)]"
         >
           <span className="material-symbols-outlined text-[15px]">file_download</span>
           <span>Export Inferences</span>

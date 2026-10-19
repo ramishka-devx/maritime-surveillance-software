@@ -99,7 +99,7 @@ export function AuthProvider({ children }) {
 
     // Store user data from login response
     if (data?.user) {
-      setUser(data.user);
+      setUser({ ...data.user, roles: data.roles || [] });
     }
     
     // Store permissions and roles from login response
@@ -111,6 +111,7 @@ export function AuthProvider({ children }) {
       setRoles(data.roles);
       localStorage.setItem(ROLES_STORAGE_KEY, JSON.stringify(data.roles));
     }
+    return { ...data.user, roles: data.roles || [] };
   }
 
   function logout() {
@@ -129,11 +130,12 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const hasPermission = useCallback((permission) => {
-    // Super admin has all permissions
+    // Super Admin is restricted to diagnostics
     if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
-      return true;
+      return /^system[._-]health(?:[._-]|$)/i.test(permission);
     }
-    return permissions.includes(permission);
+    if (/^system[._-]health(?:[._-]|$)/i.test(permission)) return false;
+    return roles.some(r => (typeof r === 'string' ? r : r?.name) === 'admin') || permissions.includes(permission);
   }, [permissions, roles]);
 
   /**
@@ -142,12 +144,8 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const hasAnyPermission = useCallback((permissionList) => {
-    // Super admin has all permissions
-    if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
-      return true;
-    }
-    return permissionList.some(p => permissions.includes(p));
-  }, [permissions, roles]);
+    return permissionList.some(hasPermission);
+  }, [hasPermission, roles]);
 
   /**
    * Check if user has all specified permissions (AND logic)
@@ -155,12 +153,8 @@ export function AuthProvider({ children }) {
    * @returns {boolean}
    */
   const hasAllPermissions = useCallback((permissionList) => {
-    // Super admin has all permissions
-    if (roles.some((r) => r === 'super_admin' || r?.name === 'super_admin' || r?.role_id === 1)) {
-      return true;
-    }
-    return permissionList.every(p => permissions.includes(p));
-  }, [permissions, roles]);
+    return permissionList.every(hasPermission);
+  }, [hasPermission, roles]);
 
   /**
    * Check if user has a specific role

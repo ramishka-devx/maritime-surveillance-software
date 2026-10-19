@@ -1,4 +1,144 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+function StatusSelector({ alert, onUpdateStatus }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleSelect = async (statusKey) => {
+    setIsOpen(false);
+    if (!onUpdateStatus) return;
+    setUpdating(true);
+    try {
+      await onUpdateStatus(alert, statusKey);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'OPEN':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest border border-cyan-400 text-cyan-400 font-mono text-[11px] font-bold shadow-[0_0_8px_rgba(34,211,238,0.2)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            OPEN
+          </span>
+        );
+      case 'ACKNOWLEDGED':
+      case "ACK'D":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/50 text-amber-300 font-mono text-[11px] font-semibold">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+            ACK'D
+          </span>
+        );
+      case 'RESOLVED':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[11px] font-semibold">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            RESOLVED
+          </span>
+        );
+      case 'DISMISSED':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800/80 border border-slate-600/50 text-slate-400 font-mono text-[11px] font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            DISMISSED
+          </span>
+        );
+      default:
+        return <span className="font-mono text-[11px]">{status}</span>;
+    }
+  };
+
+  const statusOptions = [
+    { key: 'open', label: 'OPEN', colorDot: 'bg-cyan-400', desc: 'Active surveillance queue' },
+    { key: 'acknowledged', label: "ACK'D", colorDot: 'bg-amber-400', desc: 'Under review / triage' },
+    { key: 'resolved', label: 'RESOLVED', colorDot: 'bg-emerald-400', desc: 'Incident cleared' },
+    { key: 'dismissed', label: 'DISMISSED', colorDot: 'bg-slate-400', desc: 'False positive / closed' },
+  ];
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef} onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        disabled={updating}
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="group inline-flex items-center gap-1 px-1 py-0.5 rounded hover:bg-surface-container cursor-pointer transition-all border border-transparent hover:border-outline-variant/40"
+        title="Click to change alert status"
+      >
+        {updating ? (
+          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 px-2 py-0.5 rounded bg-surface-container-highest border border-cyan-400/40">
+            <span className="h-2 w-2 rounded-full border border-cyan-400 border-t-transparent animate-spin" />
+            SAVING...
+          </span>
+        ) : (
+          <>
+            {getStatusBadge(alert.status)}
+            <span className="material-symbols-outlined text-[14px] text-outline group-hover:text-cyan-300 transition-colors">
+              arrow_drop_down
+            </span>
+          </>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 mt-1 w-44 bg-surface-container-high border border-outline-variant/60 rounded-md shadow-2xl py-1 z-50 font-mono text-xs animate-fadeIn divide-y divide-outline-variant/20">
+          <div className="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-semibold">
+            Select Status
+          </div>
+          <div className="py-1">
+            {statusOptions.map((opt) => {
+              const isCurrent =
+                alert.status === opt.label ||
+                alert.status?.toLowerCase() === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => handleSelect(opt.key)}
+                  className={`w-full flex items-center justify-between px-3 py-1.5 text-left text-[11px] transition-colors ${
+                    isCurrent
+                      ? 'bg-surface-container-lowest font-bold text-white'
+                      : 'hover:bg-surface-container text-on-surface'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${opt.colorDot}`} />
+                    <div className="flex flex-col leading-tight">
+                      <span>{opt.label}</span>
+                      <span className="text-[9px] text-outline font-sans">{opt.desc}</span>
+                    </div>
+                  </div>
+                  {isCurrent && (
+                    <span className="material-symbols-outlined text-cyan-400 text-[14px]">
+                      check
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AlertsTable({
   alerts,
@@ -7,6 +147,7 @@ export default function AlertsTable({
   onToggleSelectAll,
   onTriageAlert,
   onFocusOnMap,
+  onUpdateStatus,
 }) {
   const allSelected = alerts.length > 0 && alerts.every((a) => selectedAlertIds.includes(a.id));
   const someSelected = alerts.some((a) => selectedAlertIds.includes(a.id)) && !allSelected;
@@ -68,33 +209,6 @@ export default function AlertsTable({
     }
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'OPEN':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest border border-cyan-400 text-cyan-400 font-mono text-[11px] font-bold">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            OPEN
-          </span>
-        );
-      case 'ACKNOWLEDGED':
-      case "ACK'D":
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-[11px] font-medium">
-            ACK'D
-          </span>
-        );
-      case 'RESOLVED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[11px] font-medium">
-            RESOLVED
-          </span>
-        );
-      default:
-        return <span>{status}</span>;
-    }
-  };
-
   return (
     <div className="overflow-x-auto rounded border border-outline-variant/30 bg-surface-container-lowest shadow-md select-none font-sans">
       <table className="w-full text-left border-collapse">
@@ -135,7 +249,7 @@ export default function AlertsTable({
                 className={`transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-surface-container-high/80 border-l-4 border-cyan-400 shadow-[inset_0_0_12px_rgba(34,211,238,0.08)]'
-                    : alert.status === 'RESOLVED'
+                    : alert.status === 'RESOLVED' || alert.status === 'DISMISSED'
                     ? 'opacity-70 hover:opacity-100 hover:bg-surface-container-high/30'
                     : 'hover:bg-surface-container-high/40'
                 }`}
@@ -208,19 +322,20 @@ export default function AlertsTable({
                   </div>
                 </td>
 
-                {/* Status */}
-                <td className="py-3 px-3">{getStatusBadge(alert.status)}</td>
-
-                
+                {/* Status Column with Interactive Selector */}
+                <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                  <StatusSelector alert={alert} onUpdateStatus={onUpdateStatus} />
+                </td>
 
                 {/* Direct Actions */}
                 <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-1.5">
+
                     <button
                       onClick={() => onTriageAlert && onTriageAlert(alert)}
                       className="px-2.5 py-1 rounded bg-cyan-400 text-slate-950 font-mono text-[10px] font-bold uppercase hover:brightness-110 shadow-[0_0_8px_rgba(34,211,238,0.3)] transition-all"
                     >
-                      Triage
+                      View
                     </button>
                     <button
                       onClick={() => onFocusOnMap && onFocusOnMap(alert)}

@@ -222,6 +222,31 @@ export default function AlertsPage({ onNavigateTab }) {
     setSelectedAlertIds([]);
   };
 
+  const handleUpdateStatus = async (alertItem, newStatus) => {
+    const rawId = alertItem?.rawId;
+    if (!rawId) return;
+
+    const formatted = formatStatus(newStatus);
+    setAlerts((prev) =>
+      prev.map((a) => (a.rawId === rawId ? { ...a, status: formatted } : a))
+    );
+
+    if (triagingAlert && triagingAlert.rawId === rawId) {
+      setTriagingAlert((prev) => (prev ? { ...prev, status: formatted } : null));
+    }
+
+    try {
+      await apiRequest(`/api/alerts/${rawId}/status`, {
+        token,
+        method: 'PUT',
+        body: { status: newStatus },
+      });
+    } catch (e) {
+      console.error('Failed to update alert status:', e);
+      loadAlerts();
+    }
+  };
+
   const handleFocusOnMap = (alertItem) => {
     if (alertItem) {
       const targetMmsi = alertItem.mmsi;
@@ -324,6 +349,7 @@ export default function AlertsPage({ onNavigateTab }) {
           onToggleSelectAll={handleToggleSelectAll}
           onTriageAlert={(alertItem) => setTriagingAlert(alertItem)}
           onFocusOnMap={handleFocusOnMap}
+          onUpdateStatus={handleUpdateStatus}
         />
 
         {/* 5. Pagination Controls */}
@@ -340,7 +366,7 @@ export default function AlertsPage({ onNavigateTab }) {
       {/* Triage Detail Modal / Drawer */}
       {triagingAlert && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-container-low border border-cyan-400/50 rounded-lg max-w-lg w-full p-5 shadow-2xl space-y-4">
+          <div className="bg-surface-container-low border border-cyan-400/50 rounded-lg max-w-lg w-full p-5 shadow-2xl space-y-4 font-sans">
             <div className="flex items-start justify-between border-b border-outline-variant/30 pb-3">
               <div>
                 <span className="font-mono text-[10px] text-cyan-400 font-bold uppercase tracking-wider block">
@@ -359,6 +385,12 @@ export default function AlertsPage({ onNavigateTab }) {
             </div>
 
             <div className="p-3 bg-surface-container-lowest rounded border border-outline-variant/30 font-mono text-xs space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-outline">Current Status:</span>
+                <span className="font-bold text-cyan-400 px-2 py-0.5 rounded bg-surface-container border border-cyan-400/30">
+                  {triagingAlert.status}
+                </span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-outline">Vessel Name:</span>
                 <span className="text-white font-bold">{triagingAlert.vesselName}</span>
@@ -382,32 +414,75 @@ export default function AlertsPage({ onNavigateTab }) {
               {triagingAlert.details}
             </div>
 
+            {/* Status Modification Controls */}
+            <div className="flex flex-col gap-1.5 pt-2 border-t border-outline-variant/30 font-mono text-xs">
+              <span className="text-[10px] uppercase tracking-wider text-outline">Change Status:</span>
+              <div className="grid grid-cols-4 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUpdateStatus(triagingAlert, 'open');
+                    setTriagingAlert(null);
+                  }}
+                  className={`px-2 py-1.5 rounded font-bold uppercase transition-all ${
+                    triagingAlert.status === 'OPEN'
+                      ? 'bg-cyan-400 text-slate-950 shadow-md ring-2 ring-cyan-400'
+                      : 'bg-surface-container border border-outline-variant hover:border-cyan-400 text-cyan-300'
+                  }`}
+                >
+                  Open
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUpdateStatus(triagingAlert, 'acknowledged');
+                    setTriagingAlert(null);
+                  }}
+                  className={`px-2 py-1.5 rounded font-bold uppercase transition-all ${
+                    triagingAlert.status === "ACK'D" || triagingAlert.status === 'ACKNOWLEDGED'
+                      ? 'bg-amber-400 text-slate-950 shadow-md ring-2 ring-amber-400'
+                      : 'bg-surface-container border border-outline-variant hover:border-amber-400 text-amber-300'
+                  }`}
+                >
+                  Acknoledge
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUpdateStatus(triagingAlert, 'resolved');
+                    setTriagingAlert(null);
+                  }}
+                  className={`px-2 py-1.5 rounded font-bold uppercase transition-all ${
+                    triagingAlert.status === 'RESOLVED'
+                      ? 'bg-emerald-400 text-slate-950 shadow-md ring-2 ring-emerald-400'
+                      : 'bg-surface-container border border-outline-variant hover:border-emerald-400 text-emerald-300'
+                  }`}
+                >
+                  Resolve
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUpdateStatus(triagingAlert, 'dismissed');
+                    setTriagingAlert(null);
+                  }}
+                  className={`px-2 py-1.5 rounded font-bold uppercase transition-all ${
+                    triagingAlert.status === 'DISMISSED'
+                      ? 'bg-slate-400 text-slate-950 shadow-md ring-2 ring-slate-400'
+                      : 'bg-surface-container border border-outline-variant hover:border-slate-400 text-slate-400'
+                  }`}
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+
             <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant/30 font-mono text-xs">
               <button
                 onClick={() => setTriagingAlert(null)}
                 className="px-3 py-1.5 rounded bg-surface-container border border-outline-variant text-outline hover:text-white"
               >
                 Close
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await apiRequest(`/api/alerts/${triagingAlert.rawId}/status`, {
-                      token,
-                      method: 'PUT',
-                      body: { status: 'acknowledged' },
-                    });
-                  } catch (e) {
-                    console.error('Failed to acknowledge alert:', e);
-                  }
-                  setAlerts((prev) =>
-                    prev.map((a) => (a.id === triagingAlert.id ? { ...a, status: "ACK'D" } : a))
-                  );
-                  setTriagingAlert(null);
-                }}
-                className="px-3 py-1.5 rounded bg-cyan-400 text-slate-950 font-bold hover:brightness-110"
-              >
-                Acknowledge Alert
               </button>
             </div>
           </div>

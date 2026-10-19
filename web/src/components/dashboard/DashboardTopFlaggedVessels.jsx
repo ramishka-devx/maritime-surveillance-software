@@ -34,7 +34,7 @@ export default function DashboardTopFlaggedVessels({ topFlaggedVessels = [], tim
           <span className="material-symbols-outlined text-cyan-400 text-[20px]">flag</span>
           <span className="text-sm font-bold text-on-surface uppercase">Top Flagged Vessels</span>
         </div>
-        <span className="font-mono text-xs uppercase text-outline">PRIORITY ROSTER ({timeRange.toUpperCase()})</span>
+        <span className="font-mono text-xs uppercase text-outline">({timeRange.toUpperCase()})</span>
       </div>
 
       {topFlaggedVessels.length === 0 ? (
