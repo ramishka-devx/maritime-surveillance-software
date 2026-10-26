@@ -4,7 +4,7 @@ import { AnomalyService } from './anomaly.service.js';
 export const AnomalyController = {
   async create(req, res, next) {
     try {
-      const anomaly = await AnomalyService.create(req.body);
+      const anomaly = await AnomalyService.create(req.body, req.user?.user_id);
       return success(res, anomaly, 'Anomaly created', 201);
     } catch (e) {
       next(e);

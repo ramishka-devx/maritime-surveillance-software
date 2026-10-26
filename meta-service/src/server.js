@@ -4,6 +4,7 @@ import { logger } from './config/logger.js';
 import { startDbConnectionCheck } from './config/db.config.js';
 import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
+import { runGeofenceDetector } from './cron/geofenceDetector.js';
 import '../cron/partition-cron.js';
 
 (async () => {
@@ -61,6 +62,12 @@ import '../cron/partition-cron.js';
       timezone: 'UTC',
     }
   );
+
+  // Streamed Geofence Detector: checks incoming AIS positions against restricted areas every 30 seconds
+  const geofenceInterval = '*/30 * * * * *';
+  cron.schedule(geofenceInterval, () => {
+    runGeofenceDetector();
+  });
 
   function shutdown() {
     logger.info('Shutting down...');

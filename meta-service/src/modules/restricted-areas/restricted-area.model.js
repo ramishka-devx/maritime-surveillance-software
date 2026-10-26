@@ -72,17 +72,59 @@ export const RestrictedAreaModel = {
 
     return query(
       `SELECT
-         s.ship_name,
+         COALESCE(s.ship_name, sh.ship_name) AS ship_name,
          s.mmsi,
          r.id AS restricted_area_id,
          r.name AS restricted_zone,
          r.type AS restricted_area_type,
          s.time_utc,
+         s.sog,
+         s.cog,
          ST_Y(s.position::geometry) AS lat,
          ST_X(s.position::geometry) AS lon
        FROM ais_positions s
        JOIN restricted_areas r
          ON ST_Intersects(s.position, r.geom)
+       LEFT JOIN ships sh
+         ON sh.mmsi = s.mmsi
+       ${whereClause}
+       ORDER BY s.time_utc DESC
+       LIMIT ?`,
+      [...params, limit]
+    );
+  },
+
+  async detectBreaches({ sinceTime, limit = 100 } = {}) {
+    const where = [];
+    const params = [];
+
+    if (sinceTime) {
+      where.push('s.time_utc >= ?');
+      params.push(sinceTime);
+    } else {
+      where.push("s.time_utc >= NOW() - INTERVAL '15 minutes'");
+    }
+
+    const whereClause = `WHERE ${where.join(' AND ')}`;
+
+    return query(
+      `SELECT
+         s.id AS position_id,
+         s.mmsi,
+         COALESCE(s.ship_name, sh.ship_name) AS ship_name,
+         r.id AS restricted_area_id,
+         r.name AS restricted_zone,
+         r.type AS restricted_area_type,
+         s.time_utc,
+         s.sog,
+         s.cog,
+         ST_Y(s.position::geometry) AS lat,
+         ST_X(s.position::geometry) AS lon
+       FROM ais_positions s
+       JOIN restricted_areas r
+         ON ST_Intersects(s.position, r.geom)
+       LEFT JOIN ships sh
+         ON sh.mmsi = s.mmsi
        ${whereClause}
        ORDER BY s.time_utc DESC
        LIMIT ?`,

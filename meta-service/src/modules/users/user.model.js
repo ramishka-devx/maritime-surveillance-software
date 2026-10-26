@@ -48,11 +48,12 @@ export const UserModel = {
     const offset = (page - 1) * limit;
     const rows = await query(`
       SELECT 
-        u.user_id, u.first_name, u.last_name, u.email, 
+        u.user_id, u.first_name, u.last_name, u.username, u.email, 
         u.role_id, r.name AS role, 
-        u.status, u.created_at, u.updated_at
+        u.status, u.profile_img as "profileImg", u.created_at, u.updated_at
       FROM users u
       LEFT JOIN roles r ON r.role_id = u.role_id
+      ORDER BY u.user_id ASC
       LIMIT ? OFFSET ?
     `, [Number(limit), Number(offset)]);
     const [{ count }] = await query('SELECT COUNT(*) as count FROM users');

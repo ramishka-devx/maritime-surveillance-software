@@ -3,7 +3,7 @@ import Joi from 'joi';
 export const listSchema = Joi.object({
   query: Joi.object({
     page: Joi.number().min(1).default(1),
-    limit: Joi.number().min(1).max(100).default(10),
+    limit: Joi.number().min(1).max(1000).default(10),
     status: Joi.string().valid('open', 'acknowledged', 'resolved', 'dismissed').allow('', null),
     severity: Joi.string().valid('low', 'medium', 'high', 'critical').allow('', null),
     vessel_id: Joi.number().integer().allow(null)

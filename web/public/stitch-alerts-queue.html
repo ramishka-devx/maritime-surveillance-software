@@ -1,0 +1,911 @@
+<!DOCTYPE html><html class="dark" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary-fixed-dim": "#adc6ff", "on-tertiary": "#003824", "on-primary": "#00363e", "surface-container-highest": "#2e3544", "on-tertiary-fixed": "#002113", "error-container": "#93000a", "on-surface-variant": "#bbc9cd", "surface-container-lowest": "#070e1c", "secondary-container": "#0566d9", "on-surface": "#dce2f6", "surface-bright": "#323949", "on-background": "#dce2f6", "inverse-primary": "#006877", "on-primary-fixed-variant": "#004e5a", "surface-dim": "#0c1321", "tertiary-fixed-dim": "#4edea3", "primary-container": "#22d3ee", "secondary-fixed": "#d8e2ff", "outline": "#859397", "on-secondary-container": "#e6ecff", "on-secondary-fixed": "#001a42", "on-secondary-fixed-variant": "#004395", "surface-container-low": "#151b2a", "tertiary-container": "#46d89d", "on-tertiary-container": "#005a3d", "on-error": "#690005", "tertiary": "#68f5b8", "on-secondary": "#002e6a", "primary-fixed-dim": "#2fd9f4", "surface": "#0c1321", "outline-variant": "#3c494c", "surface-tint": "#2fd9f4", "on-primary-container": "#005763", "surface-variant": "#2e3544", "background": "#0c1321", "surface-container-high": "#232a39", "inverse-surface": "#dce2f6", "on-error-container": "#ffdad6", "on-tertiary-fixed-variant": "#005236", "tertiary-fixed": "#6ffbbe", "primary-fixed": "#a2eeff", "error": "#ffb4ab", "primary": "#8aebff", "on-primary-fixed": "#001f25", "secondary": "#adc6ff", "inverse-on-surface": "#2a3040", "surface-container": "#19202e" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "gutter-desktop": "1rem", "margin-desktop": "1rem", "space-xs": "0.25rem", "space-lg": "1rem", "gutter": "0.75rem", "space-sm": "0.5rem", "margin": "0.75rem", "space-md": "0.75rem" }, "fontFamily": { "headline-xl": ["Inter"], "telemetry-data": ["JetBrains Mono"], "body-sm": ["JetBrains Mono"], "label-sm": ["Inter"], "label-md": ["Inter"], "body-md": ["JetBrains Mono"], "headline-md": ["Inter"], "body-lg": ["JetBrains Mono"], "headline-lg": ["Inter"], "label-lg": ["Inter"] }, "fontSize": { "headline-xl": ["2rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.02em", "fontWeight": "700" }], "telemetry-data": ["0.8125rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-sm": ["0.6875rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "400" }], "label-sm": ["0.625rem", { "lineHeight": "0.75rem", "letterSpacing": "0.08em", "fontWeight": "700" }], "label-md": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.06em", "fontWeight": "600" }], "body-md": ["0.75rem", { "lineHeight": "1.125rem", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-md": ["1.125rem", { "lineHeight": "1.375rem", "letterSpacing": "0em", "fontWeight": "600" }], "body-lg": ["0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0em", "fontWeight": "500" }], "headline-lg": ["1.5rem", { "lineHeight": "1.75rem", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-lg": ["0.8125rem", { "lineHeight": "1rem", "letterSpacing": "0.04em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-60 bg-surface-container-low border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-md border-b border-outline-variant/30 flex items-center gap-space-sm bg-surface-container-lowest"><img alt="SerenGuard Shield &amp; Wheel Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WOqRMj-HEULbjaCVIAImk4WM8JOYxRz2hmPf--JbcxprFZB8PgXQoiFufdf_dJ38agL0itg2wVpZ1CVRDVMsi0F9jP9Dj-87ZIbCKf5R4Sjwdy786w6CFSfCbe8Vbg_sd484MX0Yvkq10lQHQaYdA1wTFZDwIb9J3t6OOqHQMlMxwpvJ1Eu1Cgrz2zk2_cWsDunvZlI0Yzz50cLq70mrDtO0vAscCIXJuwo87p088S_QQEEQSTrVBTRA"><div class="flex flex-col"><span class="font-headline-md text-label-lg font-bold tracking-tight text-on-surface uppercase leading-none">SerenGuard</span><span class="font-label-sm text-label-sm text-primary tracking-wider uppercase mt-1 leading-none">Tactical Maritime Ops</span></div></div><div class="px-space-sm py-space-sm"><div class="font-label-sm text-label-sm uppercase tracking-wider text-outline px-space-sm py-space-xs font-semibold">Operations</div><nav class="flex flex-col gap-0.5 mt-1" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-semibold"><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="map" href="#"><span>Map</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="alerts" href="#"><span>Alerts</span><span class="px-1.5 py-0.5 rounded bg-error-container text-on-error font-telemetry-data text-body-sm font-bold border border-error/40">14</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="vessels" href="#"><span>Vessels</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="anomalies" href="#"><span>Anomalies</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="restricted-areas" href="#"><span>Restricted Areas</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="dashboard" href="#"><span>Dashboard</span></a></nav></div><div class="px-space-sm py-space-xs border-t border-outline-variant/20"><div class="font-label-sm text-label-sm uppercase tracking-wider text-outline px-space-sm py-space-xs font-semibold">Administration</div><nav class="flex flex-col gap-0.5 mt-1" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-semibold"><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="users" href="#"><span>Users</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="roles-permissions" href="#"><span>Roles &amp; Permissions</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="audit-log" href="#"><span>Audit Log</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="detection-settings" href="#"><span>Detection Settings</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="system-health" href="#"><span>System Health</span><span class="flex items-center gap-1 font-telemetry-data text-body-sm text-tertiary font-semibold"><span class="h-1.5 w-1.5 rounded-full bg-tertiary animate-pulse"></span>99.98%</span></a></nav></div></div><div class="p-space-sm border-t border-outline-variant/30 bg-surface-container-lowest"><div class="p-space-sm bg-surface-container-low rounded border border-outline-variant/40 flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm uppercase text-outline tracking-wider">Threat Status</span><span class="font-telemetry-data text-body-sm text-primary uppercase font-bold">Active</span></div><div class="flex items-center gap-space-xs mt-0.5 px-space-xs py-1 rounded bg-surface-container-highest border border-outline-variant"><span class="h-2 w-2 rounded-full bg-tertiary-container ring-2 ring-tertiary/20"></span><span class="font-telemetry-data text-body-sm font-semibold tracking-wide text-on-surface">DEFCON 3 / ELEVATED</span></div></div></div></aside><div class="pl-60 flex flex-col min-h-screen"><header class="fixed top-0 left-60 right-0 h-16 bg-surface-container-low/95 backdrop-blur-md border-b border-outline-variant/30 z-40 px-space-md flex items-center justify-between gap-space-md"><div class="flex-1 max-w-xl"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-3 text-primary text-[18px] pointer-events-none">search</span><input class="w-full bg-surface-container-lowest border border-outline-variant/40 rounded pl-9 pr-14 py-1.5 text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container" placeholder="Search MMSI, IMO, vessel name, or callsign..." type="text"><kbd class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-outline font-telemetry-data text-body-sm border border-outline-variant/50">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-sm px-space-sm py-1 bg-surface-container-lowest rounded border border-outline-variant/30"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span></span><div class="flex flex-col"><span class="font-label-sm text-label-sm font-bold text-on-surface leading-none">AIS LIVE</span><span class="font-telemetry-data text-body-sm text-tertiary leading-none mt-0.5">9,420 pkts/s</span></div></div><div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1.5 bg-surface-container-lowest rounded border border-outline-variant/30"><span class="material-symbols-outlined text-[16px] text-primary">satellite_alt</span><span class="font-telemetry-data text-body-sm text-on-surface tracking-wide">2025-05-18 14:32:09 UTC</span></div><button class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-lowest rounded border border-outline-variant/40 text-on-surface hover:border-primary-container transition-colors"><span class="material-symbols-outlined text-[16px] text-primary">radar</span><span class="font-label-sm text-label-sm uppercase font-semibold">SECTOR 04 - DOVER</span><span class="material-symbols-outlined text-[16px] text-outline">arrow_drop_down</span></button><div class="flex items-center gap-1 border-l border-outline-variant/30 pl-space-sm"><button class="p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Audio Alerts"><span class="material-symbols-outlined text-[20px]">volume_up</span></button><button class="relative p-1.5 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Operational Pings"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary ring-2 ring-surface-container-low"></span></button></div><div class="flex items-center gap-space-sm pl-space-sm border-l border-outline-variant/30"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdmkTaKzY9p2f5-sclHBZK9FXjowrY24NumAp25yIjzr7ksveKyJGYRRvnNWv2JlqUE-sGKdGxx95eMbV9pZh3wxQHeA54NGKahaNEGApMwKG5WHWiYBGqXJ75mHSDwaMkmyoxf-VXD5Nz5icvKTN8lXYORWzeYjeG6TBbHPbEenlBSVraRFCiWmYYP6bsrERTkC2W8NFyMXvuwcQrxLnXKyXapuK2eVP63sFE_BohW4dkuJAOYmiH"><span class="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-tertiary ring-1 ring-surface-container-low"></span></div><div class="hidden md:flex flex-col"><span class="font-label-md text-label-md font-bold text-on-surface leading-tight">LT. C. MARTINEZ</span><div class="flex items-center gap-1 leading-tight"><span class="font-label-sm text-label-sm text-outline uppercase">WATCH OFFICER</span><span class="text-[10px] text-tertiary font-bold">• ON WATCH</span></div></div><span class="material-symbols-outlined text-[18px] text-outline">expand_more</span></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Interactive Client-side Script for Navigation Selection & Dynamic Behaviors -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Highlight sidebar Alerts link with live counter badge
+      const alertsNav = document.querySelector('aside nav a[data-path="alerts"]');
+      if (alertsNav) {
+        alertsNav.className = 'flex items-center justify-between px-space-sm py-space-xs rounded-lg text-primary bg-surface-container-high border-l-2 border-primary-container font-semibold transition-colors font-label-md text-label-md';
+        const badge = alertsNav.querySelector('span:last-child');
+        if (badge) {
+          badge.className = 'px-1.5 py-0.5 rounded bg-error-container text-on-error font-telemetry-data text-body-sm font-bold border border-error/50 shadow-[0_0_8px_rgba(239,68,68,0.35)]';
+          badge.textContent = '24';
+        }
+      }
+
+      // Checkbox multi-select interaction mock
+      const masterCheckbox = document.getElementById('select-all-alerts');
+      const rowCheckboxes = document.querySelectorAll('.alert-row-check');
+      const selectionBar = document.getElementById('bulk-action-bar');
+      const selectionCounter = document.getElementById('selected-count-badge');
+
+      function updateBar() {
+        const checkedCount = document.querySelectorAll('.alert-row-check:checked').length;
+        if (selectionCounter) {
+          selectionCounter.textContent = `${checkedCount} alert${checkedCount === 1 ? '' : 's'} selected`;
+        }
+        if (checkedCount > 0) {
+          selectionBar?.classList.remove('hidden');
+          selectionBar?.classList.add('flex');
+        } else {
+          selectionBar?.classList.add('hidden');
+          selectionBar?.classList.remove('flex');
+        }
+      }
+
+      masterCheckbox?.addEventListener('change', (e) => {
+        rowCheckboxes.forEach(cb => {
+          cb.checked = e.target.checked;
+          const row = cb.closest('tr');
+          if (e.target.checked) {
+            row?.classList.add('bg-surface-container-highest/60');
+          } else {
+            row?.classList.remove('bg-surface-container-highest/60');
+          }
+        });
+        updateBar();
+      });
+
+      rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const row = cb.closest('tr');
+          if (cb.checked) {
+            row?.classList.add('bg-surface-container-highest/60');
+          } else {
+            row?.classList.remove('bg-surface-container-highest/60');
+          }
+          updateBar();
+        });
+      });
+    });
+  </script>
+<!-- Main Content Space -->
+<div class="p-space-lg flex flex-col gap-space-md max-w-[1720px] mx-auto">
+<!-- 1. Tactical Workspace Header -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm border-b border-outline-variant/30">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Alerts Queue</h1>
+<span class="inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded bg-surface-container-highest border border-outline-variant/40 font-telemetry-data text-body-sm text-primary">
+<span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+            LIVE RADAR FEED
+          </span>
+<span class="font-telemetry-data text-body-sm text-outline flex items-center gap-1 ml-1">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+            Auto-refresh: 5s
+          </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+          Real-time triage and tactical interdiction roster across monitored maritime sectors
+        </p>
+</div>
+<!-- Action Triggers -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<button class="p-2 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary border border-outline-variant/40 transition-colors" title="Toggle Audio Alarms">
+<span class="material-symbols-outlined text-[18px]">volume_up</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 text-on-surface text-label-md font-label-md font-semibold transition-colors">
+<span class="material-symbols-outlined text-[16px] text-outline">download</span>
+<span>Export CSV</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded bg-primary-container text-on-primary-container font-label-md text-label-md font-bold hover:brightness-110 transition-all shadow-[0_0_12px_rgba(34,211,238,0.35)]">
+<span class="material-symbols-outlined text-[16px]">done_all</span>
+<span>Acknowledge Selected</span>
+</button>
+</div>
+</div>
+<!-- 2. Operational Triage Metrics Summary Chips -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm">
+<!-- Metric 1: Open -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded border border-outline-variant/30 hover:border-primary/40 transition-colors">
+<div class="flex items-center gap-2">
+<span class="h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-primary/20"></span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline font-semibold">Open</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-telemetry-data text-headline-md font-bold text-on-surface">24</span>
+<span class="font-telemetry-data text-body-sm text-outline">active</span>
+</div>
+</div>
+<!-- Metric 2: Acknowledged -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded border border-outline-variant/30 hover:border-outline-variant/60 transition-colors">
+<div class="flex items-center gap-2">
+<span class="h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-amber-400/20"></span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline font-semibold">Acknowledged</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-telemetry-data text-headline-md font-bold text-amber-300">11</span>
+<span class="font-telemetry-data text-body-sm text-outline">in-triage</span>
+</div>
+</div>
+<!-- Metric 3: Resolved Today -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded border border-outline-variant/30 hover:border-outline-variant/60 transition-colors">
+<div class="flex items-center gap-2">
+<span class="h-2.5 w-2.5 rounded-full bg-tertiary ring-2 ring-tertiary/20"></span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-outline font-semibold">Resolved Today</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-telemetry-data text-headline-md font-bold text-tertiary">37</span>
+<span class="font-telemetry-data text-body-sm text-tertiary/60">cleared</span>
+</div>
+</div>
+<!-- Metric 4: Critical Urgency -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded border border-error/40 hover:border-error transition-all shadow-[0_0_12px_rgba(239,68,68,0.15)]">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
+</span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-error font-bold">Critical</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-telemetry-data text-headline-md font-bold text-error">03</span>
+<span class="font-telemetry-data text-body-sm text-error/80 uppercase">URGENT</span>
+</div>
+</div>
+</div>
+<!-- 3. Tactical Filter Bar -->
+<div class="p-space-sm bg-surface-container-low rounded border border-outline-variant/30 flex flex-col xl:flex-row xl:items-center justify-between gap-space-sm">
+<div class="flex flex-wrap items-center gap-space-sm flex-1">
+<!-- Search Input -->
+<div class="relative flex items-center min-w-[260px] flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-2.5 text-outline text-[18px]">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/40 rounded pl-8 pr-12 py-1.5 text-on-surface font-telemetry-data text-body-sm placeholder:text-outline/70 focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Search alerts by vessel, MMSI, or ID..." type="text">
+<kbd class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-outline font-telemetry-data text-body-sm border border-outline-variant/50">⌘F</kbd>
+</div>
+<!-- Filter: Status -->
+<div class="relative">
+<button class="flex items-center gap-1.5 px-space-sm py-1.5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-outline text-on-surface font-label-md text-label-md">
+<span class="text-outline">Status:</span>
+<span class="font-semibold text-primary">All</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</button>
+</div>
+<!-- Filter: Type -->
+<div class="relative">
+<button class="flex items-center gap-1.5 px-space-sm py-1.5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-outline text-on-surface font-label-md text-label-md">
+<span class="text-outline">Type:</span>
+<span class="font-semibold text-on-surface">All Types</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</button>
+</div>
+<!-- Filter: Severity -->
+<div class="relative">
+<button class="flex items-center gap-1.5 px-space-sm py-1.5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-outline text-on-surface font-label-md text-label-md">
+<span class="text-outline">Severity:</span>
+<span class="font-semibold text-error">Critical + High</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</button>
+</div>
+<!-- Filter: Date Range -->
+<div class="relative">
+<button class="flex items-center gap-1.5 px-space-sm py-1.5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-outline text-on-surface font-label-md text-label-md">
+<span class="material-symbols-outlined text-[15px] text-primary">calendar_month</span>
+<span class="font-telemetry-data text-body-sm text-on-surface">Last 24 Hours (UTC)</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</button>
+</div>
+<!-- Clear Button -->
+<button class="flex items-center gap-1 px-space-xs py-1 text-outline hover:text-on-surface transition-colors font-label-sm text-label-sm uppercase">
+<span class="material-symbols-outlined text-[14px]">close</span>
+<span>Clear filters</span>
+</button>
+</div>
+<!-- Quick Counter -->
+<div class="flex items-center justify-end font-telemetry-data text-body-sm text-outline border-t xl:border-t-0 xl:border-l border-outline-variant/30 pt-2 xl:pt-0 xl:pl-space-md">
+        Showing <span class="text-primary font-bold mx-1">10</span> of <span class="text-on-surface font-bold ml-1">24</span> active alerts
+      </div>
+</div>
+<!-- 4. Floating / Docked Bulk Action Bar (Active on row selection) -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-high rounded border border-primary-container/40 shadow-[0_0_15px_rgba(34,211,238,0.15)] animate-fade-in" id="bulk-action-bar">
+<div class="flex items-center gap-space-sm">
+<span class="flex h-2 w-2 rounded-full bg-primary-container animate-ping"></span>
+<span class="font-telemetry-data text-body-sm font-bold text-primary px-2 py-0.5 rounded bg-surface-container-lowest border border-primary-container/30" id="selected-count-badge">
+          1 alert selected
+        </span>
+<span class="hidden md:inline font-body-sm text-body-sm text-outline">Target ready for tactical interdiction dispatch</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<button class="flex items-center gap-1 px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase font-bold hover:brightness-110 transition-colors">
+<span class="material-symbols-outlined text-[14px]">check</span>
+<span>Acknowledge (A)</span>
+</button>
+<button class="flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container border border-outline-variant hover:border-primary text-on-surface font-label-sm text-label-sm uppercase transition-colors">
+<span class="material-symbols-outlined text-[14px] text-primary">person_add</span>
+<span>Assign Operator</span>
+</button>
+<button class="flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container border border-error/50 hover:bg-error-container text-error hover:text-on-error font-label-sm text-label-sm uppercase font-semibold transition-colors">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span>Escalate DEFCON 2</span>
+</button>
+<button class="flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-outline hover:text-on-surface font-label-sm text-label-sm uppercase transition-colors">
+<span>False Positive</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface ml-1" title="Dismiss selection">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- 5. Data Table: Tactical 10-Row Queue Roster -->
+<div class="overflow-x-auto rounded border border-outline-variant/30 bg-surface-container-lowest shadow-md">
+<table class="w-full text-left border-collapse select-none">
+<!-- Table Header -->
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant/40 font-label-sm text-label-sm uppercase text-outline tracking-wider">
+<th class="p-space-sm w-10 text-center">
+<input class="rounded bg-surface-container-lowest border-outline-variant text-primary-container focus:ring-0 focus:ring-offset-0 cursor-pointer" id="select-all-alerts" type="checkbox">
+</th>
+<th class="py-space-sm px-space-xs font-bold text-on-surface-variant">
+<button class="flex items-center gap-1 hover:text-on-surface">
+<span>SEV</span>
+<span class="material-symbols-outlined text-[14px]">unfold_more</span>
+</button>
+</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant">Alert Type</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant">Vessel Name / Ident</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant">Coordinates &amp; Sector</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant">
+<button class="flex items-center gap-1 text-primary hover:underline">
+<span>Detected (UTC)</span>
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</button>
+</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant">Status</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant">Operator</th>
+<th class="py-space-sm px-space-sm font-bold text-on-surface-variant text-right">Direct Actions</th>
+</tr>
+</thead>
+<!-- Table Body -->
+<tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm text-on-surface">
+<!-- ROW 1: SELECTED & HIGHLIGHTED WITH CYAN ACCENT -->
+<tr class="bg-surface-container-high/80 border-l-4 border-primary-container shadow-[inset_0_0_12px_rgba(34,211,238,0.08)] transition-colors">
+<td class="p-space-sm text-center">
+<input checked="" class="alert-row-check rounded bg-surface-container border-primary-container text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-on-error border border-error/50 font-telemetry-data text-body-sm font-bold shadow-[0_0_8px_rgba(239,68,68,0.3)]">
+<span class="h-1.5 w-1.5 rounded-full bg-error animate-ping"></span>
+                CRIT
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-error font-semibold">
+<span class="material-symbols-outlined text-[18px]">cell_tower</span>
+<span class="font-label-md text-label-md">Transponder Spoofing</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-primary">[LR]</span>
+<span>MV NORDIC SENTINEL</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: <span class="text-primary-fixed">211284000</span> · IMO: 9384918
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°18'22"N 001°44'02"E</span>
+<span class="font-label-sm text-label-sm text-primary uppercase">Dover TSS Inbound</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">14:30:07 UTC</span>
+<span class="font-telemetry-data text-body-sm text-error font-bold">2m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest border border-primary-container text-primary font-telemetry-data text-body-sm font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                OPEN
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-1.5">
+<img alt="Tactical Watch Officer Martinez" class="w-6 h-6 rounded-full border border-primary-container object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1X7YccwMXaoJhCJh61RSMFo6qwKEBgkOL703JAsYJ41OrKfM66TY78Wiomd4epWGEgjVgqSRK3QdG5vQa2nNX6TlHFowSbjyDHm8IvCvN4Cmfw2ISNvxlA2mkD3-7NGdC9jiNKjZDF4w2kS4fBrK9nU-5tXGNtt3trxi8OxGZSYkJyVFQC4yfGMKbR9l6C_fijknOab8DcGmODYhk3fSSwpFquDS7yfA0yE5wdMJU11Lzn2sn6__F9n7Fg">
+<span class="font-label-md text-label-md font-medium text-on-surface">Lt. Martinez</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm font-bold uppercase hover:brightness-110 shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+                  Triage
+                </button>
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container" title="Lock Radar Viewport">
+<span class="material-symbols-outlined text-[18px]">my_location</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 2: High Severity Zone Incursion -->
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/40 font-telemetry-data text-body-sm font-bold">
+                HIGH
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-amber-300 font-semibold">
+<span class="material-symbols-outlined text-[18px]">security_update_warning</span>
+<span class="font-label-md text-label-md">Restricted Area Incursion</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-outline">[PA]</span>
+<span>OCEAN MARINER</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 354891000 · IMO: 9241029
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°09'14"N 001°16'50"E</span>
+<span class="font-label-sm text-label-sm text-outline">Zone R-04 Perimeter</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">14:28:12 UTC</span>
+<span class="font-telemetry-data text-body-sm text-amber-400">4m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container border border-primary/40 text-primary font-telemetry-data text-body-sm font-medium">
+                OPEN
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded border border-dashed border-outline-variant text-outline font-label-sm text-label-sm">
+                Unassigned
+              </span>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container" title="Center map">
+<span class="material-symbols-outlined text-[18px]">file_download_done</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container" title="Inspect AIS Packet">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Critical Dark Vessel -->
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-on-error border border-error/50 font-telemetry-data text-body-sm font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-error"></span>
+                CRIT
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-error font-semibold">
+<span class="material-symbols-outlined text-[18px]">portable_wifi_off</span>
+<span class="font-label-md text-label-md">Dark Vessel / AIS Lost</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-outline">[MH]</span>
+<span>SEA EMPRESS</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 636019442 · IMO: 9482711
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°04'38"N 001°22'19"E</span>
+<span class="font-label-sm text-label-sm text-outline">SW Shipping Lane</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">14:21:05 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline">11m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/40 text-amber-300 font-telemetry-data text-body-sm font-medium">
+                ACK'D
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-telemetry-data text-[10px] text-primary">PV</span>
+<span class="font-label-md text-label-md text-on-surface">PO Vance</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">file_download_done</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: High Collision Risk -->
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/40 font-telemetry-data text-body-sm font-bold">
+                HIGH
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-amber-300 font-semibold">
+<span class="material-symbols-outlined text-[18px]">alt_route</span>
+<span class="font-label-md text-label-md">Collision Risk (CPA Alert)</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-outline">[RU]</span>
+<span>KAPITAN V</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 273418290 · IMO: 8917203
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°14'01"N 001°38'44"E</span>
+<span class="font-label-sm text-label-sm text-error font-medium">Grid 51-04 (CPA 0.18 NM)</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">14:06:19 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline">26m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/40 text-amber-300 font-telemetry-data text-body-sm font-medium">
+                ACK'D
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-telemetry-data text-[10px] text-secondary">WD</span>
+<span class="font-label-md text-label-md text-on-surface">WO Diaz</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">file_download_done</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 5: Medium Speed Anomaly -->
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-300 border border-yellow-500/40 font-telemetry-data text-body-sm font-semibold">
+                MED
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-[18px] text-yellow-300">speed</span>
+<span class="font-label-md text-label-md">Speed Anomaly</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-outline">[PA]</span>
+<span>STAR POLARIS</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 244102911 · IMO: 9194028
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°22'50"N 001°55'12"E</span>
+<span class="font-label-sm text-label-sm text-outline">Outer Bank Approach (24.8 kts)</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">13:58:44 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline">34m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container border border-primary/40 text-primary font-telemetry-data text-body-sm font-medium">
+                OPEN
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded border border-dashed border-outline-variant text-outline font-label-sm text-label-sm">
+                Unassigned
+              </span>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">file_download_done</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 6: Medium Loitering Pattern -->
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-300 border border-yellow-500/40 font-telemetry-data text-body-sm font-semibold">
+                MED
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-[18px] text-yellow-300">sync_alt</span>
+<span class="font-label-md text-label-md">Loitering Pattern</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-outline">[LR]</span>
+<span>PACIFIC VOYAGER</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 636012891 · IMO: 9553201
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°01'15"N 001°11'08"E</span>
+<span class="font-label-sm text-label-sm text-outline">Cap Gris-Nez Shoals (8 hrs)</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">13:42:10 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline">50m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container border border-primary/40 text-primary font-telemetry-data text-body-sm font-medium">
+                OPEN
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-1.5">
+<img alt="Tactical Watch Officer Martinez" class="w-5 h-5 rounded-full border border-outline-variant object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1X7YccwMXaoJhCJh61RSMFo6qwKEBgkOL703JAsYJ41OrKfM66TY78Wiomd4epWGEgjVgqSRK3QdG5vQa2nNX6TlHFowSbjyDHm8IvCvN4Cmfw2ISNvxlA2mkD3-7NGdC9jiNKjZDF4w2kS4fBrK9nU-5tXGNtt3trxi8OxGZSYkJyVFQC4yfGMKbR9l6C_fijknOab8DcGmODYhk3fSSwpFquDS7yfA0yE5wdMJU11Lzn2sn6__F9n7Fg">
+<span class="font-label-md text-label-md text-on-surface">Lt. Martinez</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">file_download_done</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 7: Critical Unsanctioned STS -->
+<tr class="hover:bg-surface-container-high/40 transition-colors">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-on-error border border-error/50 font-telemetry-data text-body-sm font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-error"></span>
+                CRIT
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-error font-semibold">
+<span class="material-symbols-outlined text-[18px]">directions_boat</span>
+<span class="font-label-md text-label-md">Unsanctioned STS Transfer</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold text-on-surface">
+<span class="text-outline">[CY]</span>
+<span>BOREAS STAR</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 212554000 · IMO: 9308114
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-semibold">51°26'18"N 002°04'30"E</span>
+<span class="font-label-sm text-label-sm text-primary uppercase">International Waters</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface font-medium">13:20:00 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline">1h 12m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/40 text-amber-300 font-telemetry-data text-body-sm font-medium">
+                ACK'D
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-primary font-semibold">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+                Intel Unit
+              </span>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">file_download_done</span>
+</button>
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 8: Low Severity Resolved -->
+<tr class="opacity-75 hover:opacity-100 hover:bg-surface-container-high/40 transition-all">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/10 text-secondary border border-blue-500/30 font-telemetry-data text-body-sm font-medium">
+                LOW
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-outline">
+<span class="material-symbols-outlined text-[18px]">waves</span>
+<span class="font-label-md text-label-md">Draft Discrepancy</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-semibold text-on-surface-variant">
+<span class="text-outline">[FR]</span>
+<span>CMA CGM ANTOINE</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 228318000 · IMO: 9722699
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface-variant">51°24'55"N 002°01'18"E</span>
+<span class="font-label-sm text-label-sm text-outline">North Lane Corridor</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-outline">12:45:18 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline/80">1h 47m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-telemetry-data text-body-sm font-medium">
+                RESOLVED
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="font-label-md text-label-md text-outline">Port Control Dover</span>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 9: Medium Speed Anomaly Resolved -->
+<tr class="opacity-75 hover:opacity-100 hover:bg-surface-container-high/40 transition-all">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-300 border border-yellow-500/40 font-telemetry-data text-body-sm font-semibold">
+                MED
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-outline">
+<span class="material-symbols-outlined text-[18px]">speed</span>
+<span class="font-label-md text-label-md">Speed Anomaly</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-semibold text-on-surface-variant">
+<span class="text-outline">[GR]</span>
+<span>BLUE HORIZON</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 239841000 · IMO: 9118742
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface-variant">51°11'40"N 001°29'05"E</span>
+<span class="font-label-sm text-label-sm text-outline">Calais Ferry Approach</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-outline">12:10:33 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline/80">2h 22m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-telemetry-data text-body-sm font-medium">
+                RESOLVED
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-telemetry-data text-[10px] text-secondary">WD</span>
+<span class="font-label-md text-label-md text-outline">WO Diaz</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 10: Low Severity Transponder Drift Resolved -->
+<tr class="opacity-75 hover:opacity-100 hover:bg-surface-container-high/40 transition-all">
+<td class="p-space-sm text-center">
+<input class="alert-row-check rounded bg-surface-container border-outline-variant text-primary-container focus:ring-0 cursor-pointer" type="checkbox">
+</td>
+<td class="py-space-sm px-space-xs">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/10 text-secondary border border-blue-500/30 font-telemetry-data text-body-sm font-medium">
+                LOW
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs text-outline">
+<span class="material-symbols-outlined text-[18px]">update</span>
+<span class="font-label-md text-label-md">Transponder Drift</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-1 font-label-md text-label-md font-semibold text-on-surface-variant">
+<span class="text-outline">[GB]</span>
+<span>ALBATROSS 1</span>
+</div>
+<div class="font-telemetry-data text-body-sm text-outline">
+                  MMSI: 235089410 · IMO: 9418341
+                </div>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-on-surface-variant">51°16'06"N 001°22'48"E</span>
+<span class="font-label-sm text-label-sm text-outline">South Goodwin Sand</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex flex-col">
+<span class="font-telemetry-data text-body-sm text-outline">11:34:50 UTC</span>
+<span class="font-telemetry-data text-body-sm text-outline/80">2h 58m ago</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-telemetry-data text-body-sm font-medium">
+                RESOLVED
+              </span>
+</td>
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-telemetry-data text-[10px] text-primary">PV</span>
+<span class="font-label-md text-label-md text-outline">PO Vance</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- 6. Table Footer & Pagination Controls -->
+<div class="p-space-sm bg-surface-container-low rounded border border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-space-sm">
+<!-- Records Summary -->
+<div class="font-telemetry-data text-body-sm text-outline">
+        Showing <span class="text-on-surface font-semibold">1–10</span> of <span class="text-on-surface font-semibold">72</span> alerts across all maritime sectors
+      </div>
+<!-- Rows Per Page -->
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-outline">
+<span>Rows per sector view:</span>
+<select class="bg-surface-container-lowest border border-outline-variant/40 rounded px-2 py-1 text-on-surface font-telemetry-data text-body-sm focus:outline-none focus:border-primary-container">
+<option selected="">10 per page</option>
+<option>25 per page</option>
+<option>50 per page</option>
+<option>100 per page</option>
+</select>
+</div>
+<!-- Pagination Buttons -->
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest border border-outline-variant/40 text-outline hover:text-on-surface text-label-sm font-label-sm disabled:opacity-50" disabled="">
+          Previous
+        </button>
+<button class="px-2.5 py-1 rounded bg-primary-container text-on-primary-container font-telemetry-data text-body-sm font-bold shadow-[0_0_8px_rgba(34,211,238,0.3)]">
+          1
+        </button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-telemetry-data text-body-sm">
+          2
+        </button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-telemetry-data text-body-sm">
+          3
+        </button>
+<span class="px-1 text-outline font-telemetry-data">...</span>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-telemetry-data text-body-sm">
+          8
+        </button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface text-label-sm font-label-sm hover:text-primary transition-colors">
+          Next
+        </button>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
