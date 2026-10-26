@@ -33,8 +33,16 @@ function mergeDimensions(existingDimensions, incomingDimensions) {
   return incomingDimensions || existingDimensions || defaultDimensions();
 }
 
+// AIS "type of ship and cargo" codes are 0-99 (ship_types is seeded with exactly those);
+// transponders sometimes send garbage, which is stored as NULL.
+function isValidShipType(code) {
+  return Number.isInteger(code) && code >= 0 && code <= 99;
+}
+
 function resolveShipType(data, existingShip) {
-  if (data.ship_type !== null && data.ship_type !== undefined) return data.ship_type;
+  if (data.ship_type !== null && data.ship_type !== undefined) {
+    return isValidShipType(data.ship_type) ? data.ship_type : null;
+  }
   if (existingShip?.ship_type !== null && existingShip?.ship_type !== undefined) return existingShip.ship_type;
   return 0;
 }
@@ -85,7 +93,8 @@ async function insertPosition(client, data, ship) {
   const width = resolveDimensionMeasure(data.width, ship.dimensions, ["c", "d"]);
   const length = resolveDimensionMeasure(data.length, ship.dimensions, ["a", "b"]);
 
-  if (width === null || length === null || ship.shipType === null || ship.shipType === undefined) {
+  // ship_type may be NULL (invalid code reported); the position is still worth keeping.
+  if (width === null || length === null) {
     return false;
   }
 

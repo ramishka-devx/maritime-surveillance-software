@@ -30,6 +30,7 @@ export const AisPosition = new EntitySchema({
     length: { type: 'real', nullable: true },
     ship_type: {
       type: 'smallint',
+      nullable: true, // NULL when the vessel reported an invalid (non 0-99) type
       foreignKey: { target: 'ShipType', name: 'ais_positions_ship_type_fkey' }
     }
   },
