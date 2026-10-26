@@ -1,20 +1,20 @@
 import cron from 'node-cron';
 import { pool } from '../src/config/db.config.js';
 
-// Run every midnight
-cron.schedule('0 0 * * *', async () => {
-  console.log('Running partition creation job:', new Date());
+const AIS_RETENTION_DAYS = 7;
 
-  let client;
+// Creates today's + the next two daily ais_positions partitions and drops ones older than
+// AIS_RETENTION_DAYS (both functions live in the AisReadPath migration).
+async function maintainPartitions() {
   try {
-    client = await pool.connect();
-
-    await client.query('SELECT create_next_two_partitions();');
-
-    console.log('Partitions created successfully');
+    await pool.query('SELECT create_next_two_partitions()');
+    await pool.query('SELECT drop_old_ais_partitions($1)', [AIS_RETENTION_DAYS]);
+    console.log('Partition maintenance done:', new Date());
   } catch (err) {
-    console.error('Partition creation failed:', err);
-  } finally {
-    if (client) client.release();
+    console.error('Partition maintenance failed:', err);
   }
-});
+}
+
+// On startup too, so partitions exist even if the server wasn't up at midnight.
+maintainPartitions();
+cron.schedule('0 0 * * *', maintainPartitions);

@@ -11,29 +11,24 @@ import { getLatestVesselPositions } from '../lib/vessels';
  * - Change detection (only returns updated vessels)
  * - Error handling with fallback
  */
-export function useVesselUpdates(token, pollInterval = 5000) {
+export function useVesselUpdates(token, pollInterval = 5000, bbox = null) {
   const [vessels, setVessels] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState(null);
 
-  const lastFetchTimeRef = useRef(0);
   const lastDataRef = useRef(null);
   const isFirstFetchRef = useRef(true);
   const abortControllerRef = useRef(null);
 
-  const fetchVessels = async () => {
-    // Debounce fetches to prevent concurrent requests
-    const now = Date.now();
-    if (now - lastFetchTimeRef.current < pollInterval - 500) {
-      return;
-    }
-    lastFetchTimeRef.current = now;
-
+  // isCancelled: a response that arrives after the viewport (bbox) changed is for the old
+  // area and must not overwrite the new one.
+  const fetchVessels = async (isCancelled) => {
     try {
       setIsUpdating(true);
       abortControllerRef.current = new AbortController();
 
-      const data = await getLatestVesselPositions(token, 1000);
+      const data = await getLatestVesselPositions(token, 1000, bbox);
+      if (isCancelled()) return;
 
       if (!Array.isArray(data)) {
         throw new Error('Invalid response format');
@@ -83,17 +78,22 @@ export function useVesselUpdates(token, pollInterval = 5000) {
       return;
     }
 
-    // Initial fetch
-    fetchVessels();
-
-    // Setup interval
-    const interval = setInterval(fetchVessels, pollInterval);
+    // Schedule the next poll only after the current one finishes, so a slow
+    // response can't stack requests up; skip polls while the tab is hidden.
+    let timer;
+    let stopped = false;
+    const poll = async () => {
+      if (!document.hidden) await fetchVessels(() => stopped);
+      if (!stopped) timer = setTimeout(poll, pollInterval);
+    };
+    poll();
 
     return () => {
-      clearInterval(interval);
+      stopped = true;
+      clearTimeout(timer);
       abortControllerRef.current?.abort();
     };
-  }, [token, pollInterval]);
+  }, [token, pollInterval, bbox]);
 
   return {
     vessels,

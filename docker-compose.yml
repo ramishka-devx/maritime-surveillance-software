@@ -1,14 +1,5 @@
 name: maritime-surveillance
 
-# Local infrastructure for development: PostgreSQL + PostGIS (the shared `ais_db`)
-# and a single-node Kafka broker. The application services (meta-service,
-# ingest-service, analytic-service, ui) run on the host and connect to
-# localhost:5432 / localhost:9092.
-#
-#   docker compose up -d          # start
-#   docker compose down           # stop (keeps data)
-#   docker compose down -v        # stop and wipe (re-runs DB init on next up)
-
 services:
   postgres:
     image: postgis/postgis:16-3.5
@@ -21,15 +12,11 @@ services:
     # ./.env file (and set DB_PORT=5433 in the service .env files to match).
     ports:
       - "${POSTGRES_HOST_PORT:-5432}:5432"
+    # Starts as an empty ais_db with PostGIS; the schema comes from the meta-service
+    # TypeORM migrations:
+    #   cd meta-service && npm run db:migrate && npm run db:seed && npm run db:seed-permissions
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Init runs once, on an empty data dir, in filename order. The image's own
-      # 10_postgis.sh enables PostGIS first; our files run after it.
-      - ./meta-service/db/patches/2026-04-30-db-redesign.sql:/docker-entrypoint-initdb.d/20-ais-schema.sql:ro
-      - ./meta-service/db/patches/2026-09-02-restricted-areas.sql:/docker-entrypoint-initdb.d/25-restricted-areas.sql:ro
-      - ./meta-service/db/schema.sql:/docker-entrypoint-initdb.d/30-meta-schema.sql:ro
-      - ./meta-service/db/seed.sql:/docker-entrypoint-initdb.d/40-meta-seed.sql:ro
-      - ./meta-service/scripts/seed-permissions.sql:/docker-entrypoint-initdb.d/50-permissions.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-ais_db}"]
       interval: 5s

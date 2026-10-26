@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
 import { isMaintenance } from '../../auth/roles.js';
+import { searchVessels, toUiVessel } from '../../lib/vessels.js';
 
 export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
   const navigate = useNavigate();
-  const { user, logout, roles } = useAuth();
+  const { user, logout, roles, token } = useAuth();
   const maintenance = isMaintenance(user);
   const { vessels, focusVessel } = useVesselContext();
   const [slTimestamp, setSlTimestamp] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  // Server search results, tagged with the query they answer so a late response for an
+  // older query is never shown.
+  const [remoteSearch, setRemoteSearch] = useState({ q: '', rows: [] });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchContainerRef = useRef(null);
@@ -78,20 +82,46 @@ export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Filter vessels matching current search query
+  // The context only holds vessels in the current map view (plus the reference fleet), so
+  // also search the server, debounced.
+  useEffect(() => {
+    const q = searchValue.trim();
+    if (!q || !token || maintenance) return undefined;
+    let stale = false;
+    const timer = setTimeout(async () => {
+      try {
+        const rows = await searchVessels(token, q);
+        if (!stale) {
+          setRemoteSearch({
+            q,
+            rows: (rows || []).filter((v) => v.lat != null && v.lon != null).map(toUiVessel),
+          });
+        }
+      } catch (err) {
+        console.error('Vessel search failed:', err);
+      }
+    }, 250);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+  }, [searchValue, token, maintenance]);
+
+  // Local matches first, then server hits not already listed.
   const searchResults = useMemo(() => {
     const q = searchValue.trim().toLowerCase();
     if (!q) return [];
-    return (vessels || [])
-      .filter((v) => {
-        const nameMatch = v.name?.toLowerCase().includes(q);
-        const mmsiMatch = String(v.mmsi || '').includes(q);
-        const imoMatch = String(v.imo || '').toLowerCase().includes(q);
-        const callSignMatch = String(v.callSign || '').toLowerCase().includes(q);
-        return nameMatch || mmsiMatch || imoMatch || callSignMatch;
-      })
-      .slice(0, 6);
-  }, [searchValue, vessels]);
+    const local = (vessels || []).filter((v) => {
+      const nameMatch = v.name?.toLowerCase().includes(q);
+      const mmsiMatch = String(v.mmsi || '').includes(q);
+      const imoMatch = String(v.imo || '').toLowerCase().includes(q);
+      const callSignMatch = String(v.callSign || '').toLowerCase().includes(q);
+      return nameMatch || mmsiMatch || imoMatch || callSignMatch;
+    });
+    const remote = remoteSearch.q === searchValue.trim() ? remoteSearch.rows : [];
+    const seen = new Set(local.map((v) => String(v.mmsi)));
+    return [...local, ...remote.filter((v) => !seen.has(String(v.mmsi)))].slice(0, 6);
+  }, [searchValue, vessels, remoteSearch]);
 
   const handleSelectVessel = (vessel) => {
     if (!vessel) return;

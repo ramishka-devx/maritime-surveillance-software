@@ -11,6 +11,8 @@ export default function VesselDossierPopup({
 }) {
   if (!vessel) return null;
 
+  console.log('vessel',vessel)
+
   // Format position coordinates if not pre-formatted string
   const formatCoords = (pos) => {
     if (!pos || !Array.isArray(pos) || pos.length < 2) return null;

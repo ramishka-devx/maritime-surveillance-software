@@ -24,7 +24,7 @@ npm run db:seed-permissions
 ```
 
 **Prerequisites:**
-- Database schema must be created (`npm run db:schema`)
+- Database schema must be created (`npm run db:migrate`)
 - Initial seed data must be loaded (`npm run db:seed`) to create roles
 
 ### `seed-permissions.sql`

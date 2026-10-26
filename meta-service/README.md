@@ -3,7 +3,7 @@
 Install
 - Copy .env.example to .env and fill DB credentials.
 - Install deps: npm install
-- Create DB schema: npm run db:schema
+- Create DB schema (TypeORM migrations): npm run db:migrate
 - Seed data: npm run db:seed
 - Seed permissions: npm run db:seed-permissions
 - Start dev: npm run dev

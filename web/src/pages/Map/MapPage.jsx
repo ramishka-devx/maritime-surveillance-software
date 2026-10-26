@@ -13,6 +13,7 @@ export default function MapPage() {
     setSelectedVessel,
     focusTarget,
     focusVessel,
+    setViewport,
   } = useVesselContext();
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -52,6 +53,18 @@ export default function MapPage() {
       setCurrentZoom(map.getZoom());
     });
   }, []);
+
+  // Stable (memoised) so MapCanvas — memo'd, with ~1000 markers — doesn't re-render on
+  // unrelated MapPage state changes such as the cursor-coordinate readout on every mousemove.
+  const handleSelectVessel = useCallback(
+    (vessel) => {
+      if (typeof vessel === 'object' && vessel !== null) {
+        focusVessel(vessel);
+        setIsDossierMinimized(false);
+      }
+    },
+    [focusVessel]
+  );
 
   const handleZoomIn = useCallback(() => {
     if (mapInstance) {
@@ -107,15 +120,11 @@ export default function MapPage() {
       {/* Interactive Nautical Map Viewport */}
       <MapCanvas
         selectedVesselId={selectedVessel?.mmsi}
-        onSelectVessel={(vessel) => {
-          if (typeof vessel === 'object' && vessel !== null) {
-            focusVessel(vessel);
-            setIsDossierMinimized(false);
-          }
-        }}
+        onSelectVessel={handleSelectVessel}
         activeLayer={activeLayer}
-        onCursorCoordsChange={(coords) => setCursorCoords(coords)}
+        onCursorCoordsChange={setCursorCoords}
         onMapReady={handleMapReady}
+        onViewportChange={setViewport}
         focusTarget={focusTarget}
         vessels={vessels}
         filters={filters}

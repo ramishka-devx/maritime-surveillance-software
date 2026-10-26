@@ -4,8 +4,8 @@ import { AisService } from './ais.service.js';
 export const AisController = {
   async listVessels(req, res, next) {
     try {
-      const { limit } = req.query;
-      const data = await AisService.listVessels({ limit });
+      const { limit, q } = req.query;
+      const data = await AisService.listVessels({ limit, q });
       return success(res, data);
     } catch (e) {
       next(e);
@@ -14,8 +14,8 @@ export const AisController = {
 
   async latestPositions(req, res, next) {
     try {
-      const { limit } = req.query;
-      const data = await AisService.latestPositions({ limit });
+      const { limit, bbox } = req.query;
+      const data = await AisService.latestPositions({ limit, bbox });
       return success(res, data);
     } catch (e) {
       next(e);
