@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -12,8 +12,6 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useAuth } from '../../auth/AuthContext.jsx';
-import { useVesselUpdates } from '../../hooks/useVesselUpdates.js';
 
 // Fix for default Leaflet marker icons in Vite
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -113,6 +111,40 @@ function createVesselMarkerIcon(vessel, isSelected = false) {
     popupAnchor: [0, -18],
   });
 }
+
+// react-leaflet calls marker.setIcon() — which rebuilds the marker's DOM — whenever the icon
+// prop changes identity. Creating a fresh divIcon per render rebuilt all ~1000 markers on every
+// re-render (each mousemove updates the cursor readout), so icons are cached by their visual
+// inputs. Bounded: 360 headings x a few statuses x selected.
+const iconCache = new Map();
+function getVesselMarkerIcon(vessel, isSelected) {
+  const heading = Math.round(vessel.heading || vessel.cog || vessel.course || 0);
+  const key = `${vessel.threatLevel}|${vessel.status}|${heading}|${isSelected}`;
+  let icon = iconCache.get(key);
+  if (!icon) {
+    icon = createVesselMarkerIcon({ ...vessel, heading }, isSelected);
+    iconCache.set(key, icon);
+  }
+  return icon;
+}
+
+// Memoised so a MapCanvas re-render only touches markers whose vessel/selection changed.
+const VesselMarker = memo(function VesselMarker({ vessel, isSelected, onSelect }) {
+  // Handlers keyed only on onSelect: each poll brings new vessel objects, and a new
+  // eventHandlers object makes react-leaflet unbind/rebind the marker's listeners.
+  const vesselRef = useRef(vessel);
+  useEffect(() => {
+    vesselRef.current = vessel;
+  });
+  const eventHandlers = useMemo(() => ({ click: () => onSelect(vesselRef.current) }), [onSelect]);
+  return (
+    <Marker
+      position={vessel.position}
+      icon={getVesselMarkerIcon(vessel, isSelected)}
+      eventHandlers={eventHandlers}
+    />
+  );
+});
 
 // Map Controller Component to listen for events & center changes
 function MapEventsHandler({ onCursorCoordsChange, onMapReady }) {
@@ -354,7 +386,9 @@ export const defaultMaritimeFleet = [
   },
 ];
 
-export default function MapCanvas({
+export default memo(MapCanvas);
+
+function MapCanvas({
   selectedVesselId = null,
   onSelectVessel,
   activeLayer = 'vector',
@@ -367,50 +401,19 @@ export default function MapCanvas({
   onFleetUpdate = null,
   vessels: propVessels = null,
 }) {
-  const { token } = useAuth();
   const mapRef = useRef(null);
 
-  // Real-time polling via useVesselUpdates if backend is connected
-  const { vessels: apiVessels } = useVesselUpdates(token, 8000);
+  // Live vessels come from VesselContext (passed in by MapPage), which already polls the API
+  // and merges in the reference fleet; polling here too doubled the requests and re-renders.
+  const allVessels = propVessels && propVessels.length > 0 ? propVessels : defaultMaritimeFleet;
 
-  // Merge API vessels with sample fleet if API has limited records
-  const allVessels = useMemo(() => {
-    if (propVessels && propVessels.length > 0) {
-      return propVessels;
-    }
-    if (apiVessels && apiVessels.length > 0) {
-      const formattedApi = apiVessels
-        .filter((v) => v.lat && v.lon)
-        .map((v) => ({
-          id: String(v.mmsi || v.id),
-          mmsi: String(v.mmsi || v.id),
-          name: v.ship_name || v.name || `VESSEL ${v.mmsi}`,
-          type: v.type || 'Commercial',
-          flag: v.flag || 'International',
-          callSign: v.callsign || 'N/A',
-          imo: v.imo || 'N/A',
-          position: [parseFloat(v.lat), parseFloat(v.lon)],
-          speed: parseFloat(v.sog || v.speed || 0),
-          course: parseFloat(v.cog || v.course || 0),
-          heading: parseFloat(v.heading || v.cog || 0),
-          draught: v.draught ? `${v.draught} m` : '8.5 m',
-          length: v.length ? `${v.length} m` : '180 m',
-          beam: v.beam ? `${v.beam} m` : '26 m',
-          destination: v.destination || 'OPEN SEA',
-          navStatus: v.nav_status || 'Underway Using Engine',
-          threatLevel: v.threat_level || (v.anomaly ? 'CRITICAL' : 'NORMAL'),
-          threatReason: v.anomaly || 'Standard Navigation',
-          threatDetail: v.details || 'Normal AIS kinematic packet.',
-          lastReport: 'Live AIS Ingest',
-        }));
-
-      // Combine with local reference vessels if not duplicate
-      const apiMmsiSet = new Set(formattedApi.map((v) => v.mmsi));
-      const complement = defaultMaritimeFleet.filter((v) => !apiMmsiSet.has(v.mmsi));
-      return [...formattedApi, ...complement];
-    }
-    return defaultMaritimeFleet;
-  }, [propVessels, apiVessels]);
+  // Stable click handler so memoised markers don't re-render when the parent passes a new
+  // inline onSelectVessel each render.
+  const onSelectRef = useRef(onSelectVessel);
+  useEffect(() => {
+    onSelectRef.current = onSelectVessel;
+  });
+  const handleSelect = useCallback((vessel) => onSelectRef.current?.(vessel), []);
 
   // Apply filters to fleet
   const filteredVessels = useMemo(() => {
@@ -686,25 +689,14 @@ export default function MapCanvas({
         </CircleMarker>
 
         {/* Real-time Fleet Vessel Markers (Filtered with Selected Pinning) */}
-        {displayVessels.map((vessel) => {
-          const isSelected = selectedVesselId === String(vessel.mmsi);
-          const icon = createVesselMarkerIcon(vessel, isSelected);
-
-          return (
-            <Marker
-              key={vessel.id || vessel.mmsi}
-              position={vessel.position}
-              icon={icon}
-              eventHandlers={{
-                click: () => {
-                  if (onSelectVessel) {
-                    onSelectVessel(vessel);
-                  }
-                },
-              }}
-            />
-          );
-        })}
+        {displayVessels.map((vessel) => (
+          <VesselMarker
+            key={vessel.id || vessel.mmsi}
+            vessel={vessel}
+            isSelected={selectedVesselId === String(vessel.mmsi)}
+            onSelect={handleSelect}
+          />
+        ))}
       </MapContainer>
     </div>
   );

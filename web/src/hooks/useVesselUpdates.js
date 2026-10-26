@@ -16,19 +16,11 @@ export function useVesselUpdates(token, pollInterval = 5000) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState(null);
 
-  const lastFetchTimeRef = useRef(0);
   const lastDataRef = useRef(null);
   const isFirstFetchRef = useRef(true);
   const abortControllerRef = useRef(null);
 
   const fetchVessels = async () => {
-    // Debounce fetches to prevent concurrent requests
-    const now = Date.now();
-    if (now - lastFetchTimeRef.current < pollInterval - 500) {
-      return;
-    }
-    lastFetchTimeRef.current = now;
-
     try {
       setIsUpdating(true);
       abortControllerRef.current = new AbortController();
@@ -83,14 +75,19 @@ export function useVesselUpdates(token, pollInterval = 5000) {
       return;
     }
 
-    // Initial fetch
-    fetchVessels();
-
-    // Setup interval
-    const interval = setInterval(fetchVessels, pollInterval);
+    // Schedule the next poll only after the current one finishes, so a slow
+    // response can't stack requests up; skip polls while the tab is hidden.
+    let timer;
+    let stopped = false;
+    const poll = async () => {
+      if (!document.hidden) await fetchVessels();
+      if (!stopped) timer = setTimeout(poll, pollInterval);
+    };
+    poll();
 
     return () => {
-      clearInterval(interval);
+      stopped = true;
+      clearTimeout(timer);
       abortControllerRef.current?.abort();
     };
   }, [token, pollInterval]);
