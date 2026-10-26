@@ -13,6 +13,7 @@ export default function MapPage() {
     setSelectedVessel,
     focusTarget,
     focusVessel,
+    setViewport,
   } = useVesselContext();
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -123,6 +124,7 @@ export default function MapPage() {
         activeLayer={activeLayer}
         onCursorCoordsChange={setCursorCoords}
         onMapReady={handleMapReady}
+        onViewportChange={setViewport}
         focusTarget={focusTarget}
         vessels={vessels}
         filters={filters}

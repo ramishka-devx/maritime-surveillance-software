@@ -11,7 +11,7 @@ import { getLatestVesselPositions } from '../lib/vessels';
  * - Change detection (only returns updated vessels)
  * - Error handling with fallback
  */
-export function useVesselUpdates(token, pollInterval = 5000) {
+export function useVesselUpdates(token, pollInterval = 5000, bbox = null) {
   const [vessels, setVessels] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState(null);
@@ -20,12 +20,15 @@ export function useVesselUpdates(token, pollInterval = 5000) {
   const isFirstFetchRef = useRef(true);
   const abortControllerRef = useRef(null);
 
-  const fetchVessels = async () => {
+  // isCancelled: a response that arrives after the viewport (bbox) changed is for the old
+  // area and must not overwrite the new one.
+  const fetchVessels = async (isCancelled) => {
     try {
       setIsUpdating(true);
       abortControllerRef.current = new AbortController();
 
-      const data = await getLatestVesselPositions(token, 1000);
+      const data = await getLatestVesselPositions(token, 1000, bbox);
+      if (isCancelled()) return;
 
       if (!Array.isArray(data)) {
         throw new Error('Invalid response format');
@@ -80,7 +83,7 @@ export function useVesselUpdates(token, pollInterval = 5000) {
     let timer;
     let stopped = false;
     const poll = async () => {
-      if (!document.hidden) await fetchVessels();
+      if (!document.hidden) await fetchVessels(() => stopped);
       if (!stopped) timer = setTimeout(poll, pollInterval);
     };
     poll();
@@ -90,7 +93,7 @@ export function useVesselUpdates(token, pollInterval = 5000) {
       clearTimeout(timer);
       abortControllerRef.current?.abort();
     };
-  }, [token, pollInterval]);
+  }, [token, pollInterval, bbox]);
 
   return {
     vessels,

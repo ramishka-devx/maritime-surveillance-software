@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useCallback } from
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { useVesselUpdates } from '../hooks/useVesselUpdates.js';
+import { toUiVessel } from '../lib/vessels.js';
 import { defaultMaritimeFleet } from '../components/map/MapCanvas.jsx';
 import { isMaintenance } from '../auth/roles.js';
 
@@ -13,36 +14,17 @@ export function VesselProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Map viewport as "minLon,minLat,maxLon,maxLat", set by the map page while it's mounted so
+  // only vessels in view are fetched; null = the global most-recent list (other pages).
+  const [viewport, setViewport] = useState(null);
+
   // Real-time polling via useVesselUpdates if backend is connected
-  const { vessels: apiVessels } = useVesselUpdates(token, 8000);
+  const { vessels: apiVessels } = useVesselUpdates(token, 8000, viewport);
 
   // Live backend AIS vessels merged with default maritime fleet fallback
   const allVessels = useMemo(() => {
     if (apiVessels && apiVessels.length > 0) {
-      const formattedApi = apiVessels
-        .filter((v) => v.lat && v.lon)
-        .map((v) => ({
-          id: String(v.mmsi || v.id),
-          mmsi: String(v.mmsi || v.id),
-          name: v.ship_name || v.name || `VESSEL ${v.mmsi}`,
-          type: v.type || 'Commercial',
-          flag: v.flag || 'International',
-          callSign: v.callsign || 'N/A',
-          imo: v.imo || 'N/A',
-          position: [parseFloat(v.lat), parseFloat(v.lon)],
-          speed: parseFloat(v.sog || v.speed || 0),
-          course: parseFloat(v.cog || v.course || 0),
-          heading: parseFloat(v.heading || v.cog || 0),
-          draught: v.draught ? `${v.draught} m` : '8.5 m',
-          length: v.length ? `${v.length} m` : '180 m',
-          beam: v.beam ? `${v.beam} m` : '26 m',
-          destination: v.destination || 'OPEN SEA',
-          navStatus: v.nav_status || 'Underway Using Engine',
-          threatLevel: v.threat_level || (v.anomaly ? 'CRITICAL' : 'NORMAL'),
-          threatReason: v.anomaly || 'Standard Navigation',
-          threatDetail: v.details || 'Live AIS kinematic transmission.',
-          lastReport: 'Live AIS Ingest',
-        }));
+      const formattedApi = apiVessels.filter((v) => v.lat && v.lon).map(toUiVessel);
 
       const apiMmsiSet = new Set(formattedApi.map((v) => v.mmsi));
       const complement = defaultMaritimeFleet.filter((v) => !apiMmsiSet.has(v.mmsi));
@@ -99,6 +81,7 @@ export function VesselProvider({ children }) {
         focusTarget,
         setFocusTarget,
         focusVessel,
+        setViewport,
       }}
     >
       {children}

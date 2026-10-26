@@ -15,39 +15,76 @@ function normalizeMmsi(mmsi) {
   return s;
 }
 
-export const AisService = {
-  async listVessels({ limit } = {}) {
-    const safeLimit = normalizeLimit(limit, { fallback: 500, max: 5000 });
+const clampLat = (lat) => Math.min(90, Math.max(-90, lat));
+const wrapLon = (lon) => ((((lon + 180) % 360) + 360) % 360) - 180;
 
-    // Most recently seen vessels; ships.last_position_at is kept current by ingest-service.
-    const rows = await query(
-      `SELECT mmsi, ship_name, last_position_at AS time_utc
+// bbox=minLon,minLat,maxLon,maxLat (the map's padded viewport) -> SQL condition on
+// ships.lat/lon, or null for no filter. Latitudes are clamped (padded world bounds overshoot
+// ±90); a span of >= 360° of longitude means "whole world"; boxes crossing the antimeridian
+// (minLon > maxLon after wrapping) match either side.
+function bboxCondition(bbox) {
+  if (bbox === undefined || bbox === null || bbox === '') return null;
+  const parts = String(bbox).split(',').map(Number);
+  if (parts.length !== 4 || !parts.every(Number.isFinite)) {
+    throw badRequest('bbox must be minLon,minLat,maxLon,maxLat');
+  }
+  const [minLon, minLat, maxLon, maxLat] = parts;
+  if (minLat > maxLat) throw badRequest('bbox minLat must be <= maxLat');
+
+  const conditions = ['lat BETWEEN ? AND ?'];
+  const params = [clampLat(minLat), clampLat(maxLat)];
+  if (maxLon - minLon < 360) {
+    const west = wrapLon(minLon);
+    const east = wrapLon(maxLon);
+    conditions.push(west <= east ? 'lon BETWEEN ? AND ?' : '(lon >= ? OR lon <= ?)');
+    params.push(west, east);
+  }
+  return { sql: conditions.join(' AND '), params };
+}
+
+const escapeLike = (s) => s.replace(/[\\%_]/g, '\\$&');
+
+// Latest position per vessel, denormalised onto ships by ingest-service, so these read one
+// row per vessel instead of scanning the ais_positions history.
+// ponytail: seq scan on ships (~16k rows, a few ms); add a (lat, lon) index past ~200k ships.
+const LATEST_COLUMNS = `mmsi, ship_name, sog, cog, heading, nav_status,
+       last_position_at AS time_utc, lat, lon`;
+
+export const AisService = {
+  // Most recently seen vessels, optionally searched by name (substring) or MMSI (prefix).
+  async listVessels({ limit, q } = {}) {
+    const search = String(q ?? '').trim();
+    const safeLimit = normalizeLimit(limit, { fallback: search ? 10 : 500, max: 5000 });
+
+    const where = ['last_position_at IS NOT NULL'];
+    const params = [];
+    if (search) {
+      where.push('(ship_name ILIKE ? OR mmsi::text LIKE ?)');
+      params.push(`%${escapeLike(search)}%`, `${escapeLike(search)}%`);
+    }
+
+    return query(
+      `SELECT ${LATEST_COLUMNS}
        FROM ships
-       WHERE last_position_at IS NOT NULL
+       WHERE ${where.join(' AND ')}
        ORDER BY last_position_at DESC
        LIMIT ?`,
-      [safeLimit],
+      [...params, safeLimit],
     );
-
-    return rows;
   },
 
-  async latestPositions({ limit } = {}) {
+  async latestPositions({ limit, bbox } = {}) {
     const safeLimit = normalizeLimit(limit, { fallback: 500, max: 5000 });
+    const box = bboxCondition(bbox);
 
-    // Latest position per vessel, denormalised onto ships by ingest-service so this reads
-    // one row per vessel instead of scanning the whole ais_positions history.
-    const rows = await query(
-      `SELECT mmsi, ship_name, sog, cog, heading, nav_status,
-              last_position_at AS time_utc, lat, lon
+    return query(
+      `SELECT ${LATEST_COLUMNS}
        FROM ships
-       WHERE last_position_at IS NOT NULL
+       WHERE last_position_at IS NOT NULL${box ? ` AND ${box.sql}` : ''}
        ORDER BY last_position_at DESC
        LIMIT ?`,
-      [safeLimit],
+      [...(box ? box.params : []), safeLimit],
     );
-
-    return rows;
   },
 
   async positionsByMmsi(mmsi, { limit } = {}) {

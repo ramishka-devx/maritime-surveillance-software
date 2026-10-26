@@ -6,9 +6,47 @@ import { apiRequest } from './api.js';
  * @param {number} limit - Max vessels to return (default: 500)
  * @returns {Promise<Array>} Array of vessel positions
  */
-export async function getLatestVesselPositions(token, limit = 500) {
-  const data = await apiRequest(`/api/ais/positions/latest?limit=${limit}`, { token });
+export async function getLatestVesselPositions(token, limit = 500, bbox = null) {
+  const bboxParam = bbox ? `&bbox=${bbox}` : '';
+  const data = await apiRequest(`/api/ais/positions/latest?limit=${limit}${bboxParam}`, { token });
   return data;
+}
+
+/**
+ * Server-side vessel search by name (substring) or MMSI (prefix); rows include the latest
+ * position so a hit can be focused on the map.
+ */
+export async function searchVessels(token, q) {
+  return apiRequest(`/api/ais/vessels?q=${encodeURIComponent(q)}&limit=10`, { token });
+}
+
+/**
+ * API row ({ mmsi, ship_name, sog, cog, heading, lat, lon, nav_status, ... }) -> the vessel
+ * shape the map, dossier and search use.
+ */
+export function toUiVessel(v) {
+  return {
+    id: String(v.mmsi || v.id),
+    mmsi: String(v.mmsi || v.id),
+    name: v.ship_name || v.name || `VESSEL ${v.mmsi}`,
+    type: v.type || 'Commercial',
+    flag: v.flag || 'International',
+    callSign: v.callsign || 'N/A',
+    imo: v.imo || 'N/A',
+    position: [parseFloat(v.lat), parseFloat(v.lon)],
+    speed: parseFloat(v.sog || v.speed || 0),
+    course: parseFloat(v.cog || v.course || 0),
+    heading: parseFloat(v.heading || v.cog || 0),
+    draught: v.draught ? `${v.draught} m` : '8.5 m',
+    length: v.length ? `${v.length} m` : '180 m',
+    beam: v.beam ? `${v.beam} m` : '26 m',
+    destination: v.destination || 'OPEN SEA',
+    navStatus: v.nav_status || 'Underway Using Engine',
+    threatLevel: v.threat_level || (v.anomaly ? 'CRITICAL' : 'NORMAL'),
+    threatReason: v.anomaly || 'Standard Navigation',
+    threatDetail: v.details || 'Live AIS kinematic transmission.',
+    lastReport: 'Live AIS Ingest',
+  };
 }
 
 /**
