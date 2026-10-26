@@ -12,6 +12,12 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import {
+  createVesselCanvas,
+  syncVessels,
+  vesselColor,
+  vesselHeading,
+} from './vesselCanvasLayer.js';
 
 // Fix for default Leaflet marker icons in Vite
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -29,20 +35,8 @@ L.Icon.Default.mergeOptions({
  * Creates custom directional vessel icon pointing in heading/course direction
  */
 function createVesselMarkerIcon(vessel, isSelected = false) {
-  const colors = {
-    critical: '#ef4444',
-    warning: '#f59e0b',
-    normal: '#38bdf8',
-    cargo: '#3b82f6',
-    tanker: '#f59e0b',
-    fishing: '#10b981',
-    military: '#a855f7',
-    unknown: '#94a3b8',
-  };
-
-  const statusKey = vessel.threatLevel?.toLowerCase() || vessel.status?.toLowerCase() || 'normal';
-  const color = colors[statusKey] || colors.normal;
-  const heading = vessel.heading || vessel.cog || vessel.course || 0;
+  const color = vesselColor(vessel);
+  const heading = vesselHeading(vessel);
 
   const html = `
     <div style="position: relative; width: 34px; height: 34px; display: flex; items-center; justify-content: center;">
@@ -112,13 +106,13 @@ function createVesselMarkerIcon(vessel, isSelected = false) {
   });
 }
 
-// react-leaflet calls marker.setIcon() — which rebuilds the marker's DOM — whenever the icon
-// prop changes identity. Creating a fresh divIcon per render rebuilt all ~1000 markers on every
-// re-render (each mousemove updates the cursor readout), so icons are cached by their visual
+// Only the selected vessel is a DOM marker (for its animated ring); the rest are on the canvas
+// layer. react-leaflet calls marker.setIcon() — rebuilding the DOM and restarting the ring
+// animation — whenever the icon prop changes identity, so icons are cached by their visual
 // inputs. Bounded: 360 headings x a few statuses x selected.
 const iconCache = new Map();
 function getVesselMarkerIcon(vessel, isSelected) {
-  const heading = Math.round(vessel.heading || vessel.cog || vessel.course || 0);
+  const heading = Math.round(vesselHeading(vessel));
   const key = `${vessel.threatLevel}|${vessel.status}|${heading}|${isSelected}`;
   let icon = iconCache.get(key);
   if (!icon) {
@@ -128,7 +122,28 @@ function getVesselMarkerIcon(vessel, isSelected) {
   return icon;
 }
 
-// Memoised so a MapCanvas re-render only touches markers whose vessel/selection changed.
+// Draws vessels on one canvas (see vesselCanvasLayer.js) and keeps it in sync with `vessels`.
+function VesselCanvasLayer({ vessels, onSelect }) {
+  const map = useMap();
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = createVesselCanvas(map);
+    canvasRef.current = canvas;
+    return () => {
+      canvas.remove();
+      canvasRef.current = null;
+    };
+  }, [map]);
+
+  useEffect(() => {
+    if (canvasRef.current) syncVessels(canvasRef.current, vessels, onSelect);
+  }, [vessels, onSelect]);
+
+  return null;
+}
+
+// Memoised so a MapCanvas re-render doesn't touch the marker unless its vessel changed.
 const VesselMarker = memo(function VesselMarker({ vessel, isSelected, onSelect }) {
   // Handlers keyed only on onSelect: each poll brings new vessel objects, and a new
   // eventHandlers object makes react-leaflet unbind/rebind the marker's listeners.
@@ -147,7 +162,14 @@ const VesselMarker = memo(function VesselMarker({ vessel, isSelected, onSelect }
 });
 
 // Map Controller Component to listen for events & center changes
-function MapEventsHandler({ onCursorCoordsChange, onMapReady }) {
+// Padded viewport as the API's bbox string ("minLon,minLat,maxLon,maxLat"). The padding
+// keeps vessels just off-screen loaded so short pans don't show empty edges.
+function viewportBbox(map) {
+  const b = map.getBounds().pad(0.25);
+  return [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map((n) => n.toFixed(2)).join(',');
+}
+
+function MapEventsHandler({ onCursorCoordsChange, onMapReady, onViewportChange }) {
   const map = useMap();
 
   useEffect(() => {
@@ -156,7 +178,17 @@ function MapEventsHandler({ onCursorCoordsChange, onMapReady }) {
     }
   }, [map, onMapReady]);
 
+  // Report the viewport now and clear it on unmount, so other pages go back to the global list.
+  useEffect(() => {
+    if (!onViewportChange) return undefined;
+    onViewportChange(viewportBbox(map));
+    return () => onViewportChange(null);
+  }, [map, onViewportChange]);
+
   useMapEvents({
+    moveend() {
+      onViewportChange?.(viewportBbox(map));
+    },
     mousemove(e) {
       if (onCursorCoordsChange) {
         const lat = e.latlng.lat;
@@ -396,6 +428,7 @@ function MapCanvas({
   showTracks = true,
   onCursorCoordsChange,
   onMapReady,
+  onViewportChange,
   focusTarget = null,
   filters = null,
   onFleetUpdate = null,
@@ -463,6 +496,19 @@ function MapCanvas({
     }
     return filteredVessels;
   }, [filteredVessels, selectedVesselId, allVessels]);
+
+  // The selected vessel is drawn as a DOM marker (animated ring, on top); the rest go to canvas.
+  const selectedVessel = useMemo(
+    () =>
+      selectedVesselId
+        ? displayVessels.find((v) => String(v.mmsi) === String(selectedVesselId)) || null
+        : null,
+    [displayVessels, selectedVesselId]
+  );
+  const canvasVessels = useMemo(
+    () => (selectedVessel ? displayVessels.filter((v) => v !== selectedVessel) : displayVessels),
+    [displayVessels, selectedVessel]
+  );
 
   // Keep parent synchronized with fleet stats
   useEffect(() => {
@@ -566,6 +612,7 @@ function MapCanvas({
         <MapEventsHandler
           onCursorCoordsChange={onCursorCoordsChange}
           onMapReady={onMapReady}
+          onViewportChange={onViewportChange}
         />
 
         {/* Global Smooth Focus Controller */}
@@ -689,14 +736,15 @@ function MapCanvas({
         </CircleMarker>
 
         {/* Real-time Fleet Vessel Markers (Filtered with Selected Pinning) */}
-        {displayVessels.map((vessel) => (
+        <VesselCanvasLayer vessels={canvasVessels} onSelect={handleSelect} />
+        {selectedVessel && (
           <VesselMarker
-            key={vessel.id || vessel.mmsi}
-            vessel={vessel}
-            isSelected={selectedVesselId === String(vessel.mmsi)}
+            key={selectedVessel.mmsi}
+            vessel={selectedVessel}
+            isSelected
             onSelect={handleSelect}
           />
-        ))}
+        )}
       </MapContainer>
     </div>
   );

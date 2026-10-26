@@ -13,7 +13,7 @@ services plus AI notebooks, all backed by a **single shared PostgreSQL database*
 | `ingest-service/` | Node (CommonJS), kafkajs, pg, ws | Connects to aisstream.io over WebSocket, publishes raw AIS to Kafka, and consumes it back to persist `ships` / `ais_positions` |
 | `analytic-service/` | Python, FastAPI, confluent-kafka, scikit-learn, pandas | Consumes the same Kafka topic, runs IsolationForest speed-anomaly detection, POSTs findings to meta-service |
 | `meta-service/` | Node (ESM), Express, pg, JWT | REST API: RBAC/users, vessels, positions, alerts, anomalies, AIS, restricted areas. Swagger at `/api-docs` |
-| `ui/` | React 19, Vite 7, Tailwind 3, react-router 7, MapLibre GL + Leaflet | Operator dashboard |
+| `web/` | React 19, Vite 7, Tailwind 3, react-router 7, Leaflet (react-leaflet) | Operator UI (map, alerts, anomalies, restricted areas, users/RBAC) |
 | `AI/`, `test/` | Jupyter notebooks, scratch scripts | Model development and data export; not part of the runtime |
 
 ### Data flow
@@ -22,7 +22,7 @@ services plus AI notebooks, all backed by a **single shared PostgreSQL database*
 aisstream.io --ws--> ingest-service --> Kafka topic "ais.raw.messages"
                                           |-> ingest-service consumer -> ships, ais_positions (PostGIS)
                                           |-> analytic-service consumer -> speed anomaly model -> POST meta-service /api/anomalies
-ui  --/api proxy-->  meta-service  --pg-->  ais_db
+web --/api proxy-->  meta-service  --pg-->  ais_db
 ```
 
 Kafka can be disabled per-service (`KAFKA_ENABLED=false` in ingest); ingest then writes
@@ -80,9 +80,9 @@ npm run dev                     # nodemon index.js
 ```
 No lint/test. Requires a reachable Kafka broker unless `KAFKA_ENABLED=false`.
 
-### ui
+### web
 ```bash
-cd ui
+cd web
 npm install
 npm run dev       # Vite dev server; proxies /api -> meta-service (see below)
 npm run build
@@ -160,7 +160,7 @@ Standard middleware chain per protected route:
 - meta-service: `PORT` defaults to 3000 in `env.js`, but the rest of the system expects
   **5000** (with automatic fallback to **5001** if 5000 is busy — see the port-retry loop
   in `src/server.js`). Set `PORT=5000` in `.env`.
-- ui: `vite.config.js` probes 5000 then 5001 and proxies `/api` there; in production
+- web: `vite.config.js` probes 5000 then 5001 and proxies `/api` there; in production
   builds `src/lib/api.js` falls back to `http://127.0.0.1:5000`. Override with
   `VITE_API_BASE_URL` / `VITE_API_PROXY_TARGET`.
 - analytic-service: `META_SERVICE_URL` (default `http://localhost:5000`) +
@@ -181,13 +181,24 @@ scores once a buffer reaches `ANOMALY_MIN_SAMPLES`. It flags a row if IsolationF
 marks it an outlier **or** `sog` exceeds the buffer's p99. The batch/offline version
 lives in `speed_anomalies.py` and is exposed at `POST /detection/speed-anomalies`.
 
-### UI auth
+### web: auth and vessel map
 
-`src/auth/AuthContext.jsx` holds token + user + roles. Route guards:
-`RequireAuth`, `RequirePermission`, `PermissionGate`, `RequestAccessGate`
-(`src/App.jsx` wraps each page in `RequestAccessGate permission="..."`). Super-admin is
-`role_id === 1` or a role named `super_admin`. `src/lib/api.js` `apiRequest()` unwraps
-the `{ success, data }` envelope and throws on `success === false`.
+Paths below are under `web/src/`.
+- **Auth:** `auth/AuthContext.jsx` holds the token, user and roles. `App.jsx` wraps all pages in
+  `ProtectedRoute` + `AppLayout`. Maintenance users (`auth/roles.js` `isMaintenance`) are routed
+  to `/SystemHealth` only. Super-admin is `role_id === 1` or a role named `super_admin`.
+- **API client:** `lib/api.js` `apiRequest()` unwraps the `{ success, data }` envelope and throws
+  on `success === false`.
+- **Vessel data:** `context/VesselContext.jsx` is the single vessel poller
+  (`hooks/useVesselUpdates.js`, every 8 s, polls never overlap). While the Map page is mounted it
+  sets `viewport`, so `/api/ais/positions/latest?bbox=minLon,minLat,maxLon,maxLat` returns only
+  vessels in the padded view. Other pages get the global most-recent list.
+- **Header search** queries the server (`/api/ais/vessels?q=`), because the context only holds
+  vessels in view.
+- **Map rendering:** `components/map/MapCanvas.jsx` draws vessels on one Leaflet canvas
+  (`components/map/vesselCanvasLayer.js`, reconciled by MMSI). Only the selected vessel is a DOM
+  marker, for its animated ring. Don't go back to a DOM marker per vessel: about 1000 of them
+  made the map stall. `MapCanvas` is memoised, so pass it stable callbacks.
 
 ## API client collection
 
