@@ -1,10 +1,6 @@
-// Drop and rebuild the whole database from the committed SQL, in the correct order.
+// Drop and rebuild the whole database: TypeORM migrations, then the seeds.
 //
 //   node scripts/db-reset.js [--force]
-//
-// The AIS schema patch (ships / ship_types / ais_positions) must load BEFORE
-// db/schema.sql, because `anomalies` in schema.sql references ships(mmsi).
-// This mirrors the order the Docker compose init scripts run in.
 //
 // Refuses to run when NODE_ENV=production unless --force is passed.
 
@@ -24,13 +20,8 @@ if (env.nodeEnv === 'production' && !force) {
   process.exit(1);
 }
 
-// SQL files run through run-sql.js (statement-split, placeholder-safe).
-const sqlFiles = [
-  'db/patches/2026-04-30-db-redesign.sql',
-  'db/patches/2026-09-02-restricted-areas.sql',
-  'db/schema.sql',
-  'db/seed.sql',
-];
+// SQL files run through run-sql.js (statement-split, placeholder-safe), after migrations.
+const sqlFiles = ['db/seed.sql'];
 // Node scripts run afterwards.
 const nodeScripts = ['scripts/seed-permissions.js'];
 
@@ -68,6 +59,7 @@ function run(cmd, args) {
 (async () => {
   try {
     await recreateDatabase();
+    run('npx', ['typeorm', 'migration:run', '-d', 'src/db/data-source.js']);
     for (const file of sqlFiles) {
       run(process.execPath, ['scripts/run-sql.js', file]);
     }

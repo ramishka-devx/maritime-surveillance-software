@@ -32,11 +32,11 @@ straight to the DB with no queue.
 ```bash
 docker compose up -d          # Postgres+PostGIS on :5432 (ais_db) + single-node Kafka on :9092
 docker compose down           # stop, keep data
-docker compose down -v        # stop and wipe (DB re-inits from meta-service/db/* on next up)
+docker compose down -v        # stop and wipe
+cd meta-service && npm run db:migrate && npm run db:seed && npm run db:seed-permissions
 ```
-`docker-compose.yml` (repo root) loads the full schema on first start, in order:
-redesign patch (AIS tables) → `restricted-areas` patch → `db/schema.sql` → `db/seed.sql`
-→ `scripts/seed-permissions.sql`. If host port 5432 is taken, set `POSTGRES_HOST_PORT`
+The container starts as an empty `ais_db` with PostGIS, and the schema comes only from the
+meta-service TypeORM migrations (see below). If host port 5432 is taken, set `POSTGRES_HOST_PORT`
 in a root `./.env` and `DB_PORT` to match in the service `.env` files. The app services
 run on the host (not containerised). Seeded dev logins: `admin@example.com` /
 `operator@example.com`, password `Password123!`.
@@ -46,17 +46,18 @@ run on the host (not containerised). Seeded dev logins: `admin@example.com` /
 cd meta-service
 npm install
 cp .env.example .env          # set DB_HOST=localhost, DB_PASSWORD=seren0Guard, PORT=5000, JWT_SECRET
-npm run db:reset             # drop + rebuild ais_db from all SQL in the right order (non-Docker path)
-# or piecemeal: npm run db:schema / db:seed / db:seed-permissions
+npm run db:reset             # drop + recreate ais_db → migrations → seed.sql → seed-permissions
+# or piecemeal: npm run db:migrate / db:seed / db:seed-permissions
+npm run db:migrate:revert     # undo the last migration
+npm run db:migration:generate -- src/db/migrations/<Name>   # diff entities vs DB → new JS migration
 npm run dev                   # nodemon src/server.js
 npm run lint                  # eslint src/**/*.js
 npm run format                # prettier
+node --test tests/            # node:test suite (no npm script)
 ```
-`npm run db:schema` alone is **not** enough on a fresh DB — `anomalies` in `schema.sql`
-FK-references `ships`, which only the redesign patch creates. Use `db:reset`, or apply
-patches first: `node scripts/run-sql.js db/patches/<file>.sql` in date order.
-`scripts/run-sql.js` creates the database if missing and splits on `;` (comment- and
-dollar-quote-aware).
+`scripts/run-sql.js` (used for the seeds) creates the database if missing and splits on
+`;` (comment- and dollar-quote-aware). `db/patches/` now only holds legacy MySQL RBAC
+patches and one-off data fixes; it is not part of schema setup.
 
 ### analytic-service
 ```bash
@@ -105,28 +106,40 @@ exported `query(sql, params)` from `db.config.js`, and read `result.insertId` /
 `result.affectedRows`. If you add a table whose PK isn't in the `tableToPk` map,
 add it there or write an explicit `RETURNING`.
 
-### Two overlapping schemas
+### Schema: TypeORM entities + migrations (schema only, not queries)
 
-- `db/schema.sql` — RBAC (`roles`, `permissions`, `users`, `role_permissions`,
-  `user_roles`, `user_permissions`), plus `vessels`, `vessel_positions`, `alerts`,
-  `activities`, `notifications`, and `anomalies`.
-- `db/patches/2026-04-30-db-redesign.sql` — `ship_types`, `ships`, and `ais_positions`
-  (`position GEOGRAPHY(Point,4326)`, **range-partitioned by `time_utc`**, with a DEFAULT
-  partition + the `create_next_two_partitions()` function). Reconstructed from the
-  consuming code after the original hand-built DB was lost — the column set is authored
-  to match `ingest-service/insert.js` and the meta-service AIS/restricted-area queries.
-- `db/patches/2026-09-02-restricted-areas.sql` — `restricted_areas` (GEOGRAPHY polygon),
-  used by the restricted-areas module.
+`meta-service/src/db/` owns the schema for the whole shared DB:
+- `entities/*.entity.js` — one JS `EntitySchema` per table (16 tables).
+- `migrations/*.js` — `InitialSchema` is the hand-written baseline (all `IF NOT EXISTS`, so
+  it also just records itself on a DB built from the old SQL files).
+- `data-source.js` — used **only** by the TypeORM CLI. The app does not import it; models
+  still query through the `db.config.js` shim above.
 
-`ingest-service` operates on the `ships` / `ais_positions` world (analytic-service uses
-no DB — it POSTs to meta-service over HTTP). `meta-service` mostly operates on `vessels`
-/ `vessel_positions`, but `anomalies` in `schema.sql` FK-references `ships(mmsi)`, so the
-redesign patch must load **before** `schema.sql` (`npm run db:reset` and the Docker init
-both do this).
+Rules when changing the schema:
+- Edit the entity, then generate (or hand-write) a migration. Run
+  `npx typeorm schema:log -d src/db/data-source.js`; it should print "up to date" afterwards.
+- Entities pin the **Postgres-generated constraint names** (`users_role_id_fkey`,
+  `users_email_key`, `chk_*`, `idx_*`). TypeORM matches FKs, uniques and indexes by name,
+  so leaving a name out makes `migration:generate` emit pointless drop/recreate pairs.
+- `ais_positions` is **range-partitioned by `time_utc`** (DEFAULT partition +
+  `create_next_two_partitions()`, run nightly by `meta-service/cron/partition-cron.js`).
+  TypeORM can't express partitioning or the function, so review any generated migration
+  that touches this table. The entity's `idx_ais_positions_mmsi_time` has no `DESC`;
+  the migration has it. `partition-cron.js` runs at startup and nightly: it creates today +
+  2 days of partitions and calls `drop_old_ais_partitions(7)` (**7-day retention**).
+- `ships` also holds each vessel's **latest position** (`lat`, `lon`, `sog`, `cog`, `heading`,
+  `nav_status`, `last_position_at`), updated by `ingest-service/insert.js` right after each
+  `ais_positions` insert. The map endpoints (`/api/ais/positions/latest`, `/api/ais/vessels`)
+  read `ships` by `idx_ships_last_position_at`. Don't point them back at `ais_positions`;
+  `DISTINCT ON` over the full history gets slower with every row.
+- `anomaly_type_enum` keeps the `'behavoir'` typo; code depends on it.
 
-Partitions for `ais_positions` are created by `create_next_two_partitions()` (defined in
-the redesign patch), invoked nightly from `meta-service/cron/partition-cron.js` (imported
-by `src/server.js`). The DEFAULT partition means inserts never fail if that job lapses.
+Two table groups share the DB. `ingest-service` writes `ships` / `ais_positions` (it does
+not run migrations, so meta-service's must have run first). analytic-service uses no DB;
+it POSTs to meta-service over HTTP. `meta-service` mostly uses `vessels` /
+`vessel_positions`, but `anomalies.mmsi` FK-references `ships(mmsi)`. The AIS tables were
+reconstructed from the consuming code (`ingest-service/insert.js`, the meta-service
+AIS/restricted-area queries) after the original hand-built DB was lost.
 
 ### meta-service request pipeline
 

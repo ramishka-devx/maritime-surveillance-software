@@ -112,6 +112,16 @@ async function insertPosition(client, data, ship) {
     ]
   );
 
+  // Denormalised latest position, read by meta-service's map endpoint. The guard keeps an
+  // out-of-order (older) report from overwriting a newer one.
+  await client.query(
+    `UPDATE ships
+     SET lat = $2, lon = $3, sog = $4, cog = $5, heading = $6, nav_status = $7,
+         last_position_at = $8
+     WHERE mmsi = $1 AND (last_position_at IS NULL OR last_position_at < $8)`,
+    [data.mmsi, data.lat, data.lon, data.sog, data.cog, data.heading, data.nav_status, data.time]
+  );
+
   return true;
 }
 

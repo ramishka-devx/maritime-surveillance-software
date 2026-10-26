@@ -9,7 +9,9 @@
     "start": "node src/server.js",
     "lint": "eslint \"src/**/*.js\"",
     "format": "prettier --write \"**/*.{js,json,md}\"",
-    "db:schema": "node scripts/run-sql.js db/schema.sql",
+    "db:migrate": "typeorm migration:run -d src/db/data-source.js",
+    "db:migrate:revert": "typeorm migration:revert -d src/db/data-source.js",
+    "db:migration:generate": "typeorm migration:generate -o -d src/db/data-source.js",
     "db:seed": "node scripts/run-sql.js db/seed.sql",
     "db:seed-permissions": "node scripts/seed-permissions.js",
     "db:reset": "node scripts/db-reset.js"
@@ -30,7 +32,8 @@
     "pg": "^8.20.0",
     "pino": "^9.3.2",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "typeorm": "^1.1.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

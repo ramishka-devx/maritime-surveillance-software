@@ -15,15 +15,18 @@ const RECONNECT_DELAY = 5000;
 let socket;
 let heartbeatInterval;
 
+// Per-message logging was ~50 lines/s; summarise once a minute instead.
+const stats = { ships: 0, positions: 0 };
+setInterval(() => {
+  console.log(`[DB] ✓ Last 60s: ${stats.ships} ship upserts, ${stats.positions} positions inserted`);
+  stats.ships = 0;
+  stats.positions = 0;
+}, 60000).unref();
+
 async function persistParsedMessage(parsed) {
   const result = await processAISMessage(parsed);
-  if (result.positionsInserted > 0) {
-    console.log(
-      `[DB] ✓ Upserted ship ${parsed.mmsi} and inserted ${result.positionsInserted} AIS position`
-    );
-  } else {
-    console.log(`[DB] ✓ Upserted ship ${parsed.mmsi} without position insert`);
-  }
+  stats.ships += result.shipUpserted;
+  stats.positions += result.positionsInserted;
 }
 
 async function handleKafkaMessage({ message }) {
