@@ -44,14 +44,36 @@ function parseGeometry(area) {
 
 export const RestrictedAreaService = {
   async create(payload) {
-    const wktPolygon = buildPolygonWkt(payload.coordinates);
+    const wktPolygon = payload.coordinates ? buildPolygonWkt(payload.coordinates) : null;
+    if (!wktPolygon && !payload.geometry) throw badRequest('Polygon coordinates are required');
     const area = await RestrictedAreaModel.create({
       name: payload.name,
       type: payload.type,
-      wktPolygon
+      wktPolygon: wktPolygon || geoJsonPolygonWkt(payload.geometry),
+      status: payload.status || 'active',
+      expiresAt: payload.expires_at
     });
 
     return parseGeometry(area);
+  },
+
+  async update(id, payload) {
+    const wktPolygon = payload.coordinates ? buildPolygonWkt(payload.coordinates) : null;
+    const area = await RestrictedAreaModel.update(id, {
+      name: payload.name,
+      type: payload.type,
+      wktPolygon: wktPolygon || (payload.geometry ? geoJsonPolygonWkt(payload.geometry) : null),
+      status: payload.status,
+      expiresAt: payload.expires_at
+    });
+    if (!area) throw notFound('Restricted area not found');
+    return parseGeometry(area);
+  },
+
+  async remove(id) {
+    const removed = await RestrictedAreaModel.remove(id);
+    if (!removed) throw notFound('Restricted area not found');
+    return { id };
   },
 
   async list({ type } = {}) {
@@ -206,3 +228,16 @@ export const RestrictedAreaService = {
     return createdAlerts;
   }
 };
+
+function geoJsonPolygonWkt(geometry) {
+  if (geometry?.type !== 'Polygon' || !Array.isArray(geometry.coordinates?.[0])) {
+    throw badRequest('Only GeoJSON Polygon geometry is supported');
+  }
+  const points = geometry.coordinates[0].map(([lon, lat]) => {
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) throw badRequest('Invalid GeoJSON coordinate');
+    return `${normalizeCoordinate(lon)} ${normalizeCoordinate(lat)}`;
+  });
+  if (points.length < 4) throw badRequest('At least 3 polygon vertices are required');
+  if (points[0] !== points.at(-1)) points.push(points[0]);
+  return `POLYGON((${points.join(', ')}))`;
+}

@@ -6,13 +6,16 @@ import RestrictedAreasIncursionsDrawer from '../../components/restricted/Restric
 import RestrictedAreasUploadModal from '../../components/restricted/RestrictedAreasUploadModal.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { apiRequest } from '../../lib/api.js';
+import { useVesselContext } from '../../context/VesselContext.jsx';
 
 function normalizeBackendZone(z) {
   let geo = null;
   if (typeof z.geometry === 'string') {
     try {
       geo = JSON.parse(z.geometry);
-    } catch {}
+    } catch {
+      geo = null;
+    }
   } else if (z.geometry && typeof z.geometry === 'object') {
     geo = z.geometry;
   }
@@ -55,9 +58,15 @@ function normalizeBackendZone(z) {
     category: categoryMap[z.type] || (z.type ? z.type.toUpperCase() : 'Restricted Area'),
     badgeType: badgeMap[z.type] || 'neutral',
     incursions: z.incursions || 0,
-    area: coordinates.length > 0 ? `${(coordinates.length * 4.2).toFixed(1)} NM²` : '—',
+    area: Number(z.area_sqm) > 0 ? `${(Number(z.area_sqm) / 3_429_904).toFixed(1)} NM²` : '—',
     vertices: coordinates.length,
     coordinates,
+    centroid: z.centroid && Number.isFinite(Number(z.centroid.lat))
+      ? { lat: Number(z.centroid.lat), lon: Number(z.centroid.lon) }
+      : coordinates.length
+        ? { lat: coordinates.reduce((sum, point) => sum + point.lat, 0) / coordinates.length, lon: coordinates.reduce((sum, point) => sum + point.lon, 0) / coordinates.length }
+        : null,
+    areaSqm: Number(z.area_sqm) || 0,
     geometry: geo,
     constraint:
       z.type === 'military'
@@ -71,12 +80,15 @@ function normalizeBackendZone(z) {
         : z.type === 'sanctuary'
         ? 'text-emerald-400'
         : 'text-amber-400',
-    active: true,
+    active: (z.status || 'active') === 'active' && (!z.expires_at || new Date(z.expires_at) > new Date()),
+    status: z.status || 'active',
+    expires_at: z.expires_at || null,
   };
 }
 
 export default function RestrictedAreasPage() {
   const { token } = useAuth();
+  const { incursionEvents = [] } = useVesselContext();
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [zones, setZones] = useState([]);
@@ -216,10 +228,52 @@ export default function RestrictedAreasPage() {
   }, [zones, activeFilter, searchQuery]);
 
   const handleToggleZoneStatus = (zoneId) => {
-    setZones((prev) =>
-      prev.map((z) => (z.id === zoneId ? { ...z, active: !z.active } : z))
-    );
+    const zone = zones.find((z) => String(z.id) === String(zoneId));
+    if (!zone) return;
+    const status = zone.status === 'active' ? 'inactive' : 'active';
+    apiRequest(`/api/restricted-areas/${zoneId}`, { token, method: 'PUT', body: { status } })
+      .then(() => setZones((prev) => prev.map((z) => String(z.id) === String(zoneId) ? { ...z, status, active: status === 'active' && (!z.expires_at || new Date(z.expires_at) > new Date()) } : z)))
+      .catch((error) => showToast(error.message || 'Could not update zone status'));
   };
+
+  const handleCreateZone = async (payload) => {
+    try {
+      await apiRequest('/api/restricted-areas', { token, method: 'POST', body: payload });
+      showToast(`Created restricted area: ${payload.name}`);
+      await fetchZones();
+    } catch (error) {
+      showToast(error.message || 'Could not create restricted area');
+      throw error;
+    }
+  };
+
+  const handleSetZoneExpiry = (zoneId, expires_at) => {
+    apiRequest(`/api/restricted-areas/${zoneId}`, { token, method: 'PUT', body: { expires_at } })
+      .then(() => setZones((prev) => prev.map((z) => String(z.id) === String(zoneId)
+        ? { ...z, expires_at, active: z.status === 'active' && (!expires_at || new Date(expires_at) > new Date()) }
+        : z)))
+      .catch((error) => showToast(error.message || 'Could not update zone expiration'));
+  };
+
+  const handleDeleteZone = async (zoneId) => {
+    if (!window.confirm('Delete this restricted area?')) return;
+    try {
+      await apiRequest(`/api/restricted-areas/${zoneId}`, { token, method: 'DELETE' });
+      setZones((prev) => prev.filter((zone) => String(zone.id) !== String(zoneId)));
+      setSelectedZone((current) => String(current?.id) === String(zoneId) ? null : current);
+      showToast('Restricted area deleted');
+    } catch (error) { showToast(error.message || 'Could not delete restricted area'); }
+  };
+
+  const liveZoneCounts = useMemo(() => {
+    const counts = new Map();
+    incursionEvents.forEach((event) => counts.set(String(event.restricted_area_id), (counts.get(String(event.restricted_area_id)) || 0) + 1));
+    return counts;
+  }, [incursionEvents]);
+  const zonesWithLiveCounts = useMemo(() => zones.map((zone) => ({
+    ...zone,
+    incursions: (zone.incursions || 0) + (liveZoneCounts.get(String(zone.id)) || 0),
+  })), [zones, liveZoneCounts]);
 
   return (
     <div className="w-full h-full flex overflow-hidden select-none bg-surface-container-lowest font-sans relative">
@@ -233,8 +287,8 @@ export default function RestrictedAreasPage() {
 
       {/* 1. Left 380px Restricted Areas Cadastre Panel */}
       <RestrictedAreasSidebar
-        zones={filteredZones}
-        allZones={zones}
+        zones={filteredZones.map((zone) => zonesWithLiveCounts.find((item) => item.id === zone.id) || zone)}
+        allZones={zonesWithLiveCounts}
         selectedZoneId={selectedZone?.id}
         onSelectZone={setSelectedZone}
         activeFilter={activeFilter}
@@ -242,6 +296,9 @@ export default function RestrictedAreasPage() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onToggleZoneStatus={handleToggleZoneStatus}
+        onSetZoneExpiry={handleSetZoneExpiry}
+        onDeleteZone={handleDeleteZone}
+        incursionCount={incursionEvents.length}
         onUploadGeoJson={() => setIsUploadModalOpen(true)}
         onNewArea={() => setIsUploadModalOpen(true)}
         isLoading={isLoadingZones}
@@ -261,6 +318,7 @@ export default function RestrictedAreasPage() {
           zones={zones}
           selectedZone={selectedZone}
           onSelectZone={setSelectedZone}
+          onCreateZone={handleCreateZone}
         />
 
         {/* Bottom Drawer: Breach Interdiction Feed & Incursions Table */}

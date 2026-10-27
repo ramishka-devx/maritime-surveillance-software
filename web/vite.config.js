@@ -56,6 +56,11 @@ export default defineConfig(async ({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
+        '/ws': {
+          target: currentTarget,
+          ws: true,
+          changeOrigin: true,
+        },
         '/api': {
           target: currentTarget,
           changeOrigin: true,

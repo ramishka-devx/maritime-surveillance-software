@@ -7,6 +7,7 @@ import {
   listSchema,
   getByIdSchema,
   createSchema,
+  updateSchema,
   detectionsSchema,
   checkBreachesSchema
 } from './restricted-area.validation.js';
@@ -30,6 +31,8 @@ router.get('/', authMiddleware, validate(listSchema), RestrictedAreaController.l
  *     tags: [Restricted Areas]
  */
 router.post('/', authMiddleware, activityLogger('restricted_areas.create'), validate(createSchema), RestrictedAreaController.create);
+router.put('/:id', authMiddleware, activityLogger('restricted_areas.update'), validate(updateSchema), RestrictedAreaController.update);
+router.delete('/:id', authMiddleware, activityLogger('restricted_areas.delete'), validate(getByIdSchema), RestrictedAreaController.remove);
 
 /**
  * @openapi

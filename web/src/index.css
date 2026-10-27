@@ -101,3 +101,49 @@
   filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.75);
 }
 
+.restricted-area-marker {
+  background: transparent;
+  border: 0;
+}
+
+.restricted-area-marker > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--zone-color, #f59e0b);
+  border: 1px solid color-mix(in srgb, var(--zone-color, #f59e0b) 75%, transparent);
+  border-radius: 999px;
+  background: rgba(8, 17, 31, 0.92);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 0 12px color-mix(in srgb, var(--zone-color, #f59e0b) 22%, transparent);
+  transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.restricted-area-marker:hover > span {
+  transform: scale(1.14);
+  background: #111a2b;
+}
+
+.restricted-area-marker__glyph {
+  font: 700 13px/1 ui-monospace, monospace;
+}
+
+.restricted-area-marker--cluster > span {
+  color: #e6edf7;
+  border-color: rgba(34, 211, 238, 0.7);
+  background: rgba(8, 47, 73, 0.96);
+  font-size: 11px;
+}
+
+.custom-leaflet-tooltip {
+  color: #e6edf7;
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 6px;
+  background: rgba(11, 18, 32, 0.96);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.custom-leaflet-tooltip::before {
+  border-top-color: rgba(11, 18, 32, 0.96);
+}
+

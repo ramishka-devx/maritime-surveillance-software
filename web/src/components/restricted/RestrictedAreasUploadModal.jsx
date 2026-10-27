@@ -2,6 +2,9 @@ import React, { useState, useRef } from 'react';
 import { parseGeoJsonFile, normalizeZoneType } from '../../lib/geoJsonParser.js';
 import { apiRequest } from '../../lib/api.js';
 import { useAuth } from '../../auth/AuthContext.jsx';
+import { MapContainer, TileLayer, Polygon, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const ZONE_TYPE_OPTIONS = [
   { value: 'military', label: 'Military Exclusion' },
@@ -11,6 +14,15 @@ const ZONE_TYPE_OPTIONS = [
   { value: 'restricted', label: 'Custom Exclusion' },
   { value: 'anchorage', label: 'Port Anchorage' },
 ];
+
+function PreviewBounds({ zones }) {
+  const map = useMap();
+  React.useEffect(() => {
+    const points = zones.flatMap((zone) => zone.coordinates.map(({ lat, lon }) => [lat, lon]));
+    if (points.length) map.fitBounds(L.latLngBounds(points), { padding: [16, 16], maxZoom: 9 });
+  }, [map, zones]);
+  return null;
+}
 
 export default function RestrictedAreasUploadModal({
   isOpen,
@@ -26,6 +38,7 @@ export default function RestrictedAreasUploadModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null); // { current, total, zoneName }
   const [errorMessage, setErrorMessage] = useState(null);
+  const [expiresAt, setExpiresAt] = useState('');
 
   if (!isOpen) return null;
 
@@ -115,6 +128,8 @@ export default function RestrictedAreasUploadModal({
           name: zone.name.trim(),
           type: normalizeZoneType(zone.type),
           coordinates: zone.coordinates,
+          status: 'active',
+          expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
         };
 
         await apiRequest('/api/restricted-areas', {
@@ -132,6 +147,7 @@ export default function RestrictedAreasUploadModal({
 
     setIsProcessing(false);
     setUploadProgress(null);
+    setExpiresAt('');
 
     if (successCount > 0) {
       if (onSuccess) onSuccess(successCount);
@@ -270,6 +286,17 @@ export default function RestrictedAreasUploadModal({
               <p className="text-xs font-mono text-on-surface-variant m-0">
                 Review and configure zone attributes before committing to PostGIS. Coordinates have been normalized to [lat, lon].
               </p>
+              {parsedZones.length > 0 && <div className="h-48 overflow-hidden rounded border border-cyan-400/20">
+                <MapContainer center={[parsedZones[0].centroid?.lat || 7.87, parsedZones[0].centroid?.lon || 80.2]} zoom={7} zoomControl={false} scrollWheelZoom={false} style={{ width: '100%', height: '100%', background: '#070e1c' }}>
+                  <PreviewBounds zones={parsedZones} />
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" className="dark-osm-tiles" attribution="&copy; OpenStreetMap contributors" />
+                  {parsedZones.map((zone) => <Polygon key={`preview-${zone.tempId}`} positions={zone.coordinates.map(({ lat, lon }) => [lat, lon])} pathOptions={{ color: '#22d3ee', fillColor: '#22d3ee', fillOpacity: 0.15, weight: 1.5 }} />)}
+                </MapContainer>
+              </div>}
+              <label className="flex items-center gap-3 rounded border border-outline-variant/30 bg-surface-container/60 p-3 font-mono text-xs text-outline">
+                <span>Temporary zones expire at (optional)</span>
+                <input type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className="rounded border border-outline-variant/50 bg-surface-container-low px-2 py-1 text-on-surface" />
+              </label>
 
               {/* Zones Scrollable Table */}
               <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">

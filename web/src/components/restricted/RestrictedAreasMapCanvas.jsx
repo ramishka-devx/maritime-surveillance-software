@@ -2,7 +2,9 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   MapContainer,
   TileLayer,
+  Marker,
   Polygon,
+  Polyline,
   CircleMarker,
   Tooltip,
   Popup,
@@ -165,12 +167,51 @@ function MapInstanceBridge({ onMapReady }) {
   return null;
 }
 
+function clusterZones(zones, map, zoom) {
+  if (!map || zoom >= 10) return zones.map((zone) => ({ zones: [zone], centroid: zone.centroid }));
+  const buckets = new Map();
+  zones.filter((zone) => zone.centroid).forEach((zone) => {
+    const point = map.project([zone.centroid.lat, zone.centroid.lon], zoom);
+    const key = `${Math.floor(point.x / 42)}:${Math.floor(point.y / 42)}`;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(zone);
+  });
+  return [...buckets.values()].map((members) => ({
+    zones: members,
+    centroid: members.length === 1 ? members[0].centroid : {
+      lat: members.reduce((sum, zone) => sum + zone.centroid.lat, 0) / members.length,
+      lon: members.reduce((sum, zone) => sum + zone.centroid.lon, 0) / members.length,
+    },
+  }));
+}
+
+function ZoomTracker({ onZoom }) {
+  const map = useMap();
+  useMapEvents({ zoomend: () => onZoom(map.getZoom()) });
+  useEffect(() => onZoom(map.getZoom()), [map, onZoom]);
+  return null;
+}
+
+function DrawingHandler({ enabled, onPoint }) {
+  useMapEvents({ click: (event) => { if (enabled) onPoint({ lat: event.latlng.lat, lon: event.latlng.lng }); } });
+  return null;
+}
+
 export default function RestrictedAreasMapCanvas({
   zones = [],
   selectedZone = null,
   onSelectZone = () => {},
+  onCreateZone = () => {},
 }) {
   const [mapInstance, setMapInstance] = useState(null);
+  const [zoom, setZoom] = useState(7);
+  const [hoveredZoneId, setHoveredZoneId] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [draftCoordinates, setDraftCoordinates] = useState([]);
+  const [draftName, setDraftName] = useState('New restricted area');
+  const [draftType, setDraftType] = useState('military');
+  const [draftExpiry, setDraftExpiry] = useState('');
+  const hoverTimer = useRef(null);
   const [cursorCoords, setCursorCoords] = useState("06°55.80'N 079°51.60'E");
   const [activeBasemap, setActiveBasemap] = useState('dark'); // 'dark' | 'satellite'
   const [layers, setLayers] = useState({
@@ -242,10 +283,25 @@ export default function RestrictedAreasMapCanvas({
         {/* Bridges & Events */}
         <MapResizeHandler />
         <MapInstanceBridge onMapReady={setMapInstance} />
+        <ZoomTracker onZoom={setZoom} />
+        <DrawingHandler enabled={isDrawing} onPoint={(point) => setDraftCoordinates((prev) => [...prev, point])} />
         <MapCursorTracker onCursorCoordsChange={setCursorCoords} />
         <MapBoundsController selectedZone={selectedZone} allZones={zones} />
+        {draftCoordinates.length > 1 && <Polyline positions={draftCoordinates.map(({ lat, lon }) => [lat, lon])} pathOptions={{ color: '#22d3ee', weight: 2, dashArray: '5, 5' }} />}
+        {draftCoordinates.length > 2 && <Polygon positions={draftCoordinates.map(({ lat, lon }) => [lat, lon])} pathOptions={{ color: '#22d3ee', fillColor: '#22d3ee', fillOpacity: 0.12, weight: 1.5 }} />}
 
         {/* Render Real GeoJSON Restricted Areas */}
+        {layers.zones && zoom < 10 && clusterZones(zones.filter((zone) => String(zone.id) !== String(selectedZone?.id)), mapInstance, zoom).map((cluster) => {
+          const zone = cluster.zones[0];
+          const count = cluster.zones.length;
+          const color = getZoneColor(zone.type);
+          const glyph = count > 1 ? count : zone.type?.toLowerCase().includes('sanct') ? '⌖' : '✚';
+          const icon = L.divIcon({ className: `restricted-area-marker${count > 1 ? ' restricted-area-marker--cluster' : ''}`, html: `<span style="--zone-color:${color}"><span class="restricted-area-marker__glyph">${glyph}</span></span>`, iconSize: [30, 30], iconAnchor: [15, 15] });
+          return <Marker key={`zone-marker-${cluster.zones.map((item) => item.id).join('-')}`} position={[cluster.centroid.lat, cluster.centroid.lon]} icon={icon}
+            eventHandlers={{ mouseover: () => { clearTimeout(hoverTimer.current); if (count === 1) setHoveredZoneId(String(zone.id)); }, mouseout: () => { hoverTimer.current = setTimeout(() => setHoveredZoneId(null), 120); }, click: () => { if (count > 1) mapInstance?.setView([cluster.centroid.lat, cluster.centroid.lon], Math.min(zoom + 2, 10), { animate: true }); else { setHoveredZoneId(String(zone.id)); onSelectZone(zone); } } }}>
+            {layers.labels && count === 1 && <Tooltip direction="top" offset={[0, -12]}><div className="font-mono text-xs"><strong>{zone.name || `Zone #${zone.id}`}</strong><br />{zone.category || zone.type} · {zone.areaSqm ? `${(zone.areaSqm / 1e6).toFixed(2)} km²` : 'Area unavailable'}</div></Tooltip>}
+          </Marker>;
+        })}
         {layers.zones &&
           zones.map((zone) => {
             if (!Array.isArray(zone.coordinates) || zone.coordinates.length < 3) {
@@ -253,6 +309,8 @@ export default function RestrictedAreasMapCanvas({
             }
 
             const isSelected = String(zone.id) === String(selectedZone?.id);
+            const isHovered = String(zone.id) === hoveredZoneId;
+            if (zoom < 10 && !isSelected && !isHovered) return null;
             const color = getZoneColor(zone.type);
             const positions = zone.coordinates.map((c) => [c.lat, c.lon]);
 
@@ -263,13 +321,15 @@ export default function RestrictedAreasMapCanvas({
                   positions={positions}
                   eventHandlers={{
                     click: () => onSelectZone(zone),
+                    mouseover: () => { clearTimeout(hoverTimer.current); setHoveredZoneId(String(zone.id)); },
+                    mouseout: () => { hoverTimer.current = setTimeout(() => setHoveredZoneId(null), 120); },
                   }}
                   pathOptions={{
                     color: color,
-                    weight: isSelected ? 3 : 1.5,
-                    dashArray: isSelected ? '6, 6' : '4, 4',
+                    weight: isSelected ? 2 : 1.25,
+                    dashArray: isSelected ? '4, 4' : null,
                     fillColor: color,
-                    fillOpacity: isSelected ? 0.25 : 0.12,
+                    fillOpacity: isSelected ? 0.15 : 0.12,
                     className: isSelected ? 'zone-selected-pulse' : 'zone-boundary',
                   }}
                 >
@@ -388,6 +448,17 @@ export default function RestrictedAreasMapCanvas({
             <span className="font-mono text-[10px] font-bold">N</span>
           </button>
         </div>
+      </div>
+      <div className="absolute top-4 right-4 z-[800] flex max-w-[min(90vw,360px)] flex-col gap-2 rounded border border-white/10 bg-[#0b1220]/95 p-2.5 font-mono text-xs text-white shadow-xl backdrop-blur">
+        {!isDrawing ? <button type="button" onClick={() => { setDraftCoordinates([]); setIsDrawing(true); }} className="rounded border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-cyan-200 hover:bg-cyan-400/20">Draw restricted area</button> : <>
+          <div>Click map to add polygon vertices ({draftCoordinates.length})</div>
+          <input value={draftName} onChange={(e) => setDraftName(e.target.value)} aria-label="Zone name" className="rounded border border-white/10 bg-slate-900 px-2 py-1.5" />
+          <select value={draftType} onChange={(e) => setDraftType(e.target.value)} aria-label="Zone class" className="rounded border border-white/10 bg-slate-900 px-2 py-1.5">
+            <option value="military">Military Exclusion</option><option value="sanctuary">Marine Sanctuary</option><option value="port">Port Security</option><option value="cable">Cable Corridor</option><option value="restricted">Custom Exclusion</option>
+          </select>
+          <label className="flex items-center justify-between gap-2 text-slate-300">Expires <input type="datetime-local" value={draftExpiry} onChange={(e) => setDraftExpiry(e.target.value)} className="rounded border border-white/10 bg-slate-900 px-2 py-1" /></label>
+          <div className="flex gap-2"><button type="button" onClick={() => setDraftCoordinates((prev) => prev.slice(0, -1))} disabled={!draftCoordinates.length} className="rounded bg-white/10 px-2 py-1.5 disabled:opacity-40">Undo</button><button type="button" onClick={() => { setIsDrawing(false); setDraftCoordinates([]); }} className="rounded bg-white/10 px-2 py-1.5">Cancel</button><button type="button" disabled={draftCoordinates.length < 3 || !draftName.trim()} onClick={async () => { await onCreateZone({ name: draftName.trim(), type: draftType, coordinates: draftCoordinates, expires_at: draftExpiry ? new Date(draftExpiry).toISOString() : null }); setIsDrawing(false); setDraftCoordinates([]); setDraftExpiry(''); }} className="rounded bg-cyan-400 px-3 py-1.5 font-bold text-slate-950 disabled:opacity-40">Save zone</button></div>
+        </>}
       </div>
     </div>
   );

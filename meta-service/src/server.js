@@ -6,6 +6,8 @@ import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
 import { runGeofenceDetector } from './cron/geofenceDetector.js';
 import '../cron/partition-cron.js';
+import { createServer } from 'node:http';
+import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
 
 (async () => {
   try {
@@ -27,7 +29,8 @@ import '../cron/partition-cron.js';
   for (let attempt = 1; attempt <= maxPortAttempts; attempt++) {
     try {
       server = await new Promise((resolve, reject) => {
-        const s = app.listen(port, () => resolve(s));
+        const s = createServer(app);
+        s.listen(port, () => resolve(s));
         s.once('error', reject);
       });
 
@@ -47,6 +50,8 @@ import '../cron/partition-cron.js';
       process.exit(1);
     }
   }
+
+  const closeGeofenceSocket = attachGeofenceSocket(server);
 
   // Schedule daily maintenance notifications
   const interval = '* 6 * * *';
@@ -71,6 +76,7 @@ import '../cron/partition-cron.js';
 
   function shutdown() {
     logger.info('Shutting down...');
+    closeGeofenceSocket();
     server.close(() => process.exit(0));
   }
 

@@ -20,6 +20,20 @@ export const RestrictedAreaController = {
     }
   },
 
+  async update(req, res, next) {
+    try {
+      const area = await RestrictedAreaService.update(Number(req.params.id), req.body);
+      return success(res, area, 'Restricted area updated');
+    } catch (e) { next(e); }
+  },
+
+  async remove(req, res, next) {
+    try {
+      const result = await RestrictedAreaService.remove(Number(req.params.id));
+      return success(res, result, 'Restricted area deleted');
+    } catch (e) { next(e); }
+  },
+
   async getById(req, res, next) {
     try {
       const area = await RestrictedAreaService.getById(Number(req.params.id));

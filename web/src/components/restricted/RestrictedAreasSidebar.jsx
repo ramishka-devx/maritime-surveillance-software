@@ -10,6 +10,9 @@ export default function RestrictedAreasSidebar({
   searchQuery = '',
   onSearchChange,
   onToggleZoneStatus,
+  onSetZoneExpiry,
+  onDeleteZone,
+  incursionCount: liveIncursionCount,
   onUploadGeoJson,
   onNewArea,
   isLoading = false,
@@ -23,7 +26,7 @@ export default function RestrictedAreasSidebar({
     (z) => (z.type || '').toLowerCase().includes('port') || (z.type || '').toLowerCase().includes('anchor')
   ).length;
   const cableCount = baseList.filter((z) => (z.type || '').toLowerCase().includes('cable')).length;
-  const incursionCount = baseList.filter((z) => (z.incursions || 0) > 0).length;
+  const incursionCount = liveIncursionCount ?? baseList.reduce((sum, z) => sum + (z.incursions || 0), 0);
   const activeCount = baseList.filter((z) => z.active !== false).length;
 
   const filterTabs = [
@@ -174,6 +177,9 @@ export default function RestrictedAreasSidebar({
                   </div>
 
                   {/* Status Toggle Switch */}
+                  <button type="button" onClick={(e) => { e.stopPropagation(); onDeleteZone?.(zone.id); }} title="Delete restricted area" className="mr-2 text-outline hover:text-red-400" aria-label={`Delete ${zone.name}`}>
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                  </button>
                   <label
                     className="relative inline-flex items-center cursor-pointer"
                     onClick={(e) => e.stopPropagation()}
@@ -187,6 +193,13 @@ export default function RestrictedAreasSidebar({
                     <div className="w-8 h-4 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-cyan-400 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-950 after:rounded-full after:h-3 after:w-3 after:transition-all" />
                   </label>
                 </div>
+
+                <label className="mt-2 flex items-center gap-2 font-mono text-[10px] text-outline" onClick={(e) => e.stopPropagation()}>
+                  <span>Expires</span>
+                  <input type="datetime-local" value={zone.expires_at ? new Date(zone.expires_at).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => onSetZoneExpiry?.(zone.id, e.target.value ? new Date(e.target.value).toISOString() : null)}
+                    className="min-w-0 rounded border border-outline-variant/40 bg-surface-container px-1.5 py-1 text-[10px] text-on-surface" />
+                </label>
 
                 {/* Badges */}
                 <div className="flex items-center gap-1.5 mt-2 flex-wrap font-mono text-[10px]">
