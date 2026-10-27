@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/AuthContext.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
 import { isMaintenance } from '../../auth/roles.js';
 import { searchVessels, toUiVessel } from '../../lib/vessels.js';
+import { apiRequest } from '../../lib/api.js';
 
 // "27 Oct 2026, 05:31:54", Sri Lanka time.
 const clockFormat = new Intl.DateTimeFormat('en-GB', {
@@ -68,6 +69,19 @@ export default function Header({ onSearch }) {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // AIS positions stored per second over the last minute (null until the first answer).
+  const [aisRate, setAisRate] = useState(null);
+  useEffect(() => {
+    if (!token || maintenance) return undefined;
+    const load = () =>
+      apiRequest('/api/ais/rate', { token })
+        .then((d) => setAisRate(d.positions_per_s))
+        .catch(() => setAisRate(null));
+    load();
+    const interval = setInterval(load, 10000);
+    return () => clearInterval(interval);
+  }, [token, maintenance]);
 
   // "/" focuses the search box, unless the operator is already typing somewhere.
   useEffect(() => {
@@ -284,10 +298,13 @@ export default function Header({ onSearch }) {
       </div>
 
       {/* Live feed + clock */}
-      <div className="hidden xl:flex items-center gap-2 text-[14px]">
-        <span className="w-[7px] h-[7px] rounded-full bg-bs-accent" />
-        <span className="italic text-bs-neutral-700 text-[13px]">AIS stream live</span>
-      </div>
+      {aisRate !== null && (
+        <div className="hidden xl:flex items-baseline gap-2 text-[14px]" title="AIS positions stored per second, last minute">
+          <span className={`self-center w-[7px] h-[7px] rounded-full ${aisRate > 0 ? 'bg-bs-accent' : 'bg-bs-neutral-400'}`} />
+          <span className="font-semibold tabular-nums">{aisRate.toLocaleString()}</span>
+          <span className="italic text-bs-neutral-700 text-[13px]">{aisRate > 0 ? 'positions / s, AIS stream' : 'AIS stream idle'}</span>
+        </div>
+      )}
       <div className="hidden lg:flex items-center gap-2" title="Sri Lanka Standard Time (UTC+05:30)">
         <Clock size={17} className="text-bs-neutral-700" />
         <span className="font-mono font-semibold text-[13px] tabular-nums">{slTimestamp}</span>

@@ -64,6 +64,7 @@ module.exports = {
             DEFAULT: bs('accent'),
             100: bs('accent-100'),
             300: bs('accent-300'),
+            400: bs('accent-400'),
             600: bs('accent-600'),
             700: bs('accent-700'),
             800: bs('accent-800'),
@@ -71,6 +72,7 @@ module.exports = {
           'accent-2': {
             DEFAULT: bs('accent-2'),
             100: bs('accent-2-100'),
+            300: bs('accent-2-300'),
             500: bs('accent-2-500'),
             700: bs('accent-2-700'),
           },

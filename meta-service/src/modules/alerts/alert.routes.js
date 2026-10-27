@@ -19,7 +19,7 @@ const router = Router();
  * @openapi
  * /api/alerts:
  *   get:
- *     summary: List all alerts
+ *     summary: List alerts, filterable by status, severity, type, vessel_id, mmsi and created_at from/to
  *     tags: [Alerts]
  */
 router.get('/', authMiddleware, permissionMiddleware('alert.view'), validate(listSchema), AlertController.list);

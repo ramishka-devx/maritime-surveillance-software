@@ -2,6 +2,15 @@ import { success } from '../../utils/apiResponse.js';
 import { AisService } from './ais.service.js';
 
 export const AisController = {
+  async rate(req, res, next) {
+    try {
+      const data = await AisService.rate();
+      return success(res, data);
+    } catch (e) {
+      next(e);
+    }
+  },
+
   async listVessels(req, res, next) {
     try {
       const { limit, q } = req.query;

@@ -10,6 +10,18 @@ export const Alert = new EntitySchema({
       nullable: true,
       foreignKey: { target: 'Vessel', name: 'alerts_vessel_id_fkey', onDelete: 'SET NULL' }
     },
+    // The AIS vessel (ships) the alert is about; vessel_id is the meta-service registry entry.
+    mmsi: {
+      type: 'bigint',
+      nullable: true,
+      foreignKey: { target: 'Ship', name: 'alerts_mmsi_fkey', onDelete: 'SET NULL' }
+    },
+    // Set on geofence alerts: the zone that was entered.
+    restricted_area_id: {
+      type: 'integer',
+      nullable: true,
+      foreignKey: { target: 'RestrictedArea', name: 'alerts_restricted_area_id_fkey', onDelete: 'SET NULL' }
+    },
     type: { type: 'varchar', length: 30, default: 'manual' },
     severity: { type: 'varchar', length: 20, default: 'medium' },
     status: { type: 'varchar', length: 20, default: 'open' },
@@ -31,12 +43,16 @@ export const Alert = new EntitySchema({
   indices: [
     { name: 'idx_alerts_status', columns: ['status'] },
     { name: 'idx_alerts_severity', columns: ['severity'] },
-    { name: 'idx_alerts_vessel', columns: ['vessel_id'] }
+    { name: 'idx_alerts_vessel', columns: ['vessel_id'] },
+    // DESC in the migration; TypeORM entities can't express index order.
+    { name: 'idx_alerts_created_at', columns: ['created_at'] },
+    { name: 'idx_alerts_mmsi', columns: ['mmsi'] }
   ],
   checks: [
     {
       name: 'chk_alerts_type',
-      expression: "type IN ('geofence', 'speed', 'collision_risk', 'dark_vessel', 'manual')"
+      expression:
+        "type IN ('geofence', 'speed', 'collision_risk', 'dark_vessel', 'manual', 'loitering', 'route_deviation')"
     },
     {
       name: 'chk_alerts_severity',

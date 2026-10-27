@@ -1,5 +1,13 @@
 import { query } from '../../config/db.config.js';
 
+// mmsi/vessel_name prefer the alert's own AIS link (ships), falling back to the vessels registry.
+const ALERT_COLUMNS = `a.alert_id, a.vessel_id, a.type, a.severity, a.status, a.title, a.description,
+        a.created_by, a.assigned_to, a.created_at, a.updated_at, a.resolved_at, a.restricted_area_id,
+        COALESCE(a.mmsi::text, v.mmsi) AS mmsi, COALESCE(v.name, s.ship_name) AS vessel_name`;
+const ALERT_FROM = `alerts a
+      LEFT JOIN vessels v ON v.vessel_id = a.vessel_id
+      LEFT JOIN ships s ON s.mmsi = a.mmsi`;
+
 export const AlertModel = {
   async create(payload) {
     const {
@@ -10,13 +18,16 @@ export const AlertModel = {
       title,
       description,
       created_by,
-      assigned_to
+      assigned_to,
+      mmsi,
+      restricted_area_id
     } = payload;
 
     const result = await query(
       `INSERT INTO alerts (
-        vessel_id, type, severity, status, title, description, created_by, assigned_to
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        vessel_id, type, severity, status, title, description, created_by, assigned_to,
+        mmsi, restricted_area_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         vessel_id ?? null,
         type,
@@ -25,14 +36,16 @@ export const AlertModel = {
         title,
         description ?? null,
         created_by,
-        assigned_to ?? null
+        assigned_to ?? null,
+        mmsi ?? null,
+        restricted_area_id ?? null
       ]
     );
 
     return this.getById(result.insertId);
   },
 
-  async list({ page = 1, limit = 10, status, severity, vessel_id } = {}) {
+  async list({ page = 1, limit = 10, status, severity, vessel_id, type, mmsi, from, to } = {}) {
     const pageNum = Number.isFinite(Number(page)) ? Number(page) : 1;
     const limitNum = Number.isFinite(Number(limit)) ? Number(limit) : 10;
     const safePage = pageNum > 0 ? Math.floor(pageNum) : 1;
@@ -57,15 +70,31 @@ export const AlertModel = {
       params.push(vessel_id);
     }
 
+    if (type) {
+      where.push('a.type = ?');
+      params.push(type);
+    }
+
+    if (mmsi) {
+      where.push('a.mmsi = ?');
+      params.push(mmsi);
+    }
+
+    if (from) {
+      where.push('a.created_at >= ?');
+      params.push(from);
+    }
+
+    if (to) {
+      where.push('a.created_at <= ?');
+      params.push(to);
+    }
+
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
     const rows = await query(
-      `SELECT
-        a.alert_id, a.vessel_id, a.type, a.severity, a.status, a.title, a.description,
-        a.created_by, a.assigned_to, a.created_at, a.updated_at, a.resolved_at,
-        v.mmsi, v.name as vessel_name
-      FROM alerts a
-      LEFT JOIN vessels v ON v.vessel_id = a.vessel_id
+      `SELECT ${ALERT_COLUMNS}
+      FROM ${ALERT_FROM}
       ${whereClause}
       ORDER BY a.created_at DESC
       LIMIT ? OFFSET ?`,
@@ -82,12 +111,8 @@ export const AlertModel = {
 
   async getById(alert_id) {
     const rows = await query(
-      `SELECT
-        a.alert_id, a.vessel_id, a.type, a.severity, a.status, a.title, a.description,
-        a.created_by, a.assigned_to, a.created_at, a.updated_at, a.resolved_at,
-        v.mmsi, v.name as vessel_name
-      FROM alerts a
-      LEFT JOIN vessels v ON v.vessel_id = a.vessel_id
+      `SELECT ${ALERT_COLUMNS}
+      FROM ${ALERT_FROM}
       WHERE a.alert_id = ?
       LIMIT 1`,
       [alert_id]

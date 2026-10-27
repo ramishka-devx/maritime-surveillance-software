@@ -5,6 +5,14 @@ import { VesselModel } from '../vessels/vessel.model.js';
 import { query } from '../../config/db.config.js';
 import { logger } from '../../config/logger.js';
 
+// Alert raised for each anomaly type ('behavoir' (sic) is the stored behaviour type).
+export const ANOMALY_ALERT = {
+  speed: { type: 'speed', severity: 'high', label: 'Speed anomaly' },
+  route: { type: 'route_deviation', severity: 'medium', label: 'Route deviation' },
+  behavoir: { type: 'loitering', severity: 'medium', label: 'Loitering' },
+  loitering: { type: 'loitering', severity: 'medium', label: 'Loitering' }
+};
+
 export const AnomalyService = {
   async create(payload, created_by) {
     const anomaly = await AnomalyModel.create(payload);
@@ -28,16 +36,17 @@ export const AnomalyService = {
         creatorId = defaultUser?.user_id || 1;
       }
 
-      // 3. Format speed anomaly title and description
+      // 3. Format the alert title and description for this anomaly type
+      const kind = ANOMALY_ALERT[payload.anomaly_type] || ANOMALY_ALERT.speed;
       const vesselDisplay = vesselName ? `${vesselName} (${payload.mmsi})` : `MMSI ${payload.mmsi}`;
       const sogText = payload.sog !== undefined && payload.sog !== null ? `${payload.sog} kn` : null;
       const p99Text = payload.p99_speed !== undefined && payload.p99_speed !== null ? `${payload.p99_speed} kn` : null;
       const cogText = payload.cog !== undefined && payload.cog !== null ? `${payload.cog}°` : null;
 
-      const title = `Speed Anomaly: ${vesselDisplay}${sogText ? ` observed at ${sogText}` : ''}`;
+      const title = `${kind.label}: ${vesselDisplay}${sogText ? ` observed at ${sogText}` : ''}`;
 
       const descParts = [
-        `Automated speed anomaly detected by analytic-service for ${vesselDisplay}.`,
+        `Automated ${kind.label.toLowerCase()} detected by analytic-service for ${vesselDisplay}.`,
         sogText ? `Observed SOG: ${sogText}.` : null,
         p99Text ? `Peer p99 speed threshold: ${p99Text}.` : null,
         cogText ? `Course over ground: ${cogText}.` : null,
@@ -46,8 +55,9 @@ export const AnomalyService = {
 
       const alert = await AlertModel.create({
         vessel_id: vesselId,
-        type: 'speed',
-        severity: 'high',
+        mmsi: payload.mmsi,
+        type: kind.type,
+        severity: kind.severity,
         status: 'open',
         title: title.slice(0, 255),
         description: descParts.join(' '),

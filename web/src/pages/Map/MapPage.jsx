@@ -20,7 +20,7 @@ export default function MapPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [isDossierMinimized, setIsDossierMinimized] = useState(false);
-  const [activeLayer, setActiveLayer] = useState('vector');
+  const [activeLayer, setActiveLayer] = useState('enc');
   const [cursorCoords, setCursorCoords] = useState('');
   const [mapInstance, setMapInstance] = useState(null);
 

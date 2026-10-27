@@ -13,7 +13,7 @@ export const AlertController = {
 
   async list(req, res, next) {
     try {
-      const { page = 1, limit = 10, status, severity, vessel_id } = req.query;
+      const { page = 1, limit = 10, status, severity, vessel_id, type, mmsi, from, to } = req.query;
 
       const pageNum = Number.parseInt(page, 10);
       const limitNum = Number.parseInt(limit, 10);
@@ -24,7 +24,11 @@ export const AlertController = {
         limit: Number.isFinite(limitNum) && limitNum > 0 ? limitNum : 10,
         status,
         severity,
-        vessel_id: vessel_id === undefined || !Number.isFinite(vesselIdNum) ? undefined : vesselIdNum
+        vessel_id: vessel_id === undefined || !Number.isFinite(vesselIdNum) ? undefined : vesselIdNum,
+        type: type || undefined,
+        mmsi: mmsi || undefined,
+        from: from || undefined,
+        to: to || undefined
       });
       return success(res, data);
     } catch (e) {

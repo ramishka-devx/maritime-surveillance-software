@@ -53,6 +53,16 @@ const LATEST_COLUMNS = `mmsi, ship_name, sog, cog, heading, nav_status,
 const LATEST_FROM = 'ships LEFT JOIN ship_types st ON st.ship_type_id = ships.ship_type';
 
 export const AisService = {
+  // Positions stored per second over the last minute (idx_ais_positions_time). time_utc is
+  // the transponder's timestamp, so this approximates the ingest rate.
+  async rate() {
+    const [row] = await query(
+      `SELECT COUNT(*)::int AS n FROM ais_positions
+       WHERE time_utc > (now() AT TIME ZONE 'UTC') - interval '60 seconds'`
+    );
+    return { positions_per_s: Math.round((row.n / 60) * 10) / 10 };
+  },
+
   // Most recently seen vessels, optionally searched by name (substring) or MMSI (prefix).
   async listVessels({ limit, q } = {}) {
     const search = String(q ?? '').trim();

@@ -137,18 +137,16 @@ export const RestrictedAreaService = {
         logger.warn({ err, mmsi }, 'Could not resolve vessel for geofence breach');
       }
 
+      // One open alert per vessel and zone within 2 hours.
       const existingAlerts = await query(
         `SELECT alert_id FROM alerts
          WHERE type = 'geofence'
            AND status IN ('open', 'acknowledged')
-           AND (
-             (vessel_id IS NOT NULL AND vessel_id = ?)
-             OR title LIKE ?
-           )
-           AND description LIKE ?
+           AND mmsi = ?
+           AND restricted_area_id = ?
            AND created_at >= NOW() - INTERVAL '2 hours'
          LIMIT 1`,
-        [vesselId ?? -1, `%${mmsi}%`, `%${breach.restricted_zone}%`]
+        [breach.mmsi, breach.restricted_area_id]
       );
 
       if (existingAlerts.length > 0) {
@@ -182,6 +180,8 @@ export const RestrictedAreaService = {
       try {
         const alert = await AlertModel.create({
           vessel_id: vesselId,
+          mmsi: breach.mmsi,
+          restricted_area_id: breach.restricted_area_id,
           type: 'geofence',
           severity,
           status: 'open',
