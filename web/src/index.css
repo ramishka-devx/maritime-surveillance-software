@@ -61,8 +61,20 @@
   }
 }
 
-/* Dark Maritime filter for OpenStreetMap tiles (100% free, no API key needed) */
-.dark-osm-tiles .leaflet-tile {
-  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.75);
+/* Restricted-area names on the map: italic ink on a paper halo, no Leaflet tooltip box. */
+.leaflet-tooltip.bs-zone-label {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font: italic 600 12px Inter, system-ui, sans-serif;
+  color: rgb(var(--bs-accent-2-700));
+  text-shadow: 0 0 3px rgb(var(--bs-bg)), 0 0 3px rgb(var(--bs-bg)), 0 0 3px rgb(var(--bs-bg));
+}
+.leaflet-tooltip.bs-zone-label::before {
+  display: none;
+}
+.leaflet-tooltip.bs-zone-label-draft {
+  color: rgb(var(--bs-accent-700));
 }
 
