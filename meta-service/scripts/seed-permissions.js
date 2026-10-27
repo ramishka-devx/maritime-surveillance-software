@@ -67,6 +67,7 @@ async function seedPermissions() {
       const operatorPermissions = [
         'dashboard.view',
         'alert.view',
+        'alert.status.view',
         'reports.view'
       ];
 

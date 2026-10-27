@@ -13,7 +13,7 @@ export const AlertController = {
 
   async list(req, res, next) {
     try {
-      const { page = 1, limit = 10, status, severity, vessel_id, type, mmsi, from, to } = req.query;
+      const { page = 1, limit = 10, status, severity, vessel_id, type, mmsi, from, to, sort } = req.query;
 
       const pageNum = Number.parseInt(page, 10);
       const limitNum = Number.parseInt(limit, 10);
@@ -28,7 +28,8 @@ export const AlertController = {
         type: type || undefined,
         mmsi: mmsi || undefined,
         from: from || undefined,
-        to: to || undefined
+        to: to || undefined,
+        sort
       });
       return success(res, data);
     } catch (e) {
@@ -56,7 +57,7 @@ export const AlertController = {
 
   async updateStatus(req, res, next) {
     try {
-      const alert = await AlertService.updateStatus(Number(req.params.alert_id), req.body.status);
+      const alert = await AlertService.updateStatus(Number(req.params.alert_id), req.body.status, req.user.user_id);
       return success(res, alert, 'Status updated');
     } catch (e) {
       next(e);
@@ -65,8 +66,26 @@ export const AlertController = {
 
   async assign(req, res, next) {
     try {
-      const alert = await AlertService.assign(Number(req.params.alert_id), Number(req.body.assigned_to));
+      const alert = await AlertService.assign(Number(req.params.alert_id), Number(req.body.assigned_to), req.user.user_id);
       return success(res, alert, 'Alert assigned');
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async escalate(req, res, next) {
+    try {
+      const alert = await AlertService.escalate(Number(req.params.alert_id), req.user.user_id, req.body?.note);
+      return success(res, alert, 'Alert escalated');
+    } catch (e) {
+      next(e);
+    }
+  },
+
+  async events(req, res, next) {
+    try {
+      const events = await AlertService.events(Number(req.params.alert_id));
+      return success(res, events);
     } catch (e) {
       next(e);
     }

@@ -3,10 +3,13 @@ import { query } from '../../config/db.config.js';
 // mmsi/vessel_name prefer the alert's own AIS link (ships), falling back to the vessels registry.
 const ALERT_COLUMNS = `a.alert_id, a.vessel_id, a.type, a.severity, a.status, a.title, a.description,
         a.created_by, a.assigned_to, a.created_at, a.updated_at, a.resolved_at, a.restricted_area_id,
+        a.lat, a.lon, NULLIF(concat_ws(' ', u.first_name, u.last_name), '') AS assignee_name,
         COALESCE(a.mmsi::text, v.mmsi) AS mmsi, COALESCE(v.name, s.ship_name) AS vessel_name`;
 const ALERT_FROM = `alerts a
       LEFT JOIN vessels v ON v.vessel_id = a.vessel_id
-      LEFT JOIN ships s ON s.mmsi = a.mmsi`;
+      LEFT JOIN ships s ON s.mmsi = a.mmsi
+      LEFT JOIN users u ON u.user_id = a.assigned_to`;
+const SEVERITY_ORDER = `CASE a.severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END`;
 
 export const AlertModel = {
   async create(payload) {
@@ -20,14 +23,16 @@ export const AlertModel = {
       created_by,
       assigned_to,
       mmsi,
-      restricted_area_id
+      restricted_area_id,
+      lat,
+      lon
     } = payload;
 
     const result = await query(
       `INSERT INTO alerts (
         vessel_id, type, severity, status, title, description, created_by, assigned_to,
-        mmsi, restricted_area_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        mmsi, restricted_area_id, lat, lon
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         vessel_id ?? null,
         type,
@@ -38,14 +43,16 @@ export const AlertModel = {
         created_by,
         assigned_to ?? null,
         mmsi ?? null,
-        restricted_area_id ?? null
+        restricted_area_id ?? null,
+        lat ?? null,
+        lon ?? null
       ]
     );
 
     return this.getById(result.insertId);
   },
 
-  async list({ page = 1, limit = 10, status, severity, vessel_id, type, mmsi, from, to } = {}) {
+  async list({ page = 1, limit = 10, status, severity, vessel_id, type, mmsi, from, to, sort } = {}) {
     const pageNum = Number.isFinite(Number(page)) ? Number(page) : 1;
     const limitNum = Number.isFinite(Number(limit)) ? Number(limit) : 10;
     const safePage = pageNum > 0 ? Math.floor(pageNum) : 1;
@@ -55,9 +62,11 @@ export const AlertModel = {
     const where = [];
     const params = [];
 
+    // status: one value or a comma-separated list ("open,acknowledged"), validated upstream.
     if (status) {
-      where.push('a.status = ?');
-      params.push(status);
+      const statuses = String(status).split(',');
+      where.push(`a.status IN (${statuses.map(() => '?').join(', ')})`);
+      params.push(...statuses);
     }
 
     if (severity) {
@@ -96,7 +105,7 @@ export const AlertModel = {
       `SELECT ${ALERT_COLUMNS}
       FROM ${ALERT_FROM}
       ${whereClause}
-      ORDER BY a.created_at DESC
+      ORDER BY ${sort === 'severity' ? `${SEVERITY_ORDER}, ` : ''}a.created_at DESC
       LIMIT ? OFFSET ?`,
       [...params, safeLimit, offset]
     );

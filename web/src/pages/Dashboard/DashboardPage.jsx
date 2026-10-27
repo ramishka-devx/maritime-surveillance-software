@@ -5,6 +5,8 @@ import { useAuth } from '../../auth/AuthContext.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { searchVessels, toUiVessel } from '../../lib/vessels.js';
+import { esriMapImage } from '../../lib/esriMap.js';
+import Skeleton from '../../components/ui/Skeleton.jsx';
 
 const ink = (name) => `rgb(var(--bs-${name}))`;
 
@@ -112,29 +114,12 @@ function Sparkline({ values, color }) {
   );
 }
 
-// Placeholder shown until the first summary arrives: an ink-tinted block that pulses (still
-// for reduced motion).
-function Skeleton({ className = '', style }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`block rounded-sm bg-bs-ink/[.08] animate-pulse motion-reduce:animate-none ${className}`}
-      style={style}
-    />
-  );
-}
 // Bar heights (%) for the chart placeholder: uneven so it reads as a chart, not a bar.
 const SKELETON_BARS = [30, 45, 25, 60, 40, 70, 35, 50, 20, 55, 65, 40, 30, 75, 45, 35, 55, 25, 60, 40, 50, 30, 45, 35];
 const range = (n) => Array.from({ length: n }, (_, i) => i);
 
 const fmtDeg = (v, pos, neg) => `${Math.abs(v).toFixed(1)}°${v < 0 ? neg : pos}`;
 
-// One Esri map image of a lat/lon box, in plain lat/lon (EPSG:4326) so it matches the density
-// grid. The size keeps the box's aspect, so Esri doesn't widen the extent to fit.
-const sectorMap = (layer, { w, s, e, n }) =>
-  `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${layer}/MapServer/export` +
-  `?bbox=${w},${s},${e},${n}&bboxSR=4326&imageSR=4326&size=600,${Math.round((600 * (n - s)) / (e - w))}` +
-  '&format=png32&transparent=true&f=image';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -579,8 +564,8 @@ export default function DashboardPage() {
                 className="relative mt-5 w-full border border-bs-ink/[.16] overflow-hidden"
                 style={{ aspectRatio: `${heat.cols} / ${heat.rows}` }}
               >
-                <img src={sectorMap('World_Light_Gray_Base', heat.bounds)} alt="" className="absolute inset-0 w-full h-full" />
-                <img src={sectorMap('World_Light_Gray_Reference', heat.bounds)} alt="" className="absolute inset-0 w-full h-full opacity-70" />
+                <img src={esriMapImage('World_Light_Gray_Base', heat.bounds)} alt="" className="absolute inset-0 w-full h-full" />
+                <img src={esriMapImage('World_Light_Gray_Reference', heat.bounds)} alt="" className="absolute inset-0 w-full h-full opacity-70" />
                 <div className="absolute inset-0 grid gap-px" style={{ gridTemplateColumns: `repeat(${heat.cols}, minmax(0, 1fr))` }}>
                   {heat.cells.map((c, i) => (
                     <span

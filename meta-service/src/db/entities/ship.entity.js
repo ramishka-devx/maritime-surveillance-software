@@ -13,6 +13,10 @@ export const Ship = new EntitySchema({
       foreignKey: { target: 'ShipType', name: 'ships_ship_type_fkey' }
     },
     dimensions: { type: 'jsonb', nullable: true },
+    // From AIS static data (ShipStaticData).
+    imo: { type: 'varchar', length: 10, nullable: true },
+    callsign: { type: 'varchar', length: 20, nullable: true },
+    destination: { type: 'text', nullable: true },
     created_at: { type: 'timestamp', nullable: true, default: () => 'now()' },
     updated_at: { type: 'timestamp', nullable: true, default: () => 'now()' },
     // Latest position, kept current by ingest-service so the map needn't scan ais_positions.

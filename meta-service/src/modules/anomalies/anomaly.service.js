@@ -1,6 +1,8 @@
 import { notFound } from '../../utils/errorHandler.js';
 import { AnomalyModel } from './anomaly.model.js';
 import { AlertModel } from '../alerts/alert.model.js';
+import { AlertEventModel } from '../alerts/alert-event.model.js';
+import { anomalyTitle, kn, motion, vesselLabel } from '../alerts/alert-text.js';
 import { VesselModel } from '../vessels/vessel.model.js';
 import { query } from '../../config/db.config.js';
 import { logger } from '../../config/logger.js';
@@ -27,6 +29,10 @@ export const AnomalyService = {
           vesselId = vessel.vessel_id;
           vesselName = vessel.name;
         }
+        if (!vesselName) {
+          const [ship] = await query('SELECT ship_name FROM ships WHERE mmsi = ?', [payload.mmsi]);
+          vesselName = ship?.ship_name || null;
+        }
       }
 
       // 2. Resolve created_by user (from caller token or fallback to system user)
@@ -43,7 +49,11 @@ export const AnomalyService = {
       const p99Text = payload.p99_speed !== undefined && payload.p99_speed !== null ? `${payload.p99_speed} kn` : null;
       const cogText = payload.cog !== undefined && payload.cog !== null ? `${payload.cog}°` : null;
 
-      const title = `${kind.label}: ${vesselDisplay}${sogText ? ` observed at ${sogText}` : ''}`;
+      const title = anomalyTitle(payload.anomaly_type, {
+        vessel: vesselLabel(vesselName, payload.mmsi),
+        sog: payload.sog,
+        p99: payload.p99_speed
+      });
 
       const descParts = [
         `Automated ${kind.label.toLowerCase()} detected by analytic-service for ${vesselDisplay}.`,
@@ -56,6 +66,9 @@ export const AnomalyService = {
       const alert = await AlertModel.create({
         vessel_id: vesselId,
         mmsi: payload.mmsi,
+        // analytic-service sends latitude in details.lat (anomalies has no lat column).
+        lat: payload.details?.lat ?? null,
+        lon: payload.lon ?? null,
         type: kind.type,
         severity: kind.severity,
         status: 'open',
@@ -64,6 +77,18 @@ export const AnomalyService = {
         created_by: creatorId,
         assigned_to: null
       });
+
+      if (alert) {
+        const how = motion(payload.sog, payload.cog);
+        const norm = kn(payload.p99_speed) ? `; similar vessels stay under ${kn(payload.p99_speed)}` : '';
+        await AlertEventModel.add({
+          alert_id: alert.alert_id,
+          kind: 'raised',
+          at: payload.detected_at || null,
+          text: `analytic-service flagged ${kind.label.toLowerCase()}${how ? `, ${how}` : ''}${norm}.`.replace(/^a/, 'A'),
+          data: { anomaly_id: anomaly?.anomaly_id ?? null, sog: payload.sog ?? null, p99_speed: payload.p99_speed ?? null }
+        });
+      }
 
       return {
         ...anomaly,

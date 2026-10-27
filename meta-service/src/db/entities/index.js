@@ -15,3 +15,4 @@ export { Ship } from './ship.entity.js';
 export { AisPosition } from './ais-position.entity.js';
 export { RestrictedArea } from './restricted-area.entity.js';
 export { Sector } from './sector.entity.js';
+export { AlertEvent } from './alert-event.entity.js';

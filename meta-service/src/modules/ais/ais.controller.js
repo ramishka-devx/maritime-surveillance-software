@@ -34,8 +34,8 @@ export const AisController = {
   async positionsByMmsi(req, res, next) {
     try {
       const { mmsi } = req.params;
-      const { limit } = req.query;
-      const data = await AisService.positionsByMmsi(mmsi, { limit });
+      const { limit, from, to } = req.query;
+      const data = await AisService.positionsByMmsi(mmsi, { limit, from, to });
       return success(res, data);
     } catch (e) {
       next(e);

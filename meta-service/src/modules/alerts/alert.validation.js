@@ -1,5 +1,9 @@
 import Joi from 'joi';
 
+export const ALERT_STATUSES = ['open', 'acknowledged', 'escalated', 'resolved', 'dismissed'];
+// One status or a comma-separated list of them.
+const STATUS_LIST = new RegExp(`^(${ALERT_STATUSES.join('|')})(,(${ALERT_STATUSES.join('|')}))*$`);
+
 export const ALERT_TYPES = [
   'geofence',
   'speed',
@@ -14,9 +18,10 @@ export const listSchema = Joi.object({
   query: Joi.object({
     page: Joi.number().min(1).default(1),
     limit: Joi.number().min(1).max(1000).default(10),
-    status: Joi.string().valid('open', 'acknowledged', 'resolved', 'dismissed').allow('', null),
+    status: Joi.string().pattern(STATUS_LIST).allow('', null),
     severity: Joi.string().valid('low', 'medium', 'high', 'critical').allow('', null),
     vessel_id: Joi.number().integer().allow(null),
+    sort: Joi.string().valid('newest', 'severity').default('newest'),
     type: Joi.string().valid(...ALERT_TYPES).allow('', null),
     mmsi: Joi.number().integer().allow(null),
     from: Joi.date().iso().allow('', null),
@@ -60,7 +65,16 @@ export const updateStatusSchema = Joi.object({
     alert_id: Joi.number().integer().required()
   }),
   body: Joi.object({
-    status: Joi.string().valid('open', 'acknowledged', 'resolved', 'dismissed').required()
+    status: Joi.string().valid(...ALERT_STATUSES).required()
+  })
+});
+
+export const escalateSchema = Joi.object({
+  params: Joi.object({
+    alert_id: Joi.number().integer().required()
+  }),
+  body: Joi.object({
+    note: Joi.string().max(500).allow('', null)
   })
 });
 

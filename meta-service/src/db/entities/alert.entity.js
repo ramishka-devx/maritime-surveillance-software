@@ -16,6 +16,9 @@ export const Alert = new EntitySchema({
       nullable: true,
       foreignKey: { target: 'Ship', name: 'alerts_mmsi_fkey', onDelete: 'SET NULL' }
     },
+    // Where the vessel was when the alert was raised.
+    lat: { type: 'double precision', nullable: true },
+    lon: { type: 'double precision', nullable: true },
     // Set on geofence alerts: the zone that was entered.
     restricted_area_id: {
       type: 'integer',
@@ -60,7 +63,7 @@ export const Alert = new EntitySchema({
     },
     {
       name: 'chk_alerts_status',
-      expression: "status IN ('open', 'acknowledged', 'resolved', 'dismissed')"
+      expression: "status IN ('open', 'acknowledged', 'escalated', 'resolved', 'dismissed')"
     }
   ]
 });
