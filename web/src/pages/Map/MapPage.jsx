@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import MapCanvas from '../../components/map/MapCanvas.jsx';
+import { VESSEL_TYPES, getVesselThreat } from '../../components/map/vesselCanvasLayer.js';
 import FilterDrawer from '../../components/map/FilterDrawer.jsx';
 import VesselDossierPopup from '../../components/map/VesselDossierPopup.jsx';
 import AlertsStream from '../../components/map/AlertsStream.jsx';
@@ -20,9 +21,8 @@ export default function MapPage() {
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [isDossierMinimized, setIsDossierMinimized] = useState(false);
   const [activeLayer, setActiveLayer] = useState('vector');
-  const [cursorCoords, setCursorCoords] = useState("07°52'23.2\"N 080°46'18.5\"E");
+  const [cursorCoords, setCursorCoords] = useState('');
   const [mapInstance, setMapInstance] = useState(null);
-  const [currentZoom, setCurrentZoom] = useState(7);
 
   // Fleet target filters state
   const [filters, setFilters] = useState({
@@ -46,13 +46,12 @@ export default function MapPage() {
     }
   }, [selectedVessel]);
 
-  const handleMapReady = useCallback((map) => {
-    setMapInstance(map);
-    setCurrentZoom(map.getZoom());
-    map.on('zoomend', () => {
-      setCurrentZoom(map.getZoom());
-    });
-  }, []);
+  const handleMapReady = useCallback((map) => setMapInstance(map), []);
+
+  const flaggedCount = useMemo(
+    () => fleetStats.allVessels.filter((v) => getVesselThreat(v) !== 'normal').length,
+    [fleetStats.allVessels]
+  );
 
   // Stable (memoised) so MapCanvas — memo'd, with ~1000 markers — doesn't re-render on
   // unrelated MapPage state changes such as the cursor-coordinate readout on every mousemove.
@@ -116,57 +115,71 @@ export default function MapPage() {
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden select-none">
-      {/* Interactive Nautical Map Viewport */}
-      <MapCanvas
-        selectedVesselId={selectedVessel?.mmsi}
-        onSelectVessel={handleSelectVessel}
-        activeLayer={activeLayer}
-        onCursorCoordsChange={setCursorCoords}
-        onMapReady={handleMapReady}
-        onViewportChange={setViewport}
-        focusTarget={focusTarget}
-        vessels={vessels}
-        filters={filters}
-        onFleetUpdate={setFleetStats}
-      />
-
-      {/* Left Floating Target Filter Drawer */}
-      <FilterDrawer
-        isOpen={isFilterOpen}
-        onToggle={() => setIsFilterOpen(!isFilterOpen)}
-        filters={filters}
-        onFilterChange={setFilters}
-        vessels={fleetStats.allVessels.length > 0 ? fleetStats.allVessels : vessels}
-        filteredCount={fleetStats.filteredCount}
-      />
-
-      {/* Floating Selected Vessel Dossier Popup Card */}
-      {selectedVessel && (
-        <VesselDossierPopup
-          vessel={selectedVessel}
-          isMinimized={isDossierMinimized}
-          onToggleMinimize={() => setIsDossierMinimized(!isDossierMinimized)}
-          onClose={() => setSelectedVessel(null)}
-          onTrack={() => alert(`Tracking active: ${selectedVessel.name}`)}
-          onIntercept={() => alert(`Vector intercept generated for ${selectedVessel.name}`)}
-          onViewProfile={() => alert(`Opening comprehensive dossier for MMSI ${selectedVessel.mmsi}`)}
+    <div className="w-full h-full flex flex-col bg-bs-bg text-bs-ink select-none">
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        {/* Interactive nautical map */}
+        <MapCanvas
+          selectedVesselId={selectedVessel?.mmsi}
+          onSelectVessel={handleSelectVessel}
+          activeLayer={activeLayer}
+          onCursorCoordsChange={setCursorCoords}
+          onMapReady={handleMapReady}
+          onViewportChange={setViewport}
+          focusTarget={focusTarget}
+          vessels={vessels}
+          filters={filters}
+          onFleetUpdate={setFleetStats}
         />
-      )}
 
-      {/* Right Floating Incident / Threat Alerts Stream */}
-      <AlertsStream
-        isOpen={isAlertsOpen}
-        onToggle={() => setIsAlertsOpen(!isAlertsOpen)}
-        onFocusAlert={handleFocusAlert}
-      />
+        {/* Colour key: type colours for normal traffic, magenta box for alerts */}
+        <div className="absolute left-6 bottom-6 z-30 flex flex-wrap items-center gap-x-4 gap-y-1 max-w-[calc(100%-3rem)] px-3 py-2 bg-bs-bg/90 shadow-bs-sm text-[12px]">
+          {VESSEL_TYPES.map((t) => (
+            <span key={t.id} className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: t.color }} />
+              {t.label}
+            </span>
+          ))}
+          <span className="inline-flex items-center gap-1.5 text-bs-accent-2-700">
+            <span className="w-3 h-3 border-[1.5px] border-dashed border-bs-accent-2" />
+            Alert
+          </span>
+        </div>
 
-      {/* Bottom HUD & Playback Toolbar */}
+        <FilterDrawer
+          isOpen={isFilterOpen}
+          onToggle={() => setIsFilterOpen(!isFilterOpen)}
+          filters={filters}
+          onFilterChange={setFilters}
+          vessels={fleetStats.allVessels.length > 0 ? fleetStats.allVessels : vessels}
+          filteredCount={fleetStats.filteredCount}
+        />
+
+        {selectedVessel && (
+          <VesselDossierPopup
+            vessel={selectedVessel}
+            left={isFilterOpen ? 368 : 24}
+            isMinimized={isDossierMinimized}
+            onToggleMinimize={() => setIsDossierMinimized(!isDossierMinimized)}
+            onClose={() => setSelectedVessel(null)}
+            onTrack={() => alert(`Tracking active: ${selectedVessel.name}`)}
+            onIntercept={() => alert(`Vector intercept generated for ${selectedVessel.name}`)}
+            onViewProfile={() => alert(`Opening comprehensive dossier for MMSI ${selectedVessel.mmsi}`)}
+          />
+        )}
+
+        <AlertsStream
+          isOpen={isAlertsOpen}
+          onToggle={() => setIsAlertsOpen(!isAlertsOpen)}
+          onFocusAlert={handleFocusAlert}
+        />
+      </div>
+
       <BottomHud
         cursorCoords={cursorCoords}
         activeLayer={activeLayer}
-        currentZoom={currentZoom}
-        onLayerChange={(layer) => setActiveLayer(layer)}
+        vesselCount={fleetStats.filteredCount}
+        flaggedCount={flaggedCount}
+        onLayerChange={setActiveLayer}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onResetBearing={handleResetBearing}

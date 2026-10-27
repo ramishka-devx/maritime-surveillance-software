@@ -14,10 +14,14 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   createVesselCanvas,
+  getVesselCategory,
+  getVesselThreat,
+  isAlertVessel,
   syncVessels,
   vesselColor,
   vesselHeading,
 } from './vesselCanvasLayer.js';
+import { formatLatLon } from '../../lib/coords.js';
 
 // Fix for default Leaflet marker icons in Vite
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -31,77 +35,34 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const escapeHtml = (str) =>
+  String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
 /**
- * Creates custom directional vessel icon pointing in heading/course direction
+ * The selected vessel: the design's arrowhead in a cyan ring (magenta if alerted), with its name.
  */
 function createVesselMarkerIcon(vessel, isSelected = false) {
-  const color = vesselColor(vessel);
   const heading = vesselHeading(vessel);
+  const alert = isAlertVessel(vessel);
+  const fill = alert ? vesselColor(vessel) : isSelected ? '#0088b0' : vesselColor(vessel);
+  const labelInk = alert ? '#aa0b56' : '#004961';
 
   const html = `
-    <div style="position: relative; width: 34px; height: 34px; display: flex; items-center; justify-content: center;">
-      ${
-        isSelected
-          ? `<div style="
-              position: absolute;
-              inset: -4px;
-              border: 1.5px dashed ${color};
-              border-radius: 50%;
-              animation: spin 6s linear infinite;
-              pointer-events: none;
-            "></div>
-            <div style="
-              position: absolute;
-              inset: -8px;
-              border: 1px solid ${color};
-              border-radius: 50%;
-              opacity: 0.4;
-              animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-              pointer-events: none;
-            "></div>`
-          : ''
-      }
-      <div style="
-        transform: rotate(${heading}deg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.3s ease;
-      ">
-        <svg viewBox="0 0 32 32" width="26" height="26" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.7));">
-          <!-- Directional Vessel Arrowhead -->
-          <polygon
-            points="16,2 26,28 16,22 6,28"
-            fill="${color}"
-            stroke="#ffffff"
-            stroke-width="1.6"
-          />
-        </svg>
-      </div>
-      ${
-        vessel.threatLevel === 'CRITICAL'
-          ? `<span style="
-              position: absolute;
-              top: -2px;
-              right: -2px;
-              width: 8px;
-              height: 8px;
-              background-color: #ef4444;
-              border: 1.5px solid #ffffff;
-              border-radius: 50%;
-            "></span>`
-          : ''
-      }
+    <div style="position:relative;width:36px;height:36px;display:grid;place-items:center">
+      ${isSelected ? '<span style="position:absolute;inset:0;border:1.5px solid #0088b0;border-radius:50%;background:rgb(0 136 176 / 0.12)"></span>' : ''}
+      ${alert ? `<span style="position:absolute;inset:4px;border:1.5px dashed ${fill}"></span>` : ''}
+      <svg width="16" height="16" viewBox="0 0 16 16" style="transform:rotate(${heading}deg);overflow:visible">
+        <path d="M8 1 L13.5 14.5 L8 11.2 L2.5 14.5 Z" fill="${fill}" stroke="#f3f2f2" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+      <span style="position:absolute;left:40px;top:10px;white-space:nowrap;font:italic 600 12px Inter,system-ui,sans-serif;color:${labelInk};text-shadow:0 0 3px #f3f2f2,0 0 3px #f3f2f2">${escapeHtml(vessel.name || vessel.mmsi || '')}</span>
     </div>
   `;
 
   return L.divIcon({
     html,
     className: 'custom-vessel-marker',
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
     popupAnchor: [0, -18],
   });
 }
@@ -109,13 +70,14 @@ function createVesselMarkerIcon(vessel, isSelected = false) {
 // Only the selected vessel is a DOM marker (for its animated ring); the rest are on the canvas
 // layer. react-leaflet calls marker.setIcon() — rebuilding the DOM and restarting the ring
 // animation — whenever the icon prop changes identity, so icons are cached by their visual
-// inputs. Bounded: 360 headings x a few statuses x selected.
+// inputs. Cleared when it grows, since the key includes the vessel name.
 const iconCache = new Map();
 function getVesselMarkerIcon(vessel, isSelected) {
   const heading = Math.round(vesselHeading(vessel));
-  const key = `${vessel.threatLevel}|${vessel.status}|${heading}|${isSelected}`;
+  const key = `${vessel.threatLevel}|${vessel.status}|${heading}|${isSelected}|${vessel.name}`;
   let icon = iconCache.get(key);
   if (!icon) {
+    if (iconCache.size > 500) iconCache.clear();
     icon = createVesselMarkerIcon({ ...vessel, heading }, isSelected);
     iconCache.set(key, icon);
   }
@@ -190,21 +152,7 @@ function MapEventsHandler({ onCursorCoordsChange, onMapReady, onViewportChange }
       onViewportChange?.(viewportBbox(map));
     },
     mousemove(e) {
-      if (onCursorCoordsChange) {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-        const latDeg = Math.floor(Math.abs(lat));
-        const latMin = ((Math.abs(lat) - latDeg) * 60).toFixed(1);
-        const latDir = lat >= 0 ? 'N' : 'S';
-
-        const lngDeg = Math.floor(Math.abs(lng));
-        const lngMin = ((Math.abs(lng) - lngDeg) * 60).toFixed(1);
-        const lngDir = lng >= 0 ? 'E' : 'W';
-
-        onCursorCoordsChange(
-          `${latDeg}°${latMin}'${latDir} 00${lngDeg}°${lngMin}'${lngDir}`
-        );
-      }
+      onCursorCoordsChange?.(formatLatLon(e.latlng.lat, e.latlng.lng));
     },
   });
   return null;
@@ -221,43 +169,6 @@ function MapFocusController({ focusTarget }) {
     }
   }, [focusTarget, map]);
   return null;
-}
-
-/**
- * Classifies vessel type into one of the 5 standard categories
- */
-export function getVesselCategory(vessel) {
-  if (!vessel) return 'special';
-  const typeStr = (vessel.type || '').toLowerCase();
-  if (typeStr.includes('tanker') || typeStr.includes('hazmat') || typeStr.includes('oil')) {
-    return 'tanker';
-  }
-  if (
-    typeStr.includes('cargo') ||
-    typeStr.includes('container') ||
-    typeStr.includes('carrier') ||
-    typeStr.includes('bulk')
-  ) {
-    return 'cargo';
-  }
-  if (typeStr.includes('passenger') || typeStr.includes('ferry') || typeStr.includes('cruise')) {
-    return 'passenger';
-  }
-  if (typeStr.includes('fish') || typeStr.includes('trawl')) {
-    return 'fishing';
-  }
-  return 'special';
-}
-
-/**
- * Normalizes vessel threat classification
- */
-export function getVesselThreat(vessel) {
-  if (!vessel) return 'normal';
-  const threat = (vessel.threatLevel || vessel.threat_level || '').toUpperCase();
-  if (threat === 'CRITICAL') return 'critical';
-  if (threat === 'WARNING') return 'warning';
-  return 'normal';
 }
 
 // Built-in Sri Lanka Maritime Fleet Dataset (aligns with simulator zones & radar tracking)
@@ -537,11 +448,14 @@ function MapCanvas({
         className: '',
       };
     }
-    // Default: Dark Maritime styled OpenStreetMap (100% free, NO API key required)
+    // Default: Esri Light Gray Canvas, a quiet chart that sits on the Broadsheet paper
+    // (no API key), with its place-name layer on top.
     return {
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      className: 'dark-osm-tiles',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      labelsUrl:
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',
+      className: '',
     };
   }, [activeLayer]);
 
@@ -596,7 +510,7 @@ function MapCanvas({
         maxZoom={18}
         zoomControl={false}
         scrollWheelZoom={true}
-        style={{ width: '100%', height: '100%', backgroundColor: '#070e1c' }}
+        style={{ width: '100%', height: '100%', backgroundColor: '#f3f2f2' }}
         ref={mapRef}
       >
         {/* Dynamic Basemap Layer */}
@@ -607,6 +521,7 @@ function MapCanvas({
           className={tileConfig.className}
           maxZoom={19}
         />
+        {tileConfig.labelsUrl && <TileLayer key="labels" url={tileConfig.labelsUrl} maxZoom={19} />}
 
         {/* Global Mouse Tracker for HUD Reticle & Map Instance Bridge */}
         <MapEventsHandler
@@ -622,28 +537,28 @@ function MapCanvas({
         <Polyline
           positions={northBoundLane}
           pathOptions={{
-            color: '#38bdf8',
-            weight: 2,
+            color: '#99e0ff',
+            weight: 1.5,
             dashArray: '6, 6',
-            opacity: 0.5,
+            opacity: 0.9,
           }}
         />
         <Polyline
           positions={separationZone}
           pathOptions={{
-            color: '#f59e0b',
-            weight: 2,
-            dashArray: '8, 8',
-            opacity: 0.6,
+            color: '#7d7979',
+            weight: 1.2,
+            dashArray: '2, 5',
+            opacity: 0.8,
           }}
         />
         <Polyline
           positions={southBoundLane}
           pathOptions={{
-            color: '#38bdf8',
-            weight: 2,
+            color: '#99e0ff',
+            weight: 1.5,
             dashArray: '6, 6',
-            opacity: 0.5,
+            opacity: 0.9,
           }}
         />
 
@@ -653,16 +568,17 @@ function MapCanvas({
             <Polygon
               positions={sectorBravo4Zone}
               pathOptions={{
-                color: '#ef4444',
-                fillColor: '#ef4444',
-                fillOpacity: 0.25,
-                weight: 1.5,
+                color: '#d6006c',
+                fillColor: '#fff1f4',
+                fillOpacity: 0.7,
+                weight: 1.4,
+                dashArray: '6, 4',
               }}
             >
               <Popup>
                 <div className="font-sans text-xs">
-                  <strong className="text-red-600 block uppercase font-mono">
-                    Restricted: Sector Bravo-4
+                  <strong className="text-bs-accent-2-700 block">
+                    Restricted area: Sector Bravo-4
                   </strong>
                   <p className="text-gray-700 text-[11px] mt-1">
                     Naval Munitions Holding Area. Unauthorized maritime transit strictly prohibited under MDA protocols.
@@ -674,17 +590,17 @@ function MapCanvas({
             <Polygon
               positions={marineSanctuaryZone}
               pathOptions={{
-                color: '#f59e0b',
-                fillColor: '#f59e0b',
-                fillOpacity: 0.18,
+                color: '#006786',
+                fillColor: '#e9f8ff',
+                fillOpacity: 0.6,
                 weight: 1.2,
                 dashArray: '4, 4',
               }}
             >
               <Popup>
                 <div className="font-sans text-xs">
-                  <strong className="text-amber-600 block uppercase font-mono">
-                    Special Scientific Sanctuary
+                  <strong className="text-bs-accent-700 block">
+                    Special scientific sanctuary
                   </strong>
                   <p className="text-gray-700 text-[11px] mt-1">
                     Marine habitat preservation area. Anchorage & high-speed maneuvering restricted.
@@ -700,10 +616,11 @@ function MapCanvas({
           <Polyline
             positions={historicalTrackPoints}
             pathOptions={{
-              color: '#ef4444',
-              weight: 2.5,
-              dashArray: '4, 4',
-              opacity: 0.8,
+              color: '#0088b0',
+              weight: 1.6,
+              dashArray: '1, 5',
+              lineCap: 'round',
+              opacity: 1,
             }}
           />
         )}
@@ -712,7 +629,7 @@ function MapCanvas({
         <CircleMarker
           center={[5.92, 80.59]}
           radius={5}
-          pathOptions={{ color: '#000', fillColor: '#facc15', fillOpacity: 0.9, weight: 1.5 }}
+          pathOptions={{ color: '#201e1d', fillColor: '#f3f2f2', fillOpacity: 1, weight: 1.5 }}
         >
           <Popup>
             <div className="font-mono text-xs">
@@ -725,7 +642,7 @@ function MapCanvas({
         <CircleMarker
           center={[6.95, 79.83]}
           radius={5}
-          pathOptions={{ color: '#fff', fillColor: '#ef4444', fillOpacity: 0.9, weight: 1.5 }}
+          pathOptions={{ color: '#f3f2f2', fillColor: '#d6006c', fillOpacity: 1, weight: 1.5 }}
         >
           <Popup>
             <div className="font-mono text-xs">

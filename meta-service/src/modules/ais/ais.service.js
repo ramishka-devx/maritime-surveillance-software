@@ -48,7 +48,9 @@ const escapeLike = (s) => s.replace(/[\\%_]/g, '\\$&');
 // row per vessel instead of scanning the ais_positions history.
 // ponytail: seq scan on ships (~16k rows, a few ms); add a (lat, lon) index past ~200k ships.
 const LATEST_COLUMNS = `mmsi, ship_name, sog, cog, heading, nav_status,
-       last_position_at AS time_utc, lat, lon`;
+       last_position_at AS time_utc, lat, lon, ship_type, st.description AS ship_type_name`;
+// ship_types is the AIS code lookup (PK join), so the map can colour vessels by type.
+const LATEST_FROM = 'ships LEFT JOIN ship_types st ON st.ship_type_id = ships.ship_type';
 
 export const AisService = {
   // Most recently seen vessels, optionally searched by name (substring) or MMSI (prefix).
@@ -65,7 +67,7 @@ export const AisService = {
 
     return query(
       `SELECT ${LATEST_COLUMNS}
-       FROM ships
+       FROM ${LATEST_FROM}
        WHERE ${where.join(' AND ')}
        ORDER BY last_position_at DESC
        LIMIT ?`,
@@ -79,7 +81,7 @@ export const AisService = {
 
     return query(
       `SELECT ${LATEST_COLUMNS}
-       FROM ships
+       FROM ${LATEST_FROM}
        WHERE last_position_at IS NOT NULL${box ? ` AND ${box.sql}` : ''}
        ORDER BY last_position_at DESC
        LIMIT ?`,

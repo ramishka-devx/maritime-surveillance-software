@@ -1,3 +1,6 @@
+// Broadsheet colours live as RGB channels in src/index.css (--bs-*).
+const bs = (name) => `rgb(var(--bs-${name}) / <alpha-value>)`;
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -51,6 +54,46 @@ module.exports = {
         'navbar-blue': '#2150b0',
         'nav-bg': '#0b1220',
         'nav-bg-soft': '#111b2e',
+
+        // Broadsheet design system (login page)
+        bs: {
+          bg: bs('bg'),
+          surface: bs('surface'),
+          ink: bs('ink'),
+          accent: {
+            DEFAULT: bs('accent'),
+            100: bs('accent-100'),
+            300: bs('accent-300'),
+            600: bs('accent-600'),
+            700: bs('accent-700'),
+            800: bs('accent-800'),
+          },
+          'accent-2': {
+            DEFAULT: bs('accent-2'),
+            100: bs('accent-2-100'),
+            500: bs('accent-2-500'),
+            700: bs('accent-2-700'),
+          },
+          neutral: {
+            100: bs('neutral-100'),
+            200: bs('neutral-200'),
+            300: bs('neutral-300'),
+            400: bs('neutral-400'),
+            600: bs('neutral-600'),
+            700: bs('neutral-700'),
+            800: bs('neutral-800'),
+          },
+        },
+      },
+      keyframes: {
+        'port-in': {
+          '0%': { opacity: '0', transform: 'translateY(6px)' },
+          '12%, 88%': { opacity: '1', transform: 'none' },
+          '100%': { opacity: '0', transform: 'translateY(-6px)' },
+        },
+      },
+      animation: {
+        'port-in': 'port-in 4s ease both',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -68,6 +111,9 @@ module.exports = {
       boxShadow: {
         card: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
         'card-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        // Broadsheet elevation: soft ink-tinted shadows
+        'bs-sm': '0 1px 2px rgb(45 43 43 / 0.14)',
+        'bs-lg': '0 12px 32px rgb(45 43 43 / 0.22)',
       },
     },
   },
