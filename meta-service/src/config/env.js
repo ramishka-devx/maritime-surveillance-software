@@ -39,5 +39,14 @@ export const env = {
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
     from: process.env.EMAIL_FROM || 'noreply@machinecure.com',
+  },
+  // Dark-vessel detector (src/cron/darkVesselDetector.js): vessels in a sector that were
+  // underway (> minSog kn, >= minReports positions in their last hour) then silent for
+  // silenceMin minutes; at most one alert per vessel per rearmHours.
+  darkVessel: {
+    silenceMin: Number(process.env.DARK_SILENCE_MIN || 30),
+    minSog: Number(process.env.DARK_MIN_SOG || 3),
+    minReports: Number(process.env.DARK_MIN_REPORTS || 10),
+    rearmHours: Number(process.env.DARK_REARM_HOURS || 6),
   }
 };

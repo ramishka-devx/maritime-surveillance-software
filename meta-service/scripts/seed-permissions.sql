@@ -75,7 +75,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.role_id, p.permission_id
 FROM roles r
-JOIN permissions p ON p.name IN ('dashboard.view', 'alert.view', 'reports.view')
+JOIN permissions p ON p.name IN ('dashboard.view', 'alert.view', 'alert.status.view', 'reports.view')
 WHERE r.name = 'operator'
 ON CONFLICT DO NOTHING;
 

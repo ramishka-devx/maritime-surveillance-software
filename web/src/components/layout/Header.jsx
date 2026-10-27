@@ -1,11 +1,31 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { ChevronDown, Clock, CircleUser, LogOut, Navigation, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
 import { isMaintenance } from '../../auth/roles.js';
 import { searchVessels, toUiVessel } from '../../lib/vessels.js';
+import { apiRequest } from '../../lib/api.js';
 
-export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
+// "27 Oct 2026, 05:31:54", Sri Lanka time.
+const clockFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Colombo',
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23',
+});
+
+// "super_admin" -> "Super admin"
+function roleLabel(raw) {
+  const t = raw.replace(/[_-]/g, ' ').toLowerCase();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+export default function Header({ onSearch }) {
   const navigate = useNavigate();
   const { user, logout, roles, token } = useAuth();
   const maintenance = isMaintenance(user);
@@ -18,6 +38,7 @@ export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchContainerRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   const displayRole = (() => {
     const userRoles = (roles && roles.length > 0) ? roles : (user?.roles && user.roles.length > 0 ? user.roles : null);
@@ -27,48 +48,52 @@ export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
         ? firstRole
         : (firstRole?.name || firstRole?.role_name || firstRole?.title || firstRole?.description);
       if (rawName) {
-        return rawName.replace(/[_-]/g, ' ').toUpperCase();
+        return roleLabel(rawName);
       }
     }
 
     const directRole = user?.role_name || (typeof user?.role === 'string' ? user.role : user?.role?.name);
     if (directRole) {
-      return directRole.replace(/[_-]/g, ' ').toUpperCase();
+      return roleLabel(directRole);
     }
 
-    if (user?.role_id === 1) return 'SUPER ADMIN';
-    if (user?.role_id === 2) return 'OPERATOR';
+    if (user?.role_id === 1) return 'Super admin';
+    if (user?.role_id === 2) return 'Operator';
 
-    return user ? 'OPERATOR' : 'WATCH OFFICER';
+    return user ? 'Operator' : 'Watch officer';
   })();
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Colombo',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-      }).formatToParts(now);
-
-      const getPart = (type) => parts.find((p) => p.type === type)?.value || '00';
-      const year = getPart('year');
-      const month = getPart('month');
-      const day = getPart('day');
-      const hours = getPart('hour');
-      const minutes = getPart('minute');
-      const seconds = getPart('second');
-
-      setSlTimestamp(`${year}-${month}-${day} ${hours}:${minutes}:${seconds} SLST`);
-    };
+    const updateTime = () => setSlTimestamp(clockFormat.format(new Date()));
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // AIS positions stored per second over the last minute (null until the first answer).
+  const [aisRate, setAisRate] = useState(null);
+  useEffect(() => {
+    if (!token || maintenance) return undefined;
+    const load = () =>
+      apiRequest('/api/ais/rate', { token })
+        .then((d) => setAisRate(d.positions_per_s))
+        .catch(() => setAisRate(null));
+    load();
+    const interval = setInterval(load, 10000);
+    return () => clearInterval(interval);
+  }, [token, maintenance]);
+
+  // "/" focuses the search box, unless the operator is already typing somewhere.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)) return;
+      e.preventDefault();
+      searchInputRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, []);
 
   // Close search dropdown on click outside
@@ -182,97 +207,80 @@ export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
     ? [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || 'LT. C. MARTINEZ'
     : 'LT. C. MARTINEZ';
 
-  return (
-    <header className="fixed top-0 left-60 right-0 h-16 bg-surface-container-low/95 backdrop-blur-md border-b border-outline-variant/30 z-40 px-4 flex items-center justify-between gap-4 font-sans select-none">
-      {/* Global Search Bar with Live Vessel Autocomplete & Map Focus */}
-      <div className="flex-1 max-w-xl relative" ref={searchContainerRef}>
-        <div className="relative flex items-center w-full">
-          <input
-            type="text"
-            value={searchValue}
-            onChange={handleSearchChange}
-            onFocus={() => {
-              if (searchValue.trim().length > 0) {
-                setIsDropdownOpen(true);
-              }
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder={maintenance ? 'Search' : 'Search MMSI, IMO or Vessel name...'}
-            className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded pl-3.5 pr-10 py-1.5 text-on-surface font-mono text-xs placeholder:text-outline focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-colors"
-          />
-          <button
-            type="button"
-            onClick={handleSearchSubmit}
-            className="absolute right-2 text-outline hover:text-cyan-400 p-1 rounded transition-colors flex items-center justify-center cursor-pointer"
-            title="Search & Zoom to Vessel"
-          >
-            <span className="material-symbols-outlined text-[18px]">search</span>
-          </button>
-        </div>
+  const initials = displayName.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 
-        {/* Autocomplete Dropdown */}
+  return (
+    <header className="fixed top-0 left-60 right-0 h-16 z-40 pr-7 flex items-center gap-8 bg-bs-bg text-bs-ink font-sans select-none">
+      {/* Global search with live vessel autocomplete & map focus */}
+      <div className="relative w-[420px] shrink min-w-[220px]" ref={searchContainerRef}>
+        <Search size={17} className="absolute left-3 top-[11px] text-bs-neutral-700 pointer-events-none" />
+        <input
+          ref={searchInputRef}
+          type="text"
+          value={searchValue}
+          onChange={handleSearchChange}
+          onFocus={() => {
+            if (searchValue.trim().length > 0) {
+              setIsDropdownOpen(true);
+            }
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder={maintenance ? 'Search' : 'Search MMSI, IMO or vessel name'}
+          aria-label="Search vessels"
+          className="w-full h-10 pl-[38px] pr-10 text-[14px] text-bs-ink caret-bs-accent bg-bs-surface border border-bs-ink/[.16] rounded-sm placeholder:text-bs-ink/65 hover:border-bs-ink/45 outline-none focus-visible:border-bs-accent focus-visible:outline-bs-accent focus-visible:outline-offset-0"
+        />
+        <kbd className="absolute right-2.5 top-[9px] px-[7px] text-[12px] font-sans border border-bs-ink/[.16] rounded-sm text-bs-neutral-700">
+          /
+        </kbd>
+
+        {/* Autocomplete dropdown */}
         {isDropdownOpen && searchValue.trim().length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#070e1c]/95 backdrop-blur-md border border-cyan-500/30 rounded-md shadow-2xl overflow-hidden font-mono">
+          <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-bs-bg shadow-bs-lg overflow-hidden">
             {searchResults.length > 0 ? (
               <div>
-                <div className="px-3 py-1.5 bg-surface-container-highest/60 border-b border-outline-variant/20 flex items-center justify-between text-[10px] text-outline uppercase tracking-wider">
-                  <span>AIS Targets Detected ({searchResults.length})</span>
-                  <span className="text-cyan-400/80">Press Enter or click to zoom</span>
+                <div className="px-3 py-2 flex items-center justify-between text-[11px] tracking-[0.08em] uppercase text-bs-neutral-700 border-b border-bs-ink/[.16]">
+                  <span>Vessels ({searchResults.length})</span>
+                  <span className="normal-case tracking-normal italic">Enter or click to zoom</span>
                 </div>
-                <div className="max-h-72 overflow-y-auto divide-y divide-outline-variant/20">
+                <div className="max-h-72 overflow-y-auto">
                   {searchResults.map((vessel, index) => {
                     const isSelected = selectedIndex === index;
                     const threat = vessel.threatLevel || 'NORMAL';
-                    const badgeColor =
+                    const tag =
                       threat === 'CRITICAL'
-                        ? 'text-red-400 bg-red-500/10 border-red-500/30'
+                        ? 'bg-bs-accent-2-100 text-bs-accent-2-700'
                         : threat === 'WARNING'
-                        ? 'text-amber-400 bg-amber-500/10 border-amber-500/30'
-                        : 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30';
+                        ? 'bg-bs-accent-2-100 text-bs-accent-2-500'
+                        : 'bg-bs-neutral-100 text-bs-neutral-800';
 
                     return (
                       <div
                         key={vessel.id || vessel.mmsi}
                         onClick={() => handleSelectVessel(vessel)}
-                        className={`px-3 py-2 cursor-pointer transition-colors flex items-center justify-between gap-3 ${
-                          isSelected
-                            ? 'bg-cyan-500/20 border-l-2 border-cyan-400'
-                            : 'hover:bg-surface-container hover:border-l-2 hover:border-cyan-400/60'
+                        className={`px-3 py-2 cursor-pointer flex items-center justify-between gap-3 border-l-2 ${
+                          isSelected ? 'bg-bs-surface border-bs-accent' : 'border-transparent hover:bg-bs-surface'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="material-symbols-outlined text-[18px] text-cyan-400 shrink-0">
-                            navigation
-                          </span>
-                          <div className="min-w-0 flex flex-col">
+                          <Navigation size={15} className="shrink-0 text-bs-accent-700" />
+                          <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-on-surface truncate">
-                                {vessel.name}
-                              </span>
-                              <span
-                                className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${badgeColor}`}
-                              >
-                                {threat}
+                              <span className="text-[14px] font-semibold truncate">{vessel.name}</span>
+                              <span className={`text-[11px] px-2 py-px rounded-sm capitalize ${tag}`}>
+                                {threat.toLowerCase()}
                               </span>
                             </div>
-                            <div className="text-[10px] text-outline truncate">
-                              MMSI: <span className="text-on-surface-variant">{vessel.mmsi}</span>
-                              {vessel.imo && (
-                                <>
-                                  {' '}• IMO: <span className="text-on-surface-variant">{vessel.imo}</span>
-                                </>
-                              )}
-                              {' '}• {vessel.type}
+                            <div className="text-[12px] font-mono text-bs-neutral-700 truncate">
+                              MMSI {vessel.mmsi}
+                              {vessel.imo && <> · IMO {vessel.imo}</>}
+                              {vessel.type && <span className="font-sans italic"> · {vessel.type}</span>}
                             </div>
                           </div>
                         </div>
-
-                        <div className="text-right shrink-0 text-[10px] text-outline">
-                          <div className="text-cyan-400 font-semibold">
-                            {vessel.speed || 0} KTS
-                          </div>
-                          <div className="text-[9px] text-outline/80 truncate max-w-[120px]">
-                            {vessel.destination || 'OPEN SEA'}
+                        <div className="text-right shrink-0 text-[12px]">
+                          <div className="font-semibold text-bs-accent-700 tabular-nums">{vessel.speed || 0} kn</div>
+                          <div className="italic text-bs-neutral-700 truncate max-w-[120px]">
+                            {vessel.destination || 'Open sea'}
                           </div>
                         </div>
                       </div>
@@ -281,63 +289,57 @@ export default function Header({ onSearch, sector = 'SECTOR 04 - DOVER' }) {
                 </div>
               </div>
             ) : (
-              <div className="px-4 py-3 text-center text-xs text-outline font-mono">
-                No vessel targets found matching &ldquo;{searchValue}&rdquo;
+              <div className="px-4 py-3 text-center text-[13px] italic text-bs-neutral-800">
+                No vessels match &ldquo;{searchValue}&rdquo;
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Right Controls & Telemetry */}
-      <div className="flex items-center gap-3">
-        {/* AIS Live Telemetry */}
-        <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 bg-surface-container-lowest rounded border border-outline-variant/30">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+      {/* Live feed + clock */}
+      {aisRate !== null && (
+        <div className="hidden xl:flex items-baseline gap-2 text-[14px]" title="AIS positions stored per second, last minute">
+          <span className={`self-center w-[7px] h-[7px] rounded-full ${aisRate > 0 ? 'bg-bs-accent' : 'bg-bs-neutral-400'}`} />
+          <span className="font-semibold tabular-nums">{aisRate.toLocaleString()}</span>
+          <span className="italic text-bs-neutral-700 text-[13px]">{aisRate > 0 ? 'positions / s, AIS stream' : 'AIS stream idle'}</span>
+        </div>
+      )}
+      <div className="hidden lg:flex items-center gap-2" title="Sri Lanka Standard Time (UTC+05:30)">
+        <Clock size={17} className="text-bs-neutral-700" />
+        <span className="font-mono font-semibold text-[13px] tabular-nums">{slTimestamp}</span>
+        <span className="italic text-bs-neutral-700 text-[13px]">SLST</span>
+      </div>
+
+      {/* User menu */}
+      <details className="relative ml-auto group">
+        <summary className="list-none flex items-center gap-3 cursor-pointer outline-none focus-visible:outline-bs-accent [&::-webkit-details-marker]:hidden">
+          <span className="w-9 h-9 rounded-full bg-bs-surface grid place-items-center font-semibold text-[13px]">
+            {initials}
           </span>
-          <span className="font-mono text-xs text-on-surface">9,420 pkts/s</span>
-          <span className="font-mono text-[10px] text-outline">AIS STREAM</span>
-        </div>
-
-        {/* Real-time Sri Lanka Standard Time Chronometer */}
-        <div
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-surface-container-lowest rounded border border-outline-variant/30 font-mono text-xs text-on-surface"
-          title="Sri Lanka Standard Time (Asia/Colombo UTC+05:30)"
-        >
-          <span className="material-symbols-outlined text-[16px] text-primary">schedule</span>
-          <span>{slTimestamp}</span>
-        </div>
-
-        {/* User Identity Badge & Action */}
-        <div className="flex items-center gap-2 pl-2 border-l border-outline-variant/30">
-          <div
+          <span className="hidden sm:block leading-tight">
+            <span className="block text-[14px] font-semibold">{displayName}</span>
+            <span className="block text-[12px] italic text-bs-neutral-700">{displayRole}</span>
+          </span>
+          <ChevronDown size={15} className="text-bs-neutral-700 transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="absolute right-0 top-full mt-2 w-48 z-50 bg-bs-bg shadow-bs-lg py-1 text-[14px]">
+          <button
             onClick={() => navigate('/Profile')}
-            title="View My Profile"
-            className="flex items-center gap-2 cursor-pointer hover:opacity-85 transition-opacity"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-bs-surface"
           >
-            <div className="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-bold text-xs font-mono text-primary">
-              {displayName.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="hidden sm:flex flex-col text-left pr-4">
-              <span className="text-xs font-semibold font-mono text-on-surface leading-tight">
-                {displayName}
-              </span>
-              <span className="text-[10px] text-outline font-mono leading-tight uppercase">
-                {displayRole}
-              </span>
-            </div>
-          </div>
+            <CircleUser size={16} className="text-bs-neutral-700" />
+            My profile
+          </button>
           <button
             onClick={logout}
-            className="ml-1 mr-2 p-1 text-outline hover:text-red-400 hover:bg-surface-container rounded transition-colors"
-            title="Disconnect Terminal Session"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-bs-accent-2-700 hover:bg-bs-accent-2-100"
           >
-            <span className="material-symbols-outlined text-[18px]">logout</span>
+            <LogOut size={16} />
+            Sign out
           </button>
         </div>
-      </div>
+      </details>
     </header>
   );
 }

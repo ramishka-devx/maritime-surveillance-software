@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { getVesselCategory, getVesselThreat } from './MapCanvas.jsx';
+import { ChevronLeft, SlidersHorizontal } from 'lucide-react';
+import { VESSEL_TYPES, getVesselCategory, getVesselThreat } from './vesselCanvasLayer.js';
 
 const DEFAULT_FILTERS = {
   types: ['cargo', 'tanker', 'passenger', 'fishing', 'special'],
@@ -71,18 +72,12 @@ export default function FilterDrawer({
     }).length;
   }, [vessels]);
 
-  const vesselCategories = [
-    { id: 'cargo', label: 'Cargo Vessels', color: '#3b82f6', count: categoryCounts.cargo },
-    { id: 'tanker', label: 'Tankers / Hazmat', color: '#f59e0b', count: categoryCounts.tanker },
-    { id: 'passenger', label: 'Ferries & Passenger', color: '#38bdf8', count: categoryCounts.passenger },
-    { id: 'fishing', label: 'Fishing Vessels', color: '#10b981', count: categoryCounts.fishing },
-    { id: 'special', label: 'Tug & Special Ops', color: '#a855f7', count: categoryCounts.special },
-  ];
+  const vesselCategories = VESSEL_TYPES.map((t) => ({ ...t, count: categoryCounts[t.id] }));
 
   const threatLevels = [
-    { id: 'critical', label: 'CRITICAL', color: 'border-red-500/60 text-red-400 bg-red-950/40', count: threatCounts.critical },
-    { id: 'warning', label: 'WARNING', color: 'border-amber-500/60 text-amber-400 bg-amber-950/40', count: threatCounts.warning },
-    { id: 'normal', label: 'NORMAL', color: 'border-cyan-500/60 text-cyan-400 bg-cyan-950/40', count: threatCounts.normal },
+    { id: 'critical', label: 'Critical', on: 'border-bs-accent-2 bg-bs-accent-2-100 text-bs-accent-2-700', count: threatCounts.critical },
+    { id: 'warning', label: 'Warning', on: 'border-bs-accent-2-500 bg-bs-accent-2-100 text-bs-accent-2-700', count: threatCounts.warning },
+    { id: 'normal', label: 'Normal', on: 'border-bs-ink bg-bs-surface text-bs-ink', count: threatCounts.normal },
   ];
 
   const toggleType = (id) => {
@@ -127,177 +122,130 @@ export default function FilterDrawer({
     return (
       <button
         onClick={onToggle}
-        className="fixed left-64 top-20 z-30 flex items-center gap-2 px-3 py-2 bg-surface-container-low/90 backdrop-blur-md border border-outline-variant/40 rounded text-xs font-mono text-cyan-400 hover:bg-surface-container hover:border-cyan-500/50 shadow-xl transition-all"
-        title="Open Filter Drawer"
+        className="absolute left-6 top-5 z-30 inline-flex items-center gap-1.5 px-[18px] py-2.5 rounded-sm border border-bs-ink/[.16] bg-bs-bg shadow-bs-sm text-[13px] font-semibold text-bs-ink hover:bg-bs-surface outline-none focus-visible:outline-bs-accent"
+        title="Open filters"
       >
-        <span className="material-symbols-outlined text-[16px]">tune</span>
-        <span>FILTERS ({shownCount} / {totalCount})</span>
+        <SlidersHorizontal size={16} />
+        Filters
+        <span className="font-normal text-bs-neutral-700 tabular-nums">{shownCount}</span>
       </button>
     );
   }
 
+  const kicker = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700 mb-2';
+  const chip = 'py-1.5 px-2 rounded-sm border text-[12px] text-center';
+
   return (
-    <div className="fixed left-64 top-20 bottom-16 w-80 bg-surface-container-low/95 backdrop-blur-xl border border-outline-variant/40 rounded-lg shadow-2xl z-30 flex flex-col font-sans overflow-hidden transition-all duration-300">
-      {/* Drawer Header */}
-      <div className="px-4 py-3 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest/80">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[18px]">tune</span>
-          <h2 className="text-xs font-bold uppercase tracking-wider text-on-surface">Target Filters</h2>
-          <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-[10px] font-mono text-cyan-400">
-            {activeCount} ACTIVE
-          </span>
+    <div className="absolute left-6 top-5 bottom-5 w-80 z-30 flex flex-col bg-bs-bg text-bs-ink shadow-bs-lg overflow-hidden">
+      {/* Header */}
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+        <div className="flex items-baseline gap-2">
+          <h2 className="font-semibold text-[17px]">Filters</h2>
+          <span className="text-[12px] italic text-bs-neutral-700">{activeCount} active</span>
         </div>
         <button
           onClick={onToggle}
-          className="text-outline hover:text-on-surface p-1 rounded hover:bg-surface-container transition-colors"
-          title="Collapse Panel"
+          className="w-8 h-8 grid place-items-center rounded-sm text-bs-neutral-700 hover:bg-bs-ink/[.07] outline-none focus-visible:outline-bs-accent"
+          aria-label="Close filters"
         >
-          <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+          <ChevronLeft size={18} />
         </button>
       </div>
 
-      {/* Drawer Body Scrollable */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs">
-        {/* Quick Presets */}
+      <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-6 text-[13px]">
+        {/* Quick presets */}
         <div>
-          <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-2 flex justify-between">
-            <span>Quick Presets</span>
-            <button
-              onClick={() => applyPreset('all')}
-              className="text-cyan-400 hover:underline cursor-pointer"
-            >
-              Reset All
+          <div className={`${kicker} flex justify-between`}>
+            <span>Quick presets</span>
+            <button onClick={() => applyPreset('all')} className="normal-case tracking-normal text-[12px] text-bs-accent-700 underline underline-offset-[3px]">
+              Reset all
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-1.5 font-mono text-[10px]">
-            <button
-              onClick={() => applyPreset('all')}
-              className="py-1 px-2 rounded bg-surface-container-lowest border border-outline-variant/30 hover:border-cyan-500/40 text-on-surface text-center"
-            >
-              All ({totalCount})
+          <div className="grid grid-cols-3 gap-1.5">
+            <button onClick={() => applyPreset('all')} className={`${chip} border-bs-ink/[.16] hover:bg-bs-ink/[.07]`}>
+              All <span className="text-bs-neutral-700">{totalCount}</span>
             </button>
-            <button
-              onClick={() => applyPreset('suspicious')}
-              className="py-1 px-2 rounded bg-surface-container-lowest border border-red-500/30 text-red-400 hover:border-red-500/60 text-center"
-            >
-              Suspicious ({suspiciousCount})
+            <button onClick={() => applyPreset('suspicious')} className={`${chip} border-bs-accent-2 text-bs-accent-2-700 hover:bg-bs-accent-2-100`}>
+              Suspicious {suspiciousCount}
             </button>
-            <button
-              onClick={() => applyPreset('high-speed')}
-              className="py-1 px-2 rounded bg-surface-container-lowest border border-outline-variant/30 hover:border-amber-500/40 text-amber-300 text-center"
-            >
-              &gt; 18 KTS ({highSpeedCount})
+            <button onClick={() => applyPreset('high-speed')} className={`${chip} border-bs-ink/[.16] hover:bg-bs-ink/[.07]`}>
+              &gt; 18 kn <span className="text-bs-neutral-700">{highSpeedCount}</span>
             </button>
           </div>
         </div>
 
-        {/* Threat Level */}
+        {/* Threat level */}
         <div>
-          <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-2">
-            Threat Classification
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 font-mono text-[10px]">
+          <div className={kicker}>Threat level</div>
+          <div className="grid grid-cols-3 gap-1.5">
             {threatLevels.map((lvl) => {
               const active = selectedThreats.includes(lvl.id);
               return (
                 <button
                   key={lvl.id}
                   onClick={() => toggleThreat(lvl.id)}
-                  className={`py-1.5 px-2 rounded border text-center transition-all ${
-                    active
-                      ? lvl.color
-                      : 'border-outline-variant/20 bg-surface-container-lowest text-outline opacity-60'
-                  }`}
+                  aria-pressed={active}
+                  className={`${chip} ${active ? lvl.on : 'border-bs-ink/[.16] text-bs-neutral-700 opacity-60'}`}
                 >
-                  <div className="font-bold">{lvl.label}</div>
-                  <div className="text-[9px] opacity-75">{lvl.count} targets</div>
+                  <div className="font-semibold">{lvl.label}</div>
+                  <div className="text-[11px] italic">{lvl.count} vessels</div>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Vessel Category Toggles */}
+        {/* Vessel categories */}
         <div>
-          <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-2">
-            Vessel Categories
-          </div>
-          <div className="space-y-1.5">
+          <div className={kicker}>Vessel type</div>
+          <div className="divide-y divide-bs-ink/[.08]">
             {vesselCategories.map((cat) => {
               const active = selectedTypes.includes(cat.id);
               return (
-                <div
-                  key={cat.id}
-                  onClick={() => toggleType(cat.id)}
-                  className={`flex items-center justify-between px-2.5 py-1.5 rounded cursor-pointer border transition-colors ${
-                    active
-                      ? 'bg-surface-container-lowest border-outline-variant/40 hover:border-outline-variant'
-                      : 'bg-surface-container-lowest/40 border-transparent opacity-50 hover:opacity-75'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-2.5 h-2.5 rounded-sm"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span className="text-on-surface font-medium">{cat.label}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] text-outline">{cat.count}</span>
-                    <input
-                      type="checkbox"
-                      checked={active}
-                      onChange={() => toggleType(cat.id)}
-                      className="rounded bg-surface-container-highest border-outline-variant text-cyan-500 focus:ring-0 cursor-pointer h-3.5 w-3.5"
-                    />
-                  </div>
-                </div>
+                <label key={cat.id} className="flex items-center gap-2.5 py-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => toggleType(cat.id)}
+                    className="h-4 w-4 cursor-pointer accent-bs-accent"
+                  />
+                  <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: cat.color }} />
+                  <span className={`flex-1 ${active ? '' : 'text-bs-neutral-700'}`}>{cat.label}</span>
+                  <span className="tabular-nums text-bs-neutral-700">{cat.count}</span>
+                </label>
               );
             })}
           </div>
         </div>
 
-        {/* SOG Speed Filter */}
+        {/* Speed */}
         <div>
-          <div className="text-[10px] font-mono text-outline uppercase tracking-wider mb-2 flex justify-between">
-            <span>Speed Over Ground (SOG)</span>
-            <span className="text-cyan-400 font-mono">
-              {minSpeed.toFixed(1)} - {maxSpeed.toFixed(1)} KTS
+          <div className={`${kicker} flex justify-between`}>
+            <span>Speed over ground</span>
+            <span className="normal-case tracking-normal font-mono text-bs-ink tabular-nums">
+              {minSpeed.toFixed(1)}–{maxSpeed.toFixed(1)} kn
             </span>
           </div>
-          <div className="px-1">
-            <input
-              type="range"
-              min="0"
-              max="35"
-              step="0.5"
-              value={maxSpeed}
-              onChange={(e) =>
-                updateFilters({
-                  ...currentFilters,
-                  maxSpeed: parseFloat(e.target.value),
-                })
-              }
-              className="w-full h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-cyan-400"
-            />
-            <div className="flex justify-between font-mono text-[9px] text-outline mt-1">
-              <span>{minSpeed > 0 ? `${minSpeed.toFixed(0)} KTS` : '0 KTS'}</span>
-              <span>15 KTS</span>
-              <span>35 KTS</span>
-            </div>
+          <input
+            type="range"
+            min="0"
+            max="35"
+            step="0.5"
+            value={maxSpeed}
+            onChange={(e) => updateFilters({ ...currentFilters, maxSpeed: parseFloat(e.target.value) })}
+            aria-label="Maximum speed"
+            className="w-full cursor-pointer accent-bs-accent"
+          />
+          <div className="flex justify-between text-[11px] text-bs-neutral-700 mt-1 tabular-nums">
+            <span>{minSpeed > 0 ? `${minSpeed.toFixed(0)} kn` : '0 kn'}</span>
+            <span>15 kn</span>
+            <span>35 kn</span>
           </div>
         </div>
       </div>
 
-      {/* Drawer Footer Status */}
-      <div className="p-3 border-t border-outline-variant/30 bg-surface-container-lowest/90 font-mono text-[10px] text-outline flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-cyan-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          <span>FILTER APPLIED</span>
-        </div>
-        <span>
-          {shownCount} / {totalCount} SHOWN
-        </span>
+      <div className="px-5 py-3 border-t border-bs-ink/[.16] text-[12px] italic text-bs-neutral-700 tabular-nums">
+        {shownCount} of {totalCount} vessels shown
       </div>
     </div>
   );

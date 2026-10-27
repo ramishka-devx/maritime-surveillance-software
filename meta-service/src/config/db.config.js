@@ -4,6 +4,12 @@ import { logger } from './logger.js';
 
 const { Pool } = pg;
 
+// The AIS tables (ships, ais_positions) use TIMESTAMP without a zone, holding UTC. Read those
+// values as UTC and send JS dates as UTC; otherwise results and time-window filters shift by
+// the host's local offset (e.g. +05:30), and the geofence cron's "last 15 minutes" scan misses.
+pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (s) => new Date(`${s.replace(' ', 'T')}Z`));
+pg.defaults.parseInputDatesAsUTC = true;
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

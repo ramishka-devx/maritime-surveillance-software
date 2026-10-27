@@ -7,7 +7,7 @@ export const listSchema = Joi.object({
     mmsi: Joi.number().integer().allow(null),
     from: Joi.date().iso().allow('', null),
     to: Joi.date().iso().allow('', null),
-    anomaly_type: Joi.string().valid('speed', 'route', 'behavoir').allow(null)
+    anomaly_type: Joi.string().valid('speed', 'route', 'behavoir', 'loitering').allow(null)
   })
 });
 
@@ -20,7 +20,7 @@ export const getByIdSchema = Joi.object({
 export const createSchema = Joi.object({
   body: Joi.object({
     mmsi: Joi.number().integer().required(),
-    anomaly_type: Joi.string().valid('speed', 'route', 'behavoir').required(),
+    anomaly_type: Joi.string().valid('speed', 'route', 'behavoir', 'loitering').required(),
     sog: Joi.number().min(0).max(200).allow(null),
     cog: Joi.number().min(0).max(360).allow(null),
     heading: Joi.number().integer().min(0).max(359).allow(null),
@@ -39,7 +39,7 @@ export const updateSchema = Joi.object({
   }),
   body: Joi.object({
     mmsi: Joi.number().integer(),
-    anomaly_type: Joi.string().valid('speed', 'route', 'behavoir'),
+    anomaly_type: Joi.string().valid('speed', 'route', 'behavoir', 'loitering'),
     sog: Joi.number().min(0).max(200).allow(null),
     cog: Joi.number().min(0).max(360).allow(null),
     heading: Joi.number().integer().min(0).max(359).allow(null),

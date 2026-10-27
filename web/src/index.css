@@ -6,15 +6,29 @@
 
 @layer base {
   :root {
-    --bg: #0B1220;
-    --panel: #111A2B;
-    --accent: #22D3EE;
-    --text: #E6EDF7;
-    --muted: #8A99B3;
-    --border: #1F2A40;
-    --success: #10B981;
-    --warn: #F59E0B;
-    --danger: #EF4444;
+    /* Broadsheet palette (redesigned pages), as RGB channels so Tailwind's bs-* colours take /opacity. */
+    --bs-bg: 243 242 242;
+    --bs-surface: 234 233 233;
+    --bs-ink: 32 30 29;
+    --bs-accent: 0 136 176;
+    --bs-accent-100: 233 248 255;
+    --bs-accent-300: 153 224 255;
+    --bs-accent-400: 98 197 238;
+    --bs-accent-600: 17 134 172;
+    --bs-accent-700: 0 103 134;
+    --bs-accent-800: 0 73 97;
+    --bs-accent-2: 214 0 108;
+    --bs-accent-2-100: 255 241 244;
+    --bs-accent-2-300: 255 192 208;
+    --bs-accent-2-500: 255 69 142;
+    --bs-accent-2-700: 170 11 86;
+    --bs-neutral-100: 248 244 244;
+    --bs-neutral-200: 234 231 231;
+    --bs-neutral-300: 215 211 211;
+    --bs-neutral-400: 186 182 182;
+    --bs-neutral-600: 125 121 121;
+    --bs-neutral-700: 96 93 93;
+    --bs-neutral-800: 68 65 65;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -47,57 +61,20 @@
   }
 }
 
-/* Ambient Grid & Radar Animations */
-.map-grid-bg {
-  background-size: 36px 36px;
-  background-image: 
-    linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+/* Restricted-area names on the map: italic ink on a paper halo, no Leaflet tooltip box. */
+.leaflet-tooltip.bs-zone-label {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font: italic 600 12px Inter, system-ui, sans-serif;
+  color: rgb(var(--bs-accent-2-700));
+  text-shadow: 0 0 3px rgb(var(--bs-bg)), 0 0 3px rgb(var(--bs-bg)), 0 0 3px rgb(var(--bs-bg));
 }
-
-.radar-sweep-subtle {
-  background: radial-gradient(circle at 45% 52%, rgba(34, 211, 238, 0.08) 0%, rgba(11, 18, 32, 0.0) 65%);
+.leaflet-tooltip.bs-zone-label::before {
+  display: none;
 }
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50% { opacity: 0.95; transform: scale(1.15); }
-}
-
-@keyframes ping-subtle {
-  0% { transform: scale(1); opacity: 0.8; }
-  80%, 100% { transform: scale(2.8); opacity: 0; }
-}
-
-@keyframes dash {
-  to {
-    stroke-dashoffset: -100;
-  }
-}
-
-.shipping-lane-anim {
-  stroke-dasharray: 4, 8;
-  animation: dash 25s linear infinite;
-}
-
-.pulse-dot {
-  animation: pulse-slow 3s ease-in-out infinite;
-}
-
-.ping-ring {
-  animation: ping-subtle 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.glow-cyan {
-  box-shadow: 0 0 20px -3px rgba(34, 211, 238, 0.35);
-}
-
-.glow-cyan-btn:hover {
-  box-shadow: 0 0 22px rgba(34, 211, 238, 0.5);
-}
-
-/* Dark Maritime filter for OpenStreetMap tiles (100% free, no API key needed) */
-.dark-osm-tiles .leaflet-tile {
-  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.75);
+.leaflet-tooltip.bs-zone-label-draft {
+  color: rgb(var(--bs-accent-700));
 }
 

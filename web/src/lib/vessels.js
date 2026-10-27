@@ -29,7 +29,9 @@ export function toUiVessel(v) {
     id: String(v.mmsi || v.id),
     mmsi: String(v.mmsi || v.id),
     name: v.ship_name || v.name || `VESSEL ${v.mmsi}`,
-    type: v.type || 'Commercial',
+    // "Tanker, all ships of this type" -> "Tanker"
+    type: v.ship_type_name?.split(/[,:]/)[0] || v.type || 'Commercial',
+    shipType: v.ship_type ?? null,
     flag: v.flag || 'International',
     callSign: v.callsign || 'N/A',
     imo: v.imo || 'N/A',

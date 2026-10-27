@@ -14,6 +14,7 @@
     "db:migration:generate": "typeorm migration:generate -o -d src/db/data-source.js",
     "db:seed": "node scripts/run-sql.js db/seed.sql",
     "db:seed-permissions": "node scripts/seed-permissions.js",
+    "db:seed-demo-alerts": "node scripts/seed-demo-alerts.js",
     "db:reset": "node scripts/db-reset.js"
   },
   "dependencies": {

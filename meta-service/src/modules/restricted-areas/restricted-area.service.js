@@ -1,6 +1,8 @@
 import { badRequest, notFound } from '../../utils/errorHandler.js';
 import { RestrictedAreaModel } from './restricted-area.model.js';
 import { AlertModel } from '../alerts/alert.model.js';
+import { AlertEventModel } from '../alerts/alert-event.model.js';
+import { geofenceTitle, hhmm, kn, motion, vesselLabel } from '../alerts/alert-text.js';
 import { VesselModel } from '../vessels/vessel.model.js';
 import { query } from '../../config/db.config.js';
 import { logger } from '../../config/logger.js';
@@ -73,6 +75,45 @@ export const RestrictedAreaService = {
     });
   },
 
+  // Timeline for a new geofence alert: the entry, and the last position before it that was
+  // still outside the zone (looked up within 6 h so only recent partitions are scanned).
+  async recordBreachEvents(alertId, breach) {
+    try {
+      const entered = breach.time_utc ? new Date(breach.time_utc) : new Date();
+      const how = motion(breach.sog, breach.cog);
+      await AlertEventModel.add({
+        alert_id: alertId,
+        kind: 'raised',
+        at: entered,
+        text: `Entered ${breach.restricted_zone}${how ? ` ${how}` : ''}.`,
+        data: { lat: breach.lat, lon: breach.lon, sog: breach.sog, cog: breach.cog }
+      });
+
+      const [outside] = await query(
+        `SELECT p.time_utc, p.sog
+         FROM ais_positions p, restricted_areas r
+         WHERE r.id = ?
+           AND p.mmsi = ?
+           AND p.time_utc < ?::timestamp
+           AND p.time_utc > ?::timestamp - interval '6 hours'
+           AND NOT ST_Intersects(p.position, r.geom)
+         ORDER BY p.time_utc DESC
+         LIMIT 1`,
+        [breach.restricted_area_id, breach.mmsi, entered, entered]
+      );
+      await AlertEventModel.add({
+        alert_id: alertId,
+        kind: 'observation',
+        at: outside ? outside.time_utc : entered,
+        text: outside
+          ? `Last position outside the zone, ${kn(outside.sog) ? `at ${kn(outside.sog)}` : 'speed unknown'} (${hhmm(outside.time_utc)}).`
+          : 'No position outside the zone in the 6 h before entry; the vessel was first seen inside it.'
+      });
+    } catch (err) {
+      logger.warn({ err, alertId }, 'Could not record geofence alert events');
+    }
+  },
+
   async checkAndCreateGeofenceAlerts({ sinceTime, limit = 100, forceScan = false } = {}) {
     let scanSince = sinceTime;
 
@@ -137,18 +178,16 @@ export const RestrictedAreaService = {
         logger.warn({ err, mmsi }, 'Could not resolve vessel for geofence breach');
       }
 
+      // One open alert per vessel and zone within 2 hours.
       const existingAlerts = await query(
         `SELECT alert_id FROM alerts
          WHERE type = 'geofence'
            AND status IN ('open', 'acknowledged')
-           AND (
-             (vessel_id IS NOT NULL AND vessel_id = ?)
-             OR title LIKE ?
-           )
-           AND description LIKE ?
+           AND mmsi = ?
+           AND restricted_area_id = ?
            AND created_at >= NOW() - INTERVAL '2 hours'
          LIMIT 1`,
-        [vesselId ?? -1, `%${mmsi}%`, `%${breach.restricted_zone}%`]
+        [breach.mmsi, breach.restricted_area_id]
       );
 
       if (existingAlerts.length > 0) {
@@ -162,7 +201,11 @@ export const RestrictedAreaService = {
       const severity = isHighRisk ? 'critical' : 'high';
 
       const vesselDisplay = vesselName ? `${vesselName} (${mmsi})` : `MMSI ${mmsi}`;
-      const title = `Geofence Incursion: ${vesselDisplay} in ${breach.restricted_zone}`.slice(0, 255);
+      const title = geofenceTitle({
+        vessel: vesselLabel(vesselName, mmsi),
+        zone: breach.restricted_zone,
+        sog: breach.sog
+      }).slice(0, 255);
 
       const latStr = breach.lat != null ? Number(breach.lat).toFixed(5) : 'N/A';
       const lonStr = breach.lon != null ? Number(breach.lon).toFixed(5) : 'N/A';
@@ -182,6 +225,10 @@ export const RestrictedAreaService = {
       try {
         const alert = await AlertModel.create({
           vessel_id: vesselId,
+          mmsi: breach.mmsi,
+          restricted_area_id: breach.restricted_area_id,
+          lat: breach.lat,
+          lon: breach.lon,
           type: 'geofence',
           severity,
           status: 'open',
@@ -193,6 +240,7 @@ export const RestrictedAreaService = {
 
         if (alert) {
           createdAlerts.push(alert);
+          await this.recordBreachEvents(alert.alert_id, breach);
         }
       } catch (err) {
         logger.error({ err, mmsi, zone: breach.restricted_zone }, 'Failed to create geofence alert');

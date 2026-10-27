@@ -10,7 +10,8 @@ import {
   createSchema,
   updateSchema,
   updateStatusSchema,
-  assignSchema
+  assignSchema,
+  escalateSchema
 } from './alert.validation.js';
 
 const router = Router();
@@ -19,7 +20,7 @@ const router = Router();
  * @openapi
  * /api/alerts:
  *   get:
- *     summary: List all alerts
+ *     summary: List alerts, filterable by status, severity, type, vessel_id, mmsi and created_at from/to
  *     tags: [Alerts]
  */
 router.get('/', authMiddleware, permissionMiddleware('alert.view'), validate(listSchema), AlertController.list);
@@ -68,5 +69,23 @@ router.put('/:alert_id/assign', authMiddleware, permissionMiddleware('alert.stat
  *     tags: [Alerts]
  */
 router.put('/:alert_id/status', authMiddleware, permissionMiddleware('alert.status.view'), activityLogger('alerts.status'), validate(updateStatusSchema), AlertController.updateStatus);
+
+/**
+ * @openapi
+ * /api/alerts/{alert_id}/escalate:
+ *   post:
+ *     summary: Escalate an alert to intercept (status escalated, admins notified; optional body.note)
+ *     tags: [Alerts]
+ */
+router.post('/:alert_id/escalate', authMiddleware, permissionMiddleware('alert.status.view'), activityLogger('alerts.escalate'), validate(escalateSchema), AlertController.escalate);
+
+/**
+ * @openapi
+ * /api/alerts/{alert_id}/events:
+ *   get:
+ *     summary: Alert timeline - detector observations and operator actions (status, assign, escalate)
+ *     tags: [Alerts]
+ */
+router.get('/:alert_id/events', authMiddleware, permissionMiddleware('alert.view'), validate(getByIdSchema), AlertController.events);
 
 export default router;

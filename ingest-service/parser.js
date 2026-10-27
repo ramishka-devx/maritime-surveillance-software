@@ -4,6 +4,18 @@ function normalizeString(value) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+// AIS 6-bit text pads with '@' (and spaces); strip the padding.
+function normalizeAisText(value) {
+  if (value === undefined || value === null) return null;
+  return normalizeString(String(value).replace(/@+/g, ' '));
+}
+
+// IMO numbers are 7 digits; 0 means "not available".
+function normalizeImo(value) {
+  const n = normalizeNumber(value);
+  return n && n > 0 ? String(Math.trunc(n)) : null;
+}
+
 function normalizeNumber(value) {
   if (value === undefined || value === null || value === "") return null;
   const n = Number(value);
@@ -110,6 +122,9 @@ function parseShipStaticData(msg) {
     ...base,
     ship_name: normalizeString(report.Name) || base.ship_name,
     ship_type: normalizeNumber(report.Type),
+    imo: normalizeImo(report.ImoNumber),
+    callsign: normalizeAisText(report.CallSign),
+    destination: normalizeAisText(report.Destination),
     dimensions,
     width,
     length,

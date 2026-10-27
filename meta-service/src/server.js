@@ -5,6 +5,7 @@ import { startDbConnectionCheck } from './config/db.config.js';
 import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
 import { runGeofenceDetector } from './cron/geofenceDetector.js';
+import { runDarkVesselDetector } from './cron/darkVesselDetector.js';
 import '../cron/partition-cron.js';
 
 (async () => {
@@ -67,6 +68,11 @@ import '../cron/partition-cron.js';
   const geofenceInterval = '*/30 * * * * *';
   cron.schedule(geofenceInterval, () => {
     runGeofenceDetector();
+  });
+
+  // Dark-vessel detector: every 5 minutes.
+  cron.schedule('*/5 * * * *', () => {
+    runDarkVesselDetector();
   });
 
   function shutdown() {

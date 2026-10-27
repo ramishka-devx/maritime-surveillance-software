@@ -1,9 +1,44 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import serenGuardLogo from '../../assets/SerenGuard.png';
+import {
+  Activity,
+  CircleUser,
+  HeartPulse,
+  LayoutGrid,
+  Map as MapIcon,
+  Pentagon,
+  ShieldCheck,
+  TriangleAlert,
+  Users,
+} from 'lucide-react';
 import { useBadgeCounts } from '../../hooks/useBadgeCounts';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { isMaintenance, isOperator } from '../../auth/roles.js';
+
+const sectionLabel = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700 mb-2.5';
+
+function NavItem({ item, active, onClick }) {
+  const Icon = item.icon;
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 py-2 text-left text-[15px] outline-none focus-visible:outline-bs-accent ${
+        active ? 'text-bs-accent-700 font-semibold' : 'text-bs-ink hover:text-bs-accent-700'
+      }`}
+    >
+      <Icon size={19} className={active ? '' : 'text-bs-neutral-700'} />
+      <span className="flex-1 whitespace-nowrap">{item.label}</span>
+      {active && <span className="w-1.5 h-1.5 bg-bs-accent" />}
+      {!active && item.badge ? (
+        <span
+          className={`text-[13px] tabular-nums ${item.alert ? 'font-semibold text-bs-accent-2-700' : 'text-bs-neutral-700'}`}
+        >
+          {item.badge}
+        </span>
+      ) : null}
+    </button>
+  );
+}
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -38,136 +73,59 @@ export default function Sidebar() {
       : pathname.slice(1) || 'map';
 
   const operationsNav = maintenance ? [] : [
-    { id: 'map', label: 'Map', icon: 'map', path: '/' },
-    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/Dashboard' },
-    { id: 'alerts', label: 'Alerts', icon: 'warning', badge: alertCount, badgeType: 'error', path: '/Alerts' },
-    { id: 'anomalies', label: 'Anomalies', icon: 'troubleshoot', badge: anomalyCount, badgeType: 'error', path: '/Anomalies' },
-    { id: 'restricted-areas', label: 'Restricted Areas', icon: 'fence', badge: restrictedAreaCount, badgeType: 'error', path: '/RestrictedAreas' },
-    { id: 'my-profile', label: 'My Profile', icon: 'account_circle', path: '/Profile' },
+    { id: 'map', label: 'Map', icon: MapIcon, path: '/' },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/Dashboard' },
+    { id: 'alerts', label: 'Alerts', icon: TriangleAlert, badge: alertCount, alert: true, path: '/Alerts' },
+    { id: 'anomalies', label: 'Anomalies', icon: Activity, badge: anomalyCount, alert: true, path: '/Anomalies' },
+    { id: 'restricted-areas', label: 'Restricted areas', icon: Pentagon, badge: restrictedAreaCount, path: '/RestrictedAreas' },
+    { id: 'my-profile', label: 'My profile', icon: CircleUser, path: '/Profile' },
   ];
 
   const adminNav = maintenance ? [
-    { id: 'system-health', label: 'System Health', icon: 'health_and_safety', path: '/SystemHealth' },
+    { id: 'system-health', label: 'System health', icon: HeartPulse, path: '/SystemHealth' },
   ] : isOperator(user) ? [] : [
-    { id: 'users', label: 'Users', icon: 'group', path: '/Users' },
-    { id: 'roles-permissions', label: 'Roles & Permissions', icon: 'admin_panel_settings', path: '/RolesPermissions' },
+    { id: 'users', label: 'Users', icon: Users, path: '/Users' },
+    { id: 'roles-permissions', label: 'Roles & access', icon: ShieldCheck, path: '/RolesPermissions' },
   ];
 
-  const handleNavClick = (item) => {
-    if (item.path) {
-      navigate(item.path);
-    }
-  };
-
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-surface-container-low border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none font-sans">
-      <div className="flex flex-col">
-        {/* Logo Brand Header */}
-        <div
-          onClick={() => navigate(maintenance ? '/SystemHealth' : '/')}
-          className="h-16 px-4 border-b border-outline-variant/30 flex items-center gap-2.5 bg-surface-container-lowest cursor-pointer hover:bg-surface-container/50 transition-colors"
-        >
-          <div className="w-8 h-8 rounded-lg border border-cyan-500/40 p-1 flex items-center justify-center shadow-lg shadow-cyan-950/40 bg-surface-container-low">
-            <img src={serenGuardLogo} alt="SerenGuard Logo" className="w-full h-full object-contain" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-sm tracking-tight text-on-surface uppercase leading-none">
-              SerenGuard
-            </span>
-            <span className="text-[10px] font-mono text-primary tracking-wider uppercase mt-1 leading-none">
-              Maritime Surveillance
-            </span>
-          </div>
-        </div>
+    <aside className="fixed left-0 top-0 h-full w-60 z-50 flex flex-col pt-7 pb-6 pl-8 pr-6 bg-bs-bg text-bs-ink select-none font-sans">
+      <button
+        onClick={() => navigate(maintenance ? '/SystemHealth' : '/')}
+        className="text-left outline-none focus-visible:outline-bs-accent"
+      >
+        <div className="font-semibold text-[22px] leading-[1.05] tracking-[-0.02em]">SerenGuard</div>
+        <div className="italic text-[12px] text-bs-neutral-700 mt-1">Maritime surveillance</div>
+      </button>
 
-        {/* Operations Navigation */}
-        {operationsNav.length > 0 && (
-        <div className="py-4">
-          <div className="px-4 pb-2 text-[10px] font-mono uppercase tracking-widest text-outline">
-            Operations
-          </div>
-          <nav className="space-y-0.5 px-2">
-            {operationsNav.map((item) => {
-              const isActive = currentActiveTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors text-left ${
-                    isActive
-                      ? 'bg-primary-container text-on-primary font-bold shadow-sm'
-                      : 'text-outline hover:text-on-surface hover:bg-surface-container'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="material-symbols-outlined text-[18px]">
-                      {item.icon}
-                    </span>
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold leading-none ${
-                        item.badgeType === 'error'
-                          ? 'bg-error-container text-on-error-container'
-                          : 'bg-primary-container text-on-primary-container'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+      {operationsNav.length > 0 && (
+        <div className="mt-10">
+          <div className={sectionLabel}>Operations</div>
+          <nav className="flex flex-col gap-0.5">
+            {operationsNav.map((item) => (
+              <NavItem key={item.id} item={item} active={currentActiveTab === item.id} onClick={() => navigate(item.path)} />
+            ))}
           </nav>
         </div>
-        )}
+      )}
 
-        {/* Administration Navigation */}
-        {adminNav.length > 0 && (
-        <div className="py-2 border-t border-outline-variant/20">
-          <div className="px-4 pb-2 text-[10px] font-mono uppercase tracking-widest text-outline">
-            Administration
-          </div>
-          <nav className="space-y-0.5 px-2">
-            {adminNav.map((item) => {
-              const isActive = currentActiveTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors text-left ${
-                    isActive
-                      ? 'bg-primary-container text-on-primary font-bold shadow-sm'
-                      : 'text-outline hover:text-on-surface hover:bg-surface-container'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="material-symbols-outlined text-[18px]">
-                      {item.icon}
-                    </span>
-                    <span>{item.label}</span>
-                  </div>
-                  {item.extra && (
-                    <span className="text-[10px] font-mono text-tertiary">
-                      {item.extra}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+      {adminNav.length > 0 && (
+        <div className="mt-8">
+          <div className={sectionLabel}>Administration</div>
+          <nav className="flex flex-col gap-0.5">
+            {adminNav.map((item) => (
+              <NavItem key={item.id} item={item} active={currentActiveTab === item.id} onClick={() => navigate(item.path)} />
+            ))}
           </nav>
         </div>
-        )}
-      </div>
+      )}
 
-      {/* System Status / DEFCON Indicator */}
-      <div className="p-4 border-t border-outline-variant/30 bg-surface-container-lowest/60">
-        <div className="flex items-center justify-between font-mono text-[10px] mb-2">
-          <span className="text-outline">OPERATION STATUS</span>
-          <span className="text-tertiary font-bold">ONLINE</span>
+      <div className="mt-auto flex flex-col gap-1">
+        <div className="text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700">Operation status</div>
+        <div className="flex items-center gap-2 text-[14px] font-semibold">
+          <span className="w-2 h-2 rounded-full bg-bs-accent" />
+          Online
         </div>
-        
       </div>
     </aside>
   );

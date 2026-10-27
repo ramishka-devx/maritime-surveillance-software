@@ -64,15 +64,26 @@ async function upsertShip(client, data) {
   await ensureShipType(client, shipType);
 
   await client.query(
-    `INSERT INTO ships (mmsi, ship_name, ship_type, dimensions, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, NOW(), NOW())
+    `INSERT INTO ships (mmsi, ship_name, ship_type, dimensions, imo, callsign, destination, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
      ON CONFLICT (mmsi)
      DO UPDATE SET
        ship_name = COALESCE(EXCLUDED.ship_name, ships.ship_name),
        ship_type = COALESCE(EXCLUDED.ship_type, ships.ship_type),
        dimensions = COALESCE(EXCLUDED.dimensions, ships.dimensions),
+       imo = COALESCE(EXCLUDED.imo, ships.imo),
+       callsign = COALESCE(EXCLUDED.callsign, ships.callsign),
+       destination = COALESCE(EXCLUDED.destination, ships.destination),
        updated_at = NOW()`,
-    [data.mmsi, data.ship_name, shipType, dimensions ? JSON.stringify(dimensions) : null]
+    [
+      data.mmsi,
+      data.ship_name,
+      shipType,
+      dimensions ? JSON.stringify(dimensions) : null,
+      data.imo ?? null,
+      data.callsign ?? null,
+      data.destination ?? null
+    ]
   );
 
   return {

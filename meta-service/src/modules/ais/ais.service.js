@@ -48,9 +48,22 @@ const escapeLike = (s) => s.replace(/[\\%_]/g, '\\$&');
 // row per vessel instead of scanning the ais_positions history.
 // ponytail: seq scan on ships (~16k rows, a few ms); add a (lat, lon) index past ~200k ships.
 const LATEST_COLUMNS = `mmsi, ship_name, sog, cog, heading, nav_status,
-       last_position_at AS time_utc, lat, lon`;
+       last_position_at AS time_utc, lat, lon, ship_type, st.description AS ship_type_name,
+       imo, callsign, destination`;
+// ship_types is the AIS code lookup (PK join), so the map can colour vessels by type.
+const LATEST_FROM = 'ships LEFT JOIN ship_types st ON st.ship_type_id = ships.ship_type';
 
 export const AisService = {
+  // Positions stored per second over the last minute (idx_ais_positions_time). time_utc is
+  // the transponder's timestamp, so this approximates the ingest rate.
+  async rate() {
+    const [row] = await query(
+      `SELECT COUNT(*)::int AS n FROM ais_positions
+       WHERE time_utc > (now() AT TIME ZONE 'UTC') - interval '60 seconds'`
+    );
+    return { positions_per_s: Math.round((row.n / 60) * 10) / 10 };
+  },
+
   // Most recently seen vessels, optionally searched by name (substring) or MMSI (prefix).
   async listVessels({ limit, q } = {}) {
     const search = String(q ?? '').trim();
@@ -65,7 +78,7 @@ export const AisService = {
 
     return query(
       `SELECT ${LATEST_COLUMNS}
-       FROM ships
+       FROM ${LATEST_FROM}
        WHERE ${where.join(' AND ')}
        ORDER BY last_position_at DESC
        LIMIT ?`,
@@ -79,7 +92,7 @@ export const AisService = {
 
     return query(
       `SELECT ${LATEST_COLUMNS}
-       FROM ships
+       FROM ${LATEST_FROM}
        WHERE last_position_at IS NOT NULL${box ? ` AND ${box.sql}` : ''}
        ORDER BY last_position_at DESC
        LIMIT ?`,
@@ -87,9 +100,21 @@ export const AisService = {
     );
   },
 
-  async positionsByMmsi(mmsi, { limit } = {}) {
+  // Newest positions first, optionally within [from, to] (ISO). ponytail: ais_positions keeps
+  // 7 days (partition-cron.js), so older windows come back empty; snapshot tracks onto alerts
+  // if case files must outlive that.
+  async positionsByMmsi(mmsi, { limit, from, to } = {}) {
     const safeMmsi = normalizeMmsi(mmsi);
     const safeLimit = normalizeLimit(limit, { fallback: 200, max: 5000 });
+    const window = [];
+    const windowParams = [];
+    for (const [op, value] of [['>=', from], ['<=', to]]) {
+      if (value === undefined || value === null || value === '') continue;
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) throw badRequest('from/to must be ISO dates');
+      window.push(`a.time_utc ${op} ?::timestamp`);
+      windowParams.push(d);
+    }
 
     const rows = await query(
       `SELECT
@@ -104,10 +129,10 @@ export const AisService = {
          ST_X(a.position::geometry) AS lon
        FROM ais_positions a
        LEFT JOIN ships s ON a.mmsi = s.mmsi
-       WHERE a.mmsi = ?
+       WHERE a.mmsi = ?${window.map((c) => ` AND ${c}`).join('')}
        ORDER BY a.time_utc DESC
        LIMIT ?`,
-      [safeMmsi, safeLimit],
+      [safeMmsi, ...windowParams, safeLimit],
     );
 
     return rows;
