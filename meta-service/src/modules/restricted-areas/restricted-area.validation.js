@@ -21,8 +21,23 @@ export const createSchema = Joi.object({
   body: Joi.object({
     name: Joi.string().trim().max(255).required(),
     type: Joi.string().trim().max(100).required(),
-    coordinates: Joi.array().items(coordinateSchema).min(3).required()
-  })
+    coordinates: Joi.array().items(coordinateSchema).min(3),
+    geometry: Joi.object({ type: Joi.string().valid('Polygon').required(), coordinates: Joi.array().required() }),
+    status: Joi.string().valid('active', 'inactive').default('active'),
+    expires_at: Joi.date().iso().allow(null)
+  }).or('coordinates', 'geometry')
+});
+
+export const updateSchema = Joi.object({
+  params: Joi.object({ id: Joi.number().integer().required() }),
+  body: Joi.object({
+    name: Joi.string().trim().max(255),
+    type: Joi.string().trim().max(100),
+    coordinates: Joi.array().items(coordinateSchema).min(3),
+    geometry: Joi.object({ type: Joi.string().valid('Polygon').required(), coordinates: Joi.array().required() }),
+    status: Joi.string().valid('active', 'inactive'),
+    expires_at: Joi.date().iso().allow(null)
+  }).min(1)
 });
 
 export const detectionsSchema = Joi.object({
