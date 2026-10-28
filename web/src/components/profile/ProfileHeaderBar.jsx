@@ -45,43 +45,43 @@ export default function ProfileHeaderBar({ user: propUser }) {
 
   return (
     <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 relative overflow-hidden select-none font-sans">
-      <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-cyan-400/5 blur-2xl pointer-events-none" />
+      <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-cyan-500/5 blur-2xl pointer-events-none" />
       <div className="flex flex-col gap-1 min-w-0">
-        <h1 className="text-xl font-bold text-on-surface uppercase tracking-tight m-0">
+        <h1 className="text-xl font-bold text-slate-900 uppercase tracking-tight m-0">
           My Profile
         </h1>
-        <div className="flex items-center gap-2 font-mono text-xs text-outline tracking-wider uppercase">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400" />
+        <div className="flex items-center gap-2 font-mono text-xs text-slate-500 tracking-wider uppercase">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#0891b2]" />
           <span>OPERATOR CONSOLE</span>
-          <span className="text-outline-variant">/</span>
-          <span className="text-emerald-400 font-semibold">SESSION ACTIVE</span>
+          <span className="text-slate-300">/</span>
+          <span className="text-emerald-700 font-semibold">SESSION ACTIVE</span>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2.5 px-3 py-2 rounded bg-surface-container-lowest border border-outline-variant/30 shadow-sm">
-          <span className="material-symbols-outlined text-[18px] text-emerald-400">
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded bg-white border border-slate-200 shadow-sm">
+          <span className="material-symbols-outlined text-[18px] text-emerald-600">
             verified_user
           </span>
           <div className="flex flex-col">
-            <span className="text-[10px] text-outline uppercase font-mono leading-none">
+            <span className="text-[10px] text-slate-500 uppercase font-mono leading-none">
               Access Level
             </span>
-            <span className="font-mono text-xs text-on-surface font-semibold leading-tight mt-0.5">
+            <span className="font-mono text-xs text-slate-900 font-semibold leading-tight mt-0.5">
               {accessLevel}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 px-3 py-2 rounded bg-surface-container-lowest border border-outline-variant/30 shadow-sm">
-          <span className="material-symbols-outlined text-[18px] text-cyan-400">
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded bg-white border border-slate-200 shadow-sm">
+          <span className="material-symbols-outlined text-[18px] text-[#0891b2]">
             military_tech
           </span>
           <div className="flex flex-col">
-            <span className="text-[10px] text-outline uppercase font-mono leading-none">
+            <span className="text-[10px] text-slate-500 uppercase font-mono leading-none">
               Role Authorization
             </span>
-            <span className="font-mono text-xs text-cyan-400 font-semibold leading-tight mt-0.5">
+            <span className="font-mono text-xs text-[#0891b2] font-semibold leading-tight mt-0.5">
               {systemRoleBadge}
             </span>
           </div>

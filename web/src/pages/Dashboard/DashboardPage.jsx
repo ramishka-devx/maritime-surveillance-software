@@ -236,8 +236,7 @@ export default function DashboardPage() {
       {/* Title row */}
       <div className="flex flex-wrap items-end gap-4 mt-7">
         <div>
-          <div className={kicker}>All monitored waters</div>
-          <h1 className="mt-1 text-[36px] font-semibold leading-[1.1] tracking-[-0.015em]">Dashboard</h1>
+          <h1 className="text-[36px] font-semibold leading-[1.1] tracking-[-0.015em]">Dashboard</h1>
           {loading && error && (
             <p role="alert" className="mt-1 text-[13px] italic text-bs-accent-2-700">
               Couldn't load the dashboard ({error}). Retrying every 30 s.
