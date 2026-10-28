@@ -8,10 +8,10 @@ export default function RolesHeaderBar({
   affectedUsersCount = 0,
 }) {
   return (
-    <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 select-none font-sans">
+    <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 select-none font-sans">
       <div className="flex flex-col gap-1 min-w-0">
         <div className="flex items-baseline gap-3 mt-0.5">
-          <h1 className="text-xl font-bold uppercase tracking-tight text-slate-900 m-0">
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">
             Roles &amp; Permissions
           </h1>
           

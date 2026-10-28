@@ -4,7 +4,7 @@ export default function UsersMetricsRow({ totalCount, activeCount, deactivatedCo
   const activeRate = totalCount > 0 ? ((activeCount / totalCount) * 100).toFixed(1) : '0.0';
 
   return (
-    <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 border-b border-slate-200 select-none font-sans">
+    <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-4 gap-3 border-b border-slate-200 select-none font-sans">
       {/* Metric 1 */}
       <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col">

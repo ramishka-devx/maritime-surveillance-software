@@ -2,12 +2,12 @@ import React from 'react';
 
 export default function UsersHeaderBar({ totalUsers, activeUsers, onExport, onOpenCreateDrawer }) {
   return (
-    <div className="px-4 pt-3 pb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border-b border-slate-200 select-none font-sans shadow-xs">
+    <div className="px-4 pt-3 pb-1 flex flex-col lg:flex-row lg:items-center justify-between gap-4 select-none font-sans">
       <div className="flex flex-col">
         <div className="flex items-center gap-2.5">
           
           <div className="flex items-baseline gap-2.5">
-            <h1 className="text-xl font-bold uppercase tracking-tight text-slate-900 m-0">
+            <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">
               Users
             </h1>
             
