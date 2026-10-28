@@ -19,11 +19,11 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 p-4 pt-3 pb-16 font-sans">
+    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 px-4 pb-16 font-sans">
       <div className="flex flex-col gap-5 max-w-[1920px] mx-auto pb-8">
         {/* Floating Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-900 px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 animate-bounce font-mono text-xs">
+          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-900 px-4 py-2.5 rounded-sm shadow-lg flex items-center gap-2 animate-bounce font-mono text-xs">
             <span className="material-symbols-outlined text-[#0891b2] text-base">check_circle</span>
             <span>{toastMessage}</span>
           </div>

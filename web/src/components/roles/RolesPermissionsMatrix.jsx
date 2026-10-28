@@ -164,7 +164,7 @@ export default function RolesPermissionsMatrix({
 
   return (
     <section className="flex flex-col gap-4 w-full font-sans select-none">
-      <div className="bg-white border border-slate-200 rounded-lg flex flex-col shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-sm flex flex-col shadow-xs overflow-hidden">
         {/* Matrix Panel Header */}
         <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
@@ -173,16 +173,16 @@ export default function RolesPermissionsMatrix({
                 Permissions Matrix — {role?.name || 'Selected'}
               </h2>
               {isSuperAdmin ? (
-                <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 border border-purple-200 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">security</span>
                   ROOT BYPASS
                 </span>
               ) : role?.is_system === 1 ? (
-                <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 border border-purple-200 font-mono text-[10px] font-bold uppercase tracking-wider">
                   SYSTEM ROLE
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-cyan-50 text-[#0891b2] border border-cyan-200 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-sm bg-cyan-50 text-[#0891b2] border border-cyan-200 font-mono text-[10px] font-bold uppercase tracking-wider">
                   CUSTOM ROLE
                 </span>
               )}
@@ -195,7 +195,7 @@ export default function RolesPermissionsMatrix({
               type="button"
               disabled={isSuperAdmin}
               onClick={onSelectAllView}
-              className={`px-2.5 py-1 rounded-lg border transition-colors ${
+              className={`px-2.5 py-1 rounded-sm border transition-colors ${
                 isSuperAdmin
                   ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
                   : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer shadow-xs'
@@ -207,7 +207,7 @@ export default function RolesPermissionsMatrix({
               type="button"
               disabled={isSuperAdmin}
               onClick={onClearDeletes}
-              className={`px-2.5 py-1 rounded-lg border transition-colors ${
+              className={`px-2.5 py-1 rounded-sm border transition-colors ${
                 isSuperAdmin
                   ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
                   : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer shadow-xs'
@@ -219,7 +219,7 @@ export default function RolesPermissionsMatrix({
               type="button"
               disabled={isSuperAdmin}
               onClick={onResetBaseline}
-              className={`px-2.5 py-1 rounded-lg border uppercase font-semibold transition-colors flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-sm border uppercase font-semibold transition-colors flex items-center gap-1 ${
                 isSuperAdmin
                   ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
                   : 'bg-white hover:bg-slate-50 border-slate-200 text-[#0891b2] cursor-pointer shadow-xs'
@@ -304,7 +304,7 @@ export default function RolesPermissionsMatrix({
               return (
                 <div
                   key={group.name}
-                  className="bg-slate-50/40 border border-slate-200 rounded-lg overflow-hidden shadow-xs"
+                  className="bg-slate-50/40 border border-slate-200 rounded-sm overflow-hidden shadow-xs"
                 >
                   {/* Module Group Header */}
                   <div className="p-3 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
@@ -313,7 +313,7 @@ export default function RolesPermissionsMatrix({
                         <h3 className="font-mono text-xs font-bold uppercase text-slate-900 m-0 tracking-wider">
                           {group.name} Module
                         </h3>
-                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-semibold bg-white text-[#0891b2] border border-slate-200 shadow-xs">
+                        <span className="px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-white text-[#0891b2] border border-slate-200 shadow-xs">
                           {activeInGroup} / {group.permissions.length} GRANTED
                         </span>
                       </div>
@@ -323,7 +323,7 @@ export default function RolesPermissionsMatrix({
                       <button
                         type="button"
                         onClick={() => handleToggleModule(group.permissions)}
-                        className="px-2 py-1 rounded text-[11px] font-mono uppercase bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer border border-slate-200 shadow-xs flex items-center gap-1"
+                        className="px-2 py-1 rounded-sm text-[11px] font-mono uppercase bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer border border-slate-200 shadow-xs flex items-center gap-1"
                         title={
                           isAllGroupActive
                             ? `Revoke all ${group.name} permissions`
@@ -357,7 +357,7 @@ export default function RolesPermissionsMatrix({
                               >
                                 {perm.name}
                               </span>
-                              <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
+                              <span className="px-1.5 py-0.2 rounded-sm font-mono text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
                                 id #{perm.permission_id}
                               </span>
                             </div>

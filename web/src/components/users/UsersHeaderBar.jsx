@@ -20,14 +20,14 @@ export default function UsersHeaderBar({ totalUsers, activeUsers, onExport, onOp
       <div className="flex items-center gap-2.5 self-start lg:self-auto font-mono text-xs">
         <button
           onClick={onExport}
-          className="flex items-center gap-1.5 px-3 py-2 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors uppercase tracking-wider cursor-pointer shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-sm bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors uppercase tracking-wider cursor-pointer shadow-xs"
         >
           <span className="material-symbols-outlined text-[16px] text-[#0891b2]">download</span>
           <span>Export</span>
         </button>
         <button
           onClick={onOpenCreateDrawer}
-          className="flex items-center gap-1.5 px-4 py-2 rounded bg-[#0891b2] text-white hover:bg-[#0e7490] font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-sm bg-[#0891b2] text-white hover:bg-[#0e7490] font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">person_add</span>
           <span>Invite User</span>

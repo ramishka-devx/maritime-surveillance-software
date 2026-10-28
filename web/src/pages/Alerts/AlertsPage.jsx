@@ -381,7 +381,7 @@ export default function AlertsPage() {
         </div>
 
         {/* Case file */}
-        <div className="flex-1 min-w-0 flex flex-col overflow-y-auto pb-8">
+        <div className="flex-1 min-w-0 flex flex-col overflow-y-auto pb-8 pr-3">
           {!sel ? (
             alerts === null ? (
               <>
@@ -400,7 +400,7 @@ export default function AlertsPage() {
                 <span className="text-bs-neutral-700">· Case SG-{String(sel.alert_id).padStart(4, '0')}</span>
                 <span className={`ml-auto font-semibold ${statusInk(status)}`}>{status}</span>
               </div>
-              <h2 className="mt-2.5 mb-2 text-[26px] font-semibold leading-[1.15] tracking-[-0.01em] [text-wrap:pretty]">{sel.title}</h2>
+              <h2 className="mt-2.5 mb-2 text-[20px] font-semibold leading-[1.15] tracking-[-0.01em] [text-wrap:pretty]">{sel.title}</h2>
               <div className="flex flex-wrap gap-6 text-[13px]">
                 <span>
                   <span className="text-bs-neutral-700">Detected</span>{' '}

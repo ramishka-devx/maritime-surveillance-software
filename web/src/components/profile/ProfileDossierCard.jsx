@@ -68,12 +68,12 @@ export default function ProfileDossierCard({ user: propUser }) {
   return (
     <div className="flex flex-col gap-4 font-sans select-none">
       {/* Main Identity Dossier Card */}
-      <div className="bg-white rounded-lg py-5 px-4 shadow-sm flex flex-col gap-4 relative overflow-hidden border border-slate-200">
+      <div className="bg-white rounded-sm py-5 px-4 shadow-sm flex flex-col gap-4 relative overflow-hidden border border-slate-200">
         
         {/* Operator Photo with Ping Reticle */}
         <div className="flex flex-col items-center gap-4 pt-1">
           <div className="relative group">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-slate-100 shadow-sm relative border border-slate-200">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-sm overflow-hidden bg-slate-100 shadow-sm relative border border-slate-200">
               <img
                 alt={displayName}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
@@ -105,7 +105,7 @@ export default function ProfileDossierCard({ user: propUser }) {
             <span className="font-mono text-xs text-slate-500 mt-1 truncate max-w-full">
               {displayEmail}
             </span>
-            <div className="flex items-center gap-1.5 mt-2.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
+            <div className="flex items-center gap-1.5 mt-2.5 px-3 py-1 rounded-sm bg-slate-100 border border-slate-200">
               <span className="material-symbols-outlined text-[14px] text-[#0891b2]">
                 shield_with_heart
               </span>

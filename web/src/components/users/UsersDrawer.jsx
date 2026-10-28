@@ -64,7 +64,7 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+                className="p-1 rounded-sm text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -84,7 +84,7 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
                 person
               </span>
               <input
-                className="w-full bg-slate-50 rounded pl-8 pr-3 py-2 text-slate-900 text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
+                className="w-full bg-slate-50 rounded-sm pl-8 pr-3 py-2 text-slate-900 text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
                 placeholder="e.g. Lt. Cmdr. Elena Rostova"
                 type="text"
                 value={name}
@@ -106,7 +106,7 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
                 mail
               </span>
               <input
-                className="w-full bg-slate-50 rounded pl-8 pr-3 py-2 text-slate-900 text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
+                className="w-full bg-slate-50 rounded-sm pl-8 pr-3 py-2 text-slate-900 text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
                 placeholder="username@serenguard.maritime.mil"
                 type="email"
                 value={email}
@@ -128,7 +128,7 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-slate-50 rounded pl-8 pr-8 py-2 text-slate-900 text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] appearance-none cursor-pointer"
+                className="w-full bg-slate-50 rounded-sm pl-8 pr-8 py-2 text-slate-900 text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] appearance-none cursor-pointer"
               >
                 <option value="operator" className="bg-white text-slate-900">Watch Operator</option>
                 <option value="admin" className="bg-white text-slate-900">Administrator</option>
@@ -159,7 +159,7 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
                 key
               </span>
               <input
-                className="w-full bg-slate-50 rounded pl-8 pr-10 py-2 text-[#0891b2] font-mono font-bold text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
+                className="w-full bg-slate-50 rounded-sm pl-8 pr-10 py-2 text-[#0891b2] font-mono font-bold text-xs border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
                 type="text"
                 value={tempKey}
                 onChange={(e) => setTempKey(e.target.value)}
@@ -178,7 +178,7 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
           </div>
 
           {/* Security Protocol Banner */}
-          <div className="p-3 rounded-lg bg-cyan-50/70 border border-cyan-200 flex items-start gap-2 mt-3">
+          <div className="p-3 rounded-sm bg-cyan-50/70 border border-cyan-200 flex items-start gap-2 mt-3">
             <span className="material-symbols-outlined text-[#0891b2] text-[18px] shrink-0 mt-0.5">
               info
             </span>
@@ -193,14 +193,14 @@ export default function UsersDrawer({ isOpen, onClose, onCreateUser }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 rounded bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
+            className="px-3.5 py-2 rounded-sm bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex items-center gap-1.5 px-4 py-2 rounded bg-[#0891b2] text-white hover:bg-[#0e7490] font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-sm bg-[#0891b2] text-white hover:bg-[#0e7490] font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
             <span>Create User</span>

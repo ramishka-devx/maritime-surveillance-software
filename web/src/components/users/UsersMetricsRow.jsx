@@ -6,7 +6,7 @@ export default function UsersMetricsRow({ totalCount, activeCount, deactivatedCo
   return (
     <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-4 gap-3 border-b border-slate-200 select-none font-sans">
       {/* Metric 1 */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-xs">
+      <div className="flex items-center justify-between p-3 rounded-sm bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col">
           <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">
             Total Personnel
@@ -19,7 +19,7 @@ export default function UsersMetricsRow({ totalCount, activeCount, deactivatedCo
       </div>
 
       {/* Metric 2 */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-xs">
+      <div className="flex items-center justify-between p-3 rounded-sm bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col">
           <span className="text-[11px] font-mono text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Active Watch
@@ -32,7 +32,7 @@ export default function UsersMetricsRow({ totalCount, activeCount, deactivatedCo
       </div>
 
       {/* Metric 3 */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-xs">
+      <div className="flex items-center justify-between p-3 rounded-sm bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col">
           <span className="text-[11px] font-mono text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> Deactivated
@@ -45,7 +45,7 @@ export default function UsersMetricsRow({ totalCount, activeCount, deactivatedCo
       </div>
 
       {/* Metric 4 */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-xs">
+      <div className="flex items-center justify-between p-3 rounded-sm bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col">
           <span className="text-[11px] font-mono text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-purple-500" /> Pending Invite

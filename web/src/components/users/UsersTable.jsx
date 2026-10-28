@@ -22,7 +22,7 @@ export default function UsersTable({
     const r = String(role || '').toLowerCase();
     if (r === 'super_admin' || r === 'super administrator' || r === 'super admin') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono text-xs uppercase font-semibold border border-purple-200">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 font-mono text-xs uppercase font-semibold border border-purple-200">
           <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
           Super Admin
         </span>
@@ -30,7 +30,7 @@ export default function UsersTable({
     }
     if (r === 'administrator' || r === 'admin') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono text-xs uppercase font-semibold border border-blue-200">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-blue-50 text-blue-700 font-mono text-xs uppercase font-semibold border border-blue-200">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
           Administrator
         </span>
@@ -38,7 +38,7 @@ export default function UsersTable({
     }
     if (r === 'maintenance') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono text-xs uppercase font-semibold border border-emerald-200">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 font-mono text-xs uppercase font-semibold border border-emerald-200">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Maintenance
         </span>
@@ -46,14 +46,14 @@ export default function UsersTable({
     }
     if (r === 'viewer') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-xs uppercase font-semibold border border-slate-300">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 text-slate-700 font-mono text-xs uppercase font-semibold border border-slate-300">
           <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
           Viewer
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-50 text-[#0891b2] font-mono text-xs uppercase font-semibold border border-cyan-200">
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-cyan-50 text-[#0891b2] font-mono text-xs uppercase font-semibold border border-cyan-200">
         <span className="h-1.5 w-1.5 rounded-full bg-[#0891b2]" />
         Operator
       </span>
@@ -64,7 +64,7 @@ export default function UsersTable({
     const s = String(status || '').toUpperCase();
     if (s === 'ACTIVE' || s === 'VERIFIED') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 text-[10px]">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 text-[10px]">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           ACTIVE
         </span>
@@ -72,14 +72,14 @@ export default function UsersTable({
     }
     if (s === 'PENDING') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-semibold border border-amber-200 text-[10px]">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-amber-50 text-amber-800 font-semibold border border-amber-200 text-[10px]">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
           PENDING
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-semibold border border-rose-200 text-[10px]">
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-rose-50 text-rose-700 font-semibold border border-rose-200 text-[10px]">
         <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
         DEACTIVATED
       </span>
@@ -95,7 +95,7 @@ export default function UsersTable({
 
   return (
     <div className="px-4 pt-3 pb-6 flex flex-col gap-2 font-sans select-none">
-      <div className="w-full overflow-x-auto rounded-lg bg-white border border-slate-200 shadow-xs">
+      <div className="w-full overflow-x-auto rounded-sm bg-white border border-slate-200 shadow-xs">
         <table className="w-full text-left border-collapse font-mono text-xs">
           <thead>
             <tr className="bg-slate-50 text-slate-600 text-[11px] uppercase tracking-wider border-b border-slate-200">
@@ -220,7 +220,7 @@ export default function UsersTable({
                       <button
                         type="button"
                         onClick={(e) => toggleRowMenu(userId, e)}
-                        className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-sm hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                         title="User Actions"
                       >
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
@@ -233,7 +233,7 @@ export default function UsersTable({
                             className="fixed inset-0 z-20 cursor-default"
                             onClick={() => setActiveMenuId(null)}
                           />
-                          <div className="absolute right-4 top-10 z-30 w-48 rounded-lg bg-white border border-slate-200 shadow-xl py-1 text-left font-mono text-xs">
+                          <div className="absolute right-4 top-10 z-30 w-48 rounded-sm bg-white border border-slate-200 shadow-xl py-1 text-left font-mono text-xs">
                             <button
                               type="button"
                               onClick={() => {
@@ -290,7 +290,7 @@ export default function UsersTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between py-2 px-3 bg-slate-50 rounded-lg border border-slate-200 gap-2 font-mono text-xs">
+      <div className="flex flex-col sm:flex-row items-center justify-between py-2 px-3 bg-slate-50 rounded-sm border border-slate-200 gap-2 font-mono text-xs">
         <span className="text-slate-500 text-[11px]">
           Showing {users.length > 0 ? 1 : 0}–{users.length} of {totalRecords || users.length} records
         </span>
@@ -298,14 +298,14 @@ export default function UsersTable({
           <button
             onClick={() => onPageChange && onPageChange(1)}
             disabled={currentPage <= 1}
-            className="p-1 rounded bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">first_page</span>
           </button>
           <button
             onClick={() => onPageChange && onPageChange(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="p-1 rounded bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">chevron_left</span>
           </button>
@@ -316,7 +316,7 @@ export default function UsersTable({
               <button
                 key={pageNum}
                 onClick={() => onPageChange && onPageChange(pageNum)}
-                className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                className={`px-2 py-0.5 rounded-sm font-bold cursor-pointer transition-colors ${
                   currentPage === pageNum
                     ? 'bg-[#0891b2] text-white shadow-xs'
                     : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -330,14 +330,14 @@ export default function UsersTable({
           <button
             onClick={() => onPageChange && onPageChange(currentPage + 1)}
             disabled={currentPage >= (totalPages || 1)}
-            className="p-1 rounded bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>
           <button
             onClick={() => onPageChange && onPageChange(totalPages || 1)}
             disabled={currentPage >= (totalPages || 1)}
-            className="p-1 rounded bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">last_page</span>
           </button>

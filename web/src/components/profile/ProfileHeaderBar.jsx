@@ -47,13 +47,13 @@ export default function ProfileHeaderBar({ user: propUser }) {
     <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 relative overflow-hidden select-none font-sans">
       <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-cyan-500/5 blur-2xl pointer-events-none" />
       <div className="flex flex-col gap-1 min-w-0">
-        <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight m-0">
+        <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight m-0 pt-3">
           My Profile
         </h1>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2.5 px-3 py-2 rounded bg-white border border-slate-200 shadow-sm">
+      <div className="flex flex-wrap items-center gap-3 pt-3">
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-sm bg-white border border-slate-200 shadow-sm">
           <span className="material-symbols-outlined text-[18px] text-emerald-600">
             verified_user
           </span>
@@ -67,7 +67,7 @@ export default function ProfileHeaderBar({ user: propUser }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 px-3 py-2 rounded bg-white border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-sm bg-white border border-slate-200 shadow-sm">
           <span className="material-symbols-outlined text-[18px] text-[#0891b2]">
             military_tech
           </span>

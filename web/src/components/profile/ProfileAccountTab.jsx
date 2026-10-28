@@ -69,13 +69,13 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-5 sm:p-6 shadow-sm flex flex-col gap-6 border border-slate-200 font-sans select-none">
+    <div className="bg-white rounded-sm p-5 sm:p-6 shadow-sm flex flex-col gap-6 border border-slate-200 font-sans select-none">
       {/* Section 1: Personal & Operational Information */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#0891b2] text-[20px]">person_pin</span>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase m-0">
+            <h2 className="text-[20px] font-bold text-slate-900 m-0">
               Personal &amp; Operational Information
             </h2>
           </div>
@@ -92,7 +92,7 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
                 badge
               </span>
               <input
-                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
+                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded-sm pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
                 type="text"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -110,7 +110,7 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
                 military_tech
               </span>
               <input
-                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
+                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded-sm pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
                 type="text"
                 value={formData.center}
                 onChange={(e) => setFormData({ ...formData, center: e.target.value })}
@@ -128,7 +128,7 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
                 mail
               </span>
               <input
-                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
+                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded-sm pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -146,7 +146,7 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
                 alternate_email
               </span>
               <input
-                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
+                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded-sm pl-10 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors"
                 type="text"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
@@ -166,7 +166,7 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
               <select
                 value={formData.timezone}
                 onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded pl-10 pr-10 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors appearance-none cursor-pointer"
+                className="w-full bg-slate-50 text-slate-900 font-mono text-xs rounded-sm pl-10 pr-10 py-2 border border-slate-200 focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] focus:bg-white transition-colors appearance-none cursor-pointer"
               >
                 <option value="UTC">UTC (Coordinated Universal Time) [Standard Operations]</option>
                 <option value="BST">BST (UTC+1) [British Summer Time - Local Sector 04]</option>
@@ -194,7 +194,7 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
             <span className="material-symbols-outlined text-[#0891b2] text-[20px]">
               notifications_active
             </span>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase m-0">
+            <h2 className="text-[20px] font-bold m-0">
               Preferences
             </h2>
           </div>
@@ -202,9 +202,9 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
 
         <div className="flex flex-col gap-2">
           {/* Toggle 1: Push */}
-          <div className="bg-slate-50 p-3.5 rounded flex items-center justify-between gap-4 border border-slate-200 shadow-xs">
+          <div className="bg-slate-50 p-3.5 rounded-sm flex items-center justify-between gap-4 border border-slate-200 shadow-xs">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded bg-white text-[#0891b2] border border-slate-200 mt-0.5 shadow-xs">
+              <div className="p-2 rounded-sm bg-white text-[#0891b2] border border-slate-200 mt-0.5 shadow-xs">
                 <span className="material-symbols-outlined text-[18px]">desktop_windows</span>
               </div>
               <div className="flex flex-col">
@@ -227,21 +227,21 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
       </div>
 
       {/* Bottom Action Dock */}
-      <div className="rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="rounded-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2 font-mono text-xs text-slate-500">
         </div>
         <div className="flex items-center gap-3 self-end sm:self-auto font-mono text-xs">
           <button
             type="button"
             onClick={handleDiscard}
-            className="px-3 py-2 rounded bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 shadow-xs transition-colors cursor-pointer"
+            className="px-3 py-2 rounded-sm bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 shadow-xs transition-colors cursor-pointer"
           >
             Discard Changes
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-4 py-2 rounded bg-[#0891b2] text-white font-bold uppercase transition-all hover:bg-[#0e7490] shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-sm bg-[#0891b2] text-white font-bold uppercase transition-all hover:bg-[#0e7490] shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">save</span>
             <span>Save Changes</span>

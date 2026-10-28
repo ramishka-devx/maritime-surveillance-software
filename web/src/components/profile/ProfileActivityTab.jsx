@@ -63,7 +63,7 @@ export default function ProfileActivityTab({ onSaveNotice }) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-5 sm:p-6 shadow-sm flex flex-col gap-5 border border-slate-200 font-sans select-none">
+    <div className="bg-white rounded-sm p-5 sm:p-6 shadow-sm flex flex-col gap-5 border border-slate-200 font-sans select-none">
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-200">
         <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export default function ProfileActivityTab({ onSaveNotice }) {
                 <td className="py-2.5 px-3 text-slate-500">{log.ip}</td>
                 <td className="py-2.5 px-3 text-right">
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-sm text-[10px] font-bold ${
                       log.statusType === 'success'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : 'bg-cyan-50 text-[#0891b2] border border-cyan-200'

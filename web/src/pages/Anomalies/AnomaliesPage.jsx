@@ -267,7 +267,7 @@ export default function AnomaliesPage() {
   }, [anomalies]);
 
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-surface-container-lowest font-sans">
+    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 font-sans">
       <div className="flex flex-col w-full pb-8">
         {/* 1. Command Toolbar Subheader */}
         <AnomaliesHeaderBar
@@ -276,11 +276,11 @@ export default function AnomaliesPage() {
         />
 
         {error && (
-          <div className="mx-4 mt-3 p-3 bg-red-950/40 border border-red-500/40 rounded text-xs text-red-300 font-mono flex items-center justify-between">
+          <div className="mx-4 mt-3 p-3 bg-red-50 border border-red-200 rounded-sm text-xs text-red-700 font-mono flex items-center justify-between">
             <span>Anomalies Feed Connection Issue: {error}</span>
             <button
               onClick={loadAnomalies}
-              className="px-2 py-1 rounded bg-red-900/60 hover:bg-red-900 text-white font-bold"
+              className="px-2 py-1 rounded-sm bg-red-600 hover:bg-red-700 text-white font-bold"
             >
               Retry
             </button>
@@ -288,8 +288,8 @@ export default function AnomaliesPage() {
         )}
 
         {loading && anomalies.length === 0 && (
-          <div className="mx-4 mt-2 px-3 py-1.5 bg-cyan-950/20 border border-cyan-500/30 rounded text-[11px] text-cyan-300 font-mono flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+          <div className="mx-4 mt-2 px-3 py-1.5 bg-cyan-50 border border-cyan-200 rounded-sm text-[11px] text-cyan-800 font-mono flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#0891b2] animate-ping" />
             <span>Synchronizing live anomalies from meta-service pipeline...</span>
           </div>
         )}
