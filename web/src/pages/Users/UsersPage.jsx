@@ -210,12 +210,12 @@ export default function UsersPage() {
   const totalPages = Math.max(1, Math.ceil((totalRecords || users.length) / 50));
 
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-surface text-on-surface pb-16 font-sans">
+    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 pb-16 font-sans">
       <div className="flex flex-col w-full max-w-[1920px] mx-auto min-w-0">
         {/* Floating Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-cyan-950 border border-cyan-400/50 text-cyan-200 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
-            <span className="material-symbols-outlined text-cyan-400 text-base">check_circle</span>
+          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-950 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
+            <span className="material-symbols-outlined text-[#0891b2] text-base">check_circle</span>
             <span>{toastMessage}</span>
           </div>
         )}

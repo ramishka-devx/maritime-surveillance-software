@@ -12,7 +12,7 @@ export default function UsersFilterToolbar({
   totalCount,
 }) {
   return (
-    <div className="px-4 py-3 bg-surface-container-lowest border-b border-outline-variant/30 flex flex-wrap items-center justify-between gap-3 select-none font-sans">
+    <div className="px-4 py-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 select-none font-sans">
       {/* Search Input */}
       <div className="flex flex-1 items-center gap-2 min-w-[280px] max-w-xl">
         <div className="relative w-full">
@@ -21,12 +21,12 @@ export default function UsersFilterToolbar({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search user by name, callsign, or official email..."
-            className="w-full bg-surface-container-high rounded pl-3.5 pr-10 py-1.5 text-on-surface font-mono text-xs placeholder:text-outline border border-outline-variant/20 focus:outline-none focus:bg-surface-container-highest focus:border-cyan-400 transition-colors"
+            className="w-full bg-slate-50 rounded pl-3.5 pr-10 py-1.5 text-slate-900 font-mono text-xs placeholder:text-slate-400 border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
           />
           <button
             type="button"
             onClick={() => onSearchChange(searchQuery)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-outline hover:text-cyan-400 p-1 rounded transition-colors flex items-center justify-center cursor-pointer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0891b2] p-1 rounded transition-colors flex items-center justify-center cursor-pointer"
             title="Search"
           >
             <span className="material-symbols-outlined text-[18px]">search</span>
@@ -37,38 +37,38 @@ export default function UsersFilterToolbar({
       {/* Filter Controls */}
       <div className="flex items-center gap-3 flex-wrap font-mono text-xs">
         {/* Role Filter */}
-        <div className="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded border border-outline-variant/20">
-          <span className="text-[11px] text-outline uppercase">Role:</span>
+        <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
+          <span className="text-[11px] text-slate-500 uppercase">Role:</span>
           <select
             value={roleFilter}
             onChange={(e) => onRoleFilterChange(e.target.value)}
-            className="bg-transparent text-on-surface text-xs focus:outline-none cursor-pointer"
+            className="bg-transparent text-slate-900 text-xs focus:outline-none cursor-pointer"
           >
-            <option className="bg-surface-container-high text-on-surface" value="all">
+            <option className="bg-white text-slate-900" value="all">
               All Roles
             </option>
-            <option className="bg-surface-container-high text-on-surface" value="super_admin">
+            <option className="bg-white text-slate-900" value="super_admin">
               Super Admin
             </option>
-            <option className="bg-surface-container-high text-on-surface" value="operator">
-              Watch Operator
+            <option className="bg-white text-slate-900" value="operator">
+              Operator
             </option>
-            <option className="bg-surface-container-high text-on-surface" value="analyst">
-              Intelligence Analyst
+            <option className="bg-white text-slate-900" value="analyst">
+              Maintenace
             </option>
           </select>
         </div>
 
         {/* Status Toggle Pills */}
-        <div className="flex items-center bg-surface-container-high p-0.5 rounded border border-outline-variant/20">
+        <div className="flex items-center bg-slate-100 p-0.5 rounded border border-slate-200">
           {['all', 'active', 'pending', 'deactivated'].map((st) => (
             <button
               key={st}
               onClick={() => onStatusFilterChange(st)}
               className={`px-2.5 py-1 rounded text-xs uppercase transition-all cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-surface-container-highest text-cyan-400 font-bold shadow-sm'
-                  : 'text-outline hover:text-on-surface'
+                  ? 'bg-white text-[#0891b2] font-bold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {st === 'all' ? 'All' : st}
@@ -79,14 +79,14 @@ export default function UsersFilterToolbar({
         {/* Clear Filters */}
         <button
           onClick={onClearFilters}
-          className="flex items-center gap-1 px-2 py-1 text-outline hover:text-on-surface transition-colors font-mono text-[11px] uppercase"
+          className="flex items-center gap-1 px-2 py-1 text-slate-500 hover:text-slate-900 transition-colors font-mono text-[11px] uppercase cursor-pointer"
         >
           <span className="material-symbols-outlined text-[14px]">filter_alt_off</span>
           <span>Clear</span>
         </button>
 
         {/* Counter */}
-        <span className="text-outline pl-1">
+        <span className="text-slate-500 pl-1">
           Showing {showingCount} of {totalCount} users
         </span>
       </div>
