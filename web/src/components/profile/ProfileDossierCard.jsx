@@ -68,10 +68,10 @@ export default function ProfileDossierCard({ user: propUser }) {
   return (
     <div className="flex flex-col gap-4 font-sans select-none">
       {/* Main Identity Dossier Card */}
-      <div className="bg-white rounded-lg p-5 shadow-sm flex flex-col gap-4 relative overflow-hidden border border-slate-200">
+      <div className="bg-white rounded-lg py-5 px-4 shadow-sm flex flex-col gap-4 relative overflow-hidden border border-slate-200">
         
         {/* Operator Photo with Ping Reticle */}
-        <div className="flex flex-col sm:flex-row xl:flex-col items-center gap-4 pt-1">
+        <div className="flex flex-col items-center gap-4 pt-1">
           <div className="relative group">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-slate-100 shadow-sm relative border border-slate-200">
               <img
@@ -95,7 +95,7 @@ export default function ProfileDossierCard({ user: propUser }) {
             </div>
           </div>
 
-          <div className="flex flex-col items-center sm:items-start xl:items-center text-center sm:text-left xl:text-center min-w-0">
+          <div className="flex flex-col items-center text-center min-w-0">
             <span className="text-lg font-bold text-slate-900 uppercase tracking-tight">
               {displayName}
             </span>
@@ -115,100 +115,6 @@ export default function ProfileDossierCard({ user: propUser }) {
             </div>
           </div>
         </div>
-
-        {/* Teleprinter Telemetry Specs */}
-        <div className="flex flex-col gap-1 bg-slate-50 p-3 rounded border border-slate-200 font-mono text-xs">
-          <div className="flex items-center justify-between py-1 border-b border-slate-200">
-            <span className="text-slate-500 uppercase flex items-center gap-1.5 text-[11px]">
-              <span className="material-symbols-outlined text-[14px]">call</span> Call Sign
-            </span>
-            <span className="text-[#0891b2] font-semibold">TRITON-4</span>
-          </div>
-          <div className="flex items-center justify-between py-1 border-b border-slate-200">
-            <span className="text-slate-500 uppercase flex items-center gap-1.5 text-[11px]">
-              <span className="material-symbols-outlined text-[14px]">cell_tower</span> Station
-            </span>
-            <span className="text-slate-900">Dover VTS Sector 04</span>
-          </div>
-          <div className="flex items-center justify-between py-1 border-b border-slate-200">
-            <span className="text-slate-500 uppercase flex items-center gap-1.5 text-[11px]">
-              <span className="material-symbols-outlined text-[14px]">history</span> Last Login
-            </span>
-            <span className="text-slate-600">13:45:12 UTC (47m ago)</span>
-          </div>
-          <div className="flex items-center justify-between py-1 border-b border-slate-200">
-            <span className="text-slate-500 uppercase flex items-center gap-1.5 text-[11px]">
-              <span className="material-symbols-outlined text-[14px]">router</span> Terminal IP
-            </span>
-            <span className="text-blue-700">192.168.42.108 [VPN]</span>
-          </div>
-          <div className="flex items-center justify-between py-1 border-b border-slate-200">
-            <span className="text-slate-500 uppercase flex items-center gap-1.5 text-[11px]">
-              <span className="material-symbols-outlined text-[14px]">timer</span> Active Session
-            </span>
-            <span className="text-emerald-700 font-semibold">{formatSessionTime(sessionSeconds)}</span>
-          </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 uppercase flex items-center gap-1.5 text-[11px]">
-              <span className="material-symbols-outlined text-[14px]">key</span> Crypto Token
-            </span>
-            <span className="text-emerald-700 font-semibold flex items-center gap-1 text-[11px]">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> FIPS 140-3 HW Key
-            </span>
-          </div>
-        </div>
-
-        {/* Quick Action Controls */}
-        <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-xs">
-          <button
-            onClick={() => alert('Photo upload dialog dispatched.')}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs transition-colors cursor-pointer"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[16px] text-[#0891b2]">add_a_photo</span>
-            <span>Upload Photo</span>
-          </button>
-          <button
-            onClick={() => alert('Digital Security Keycard exported.')}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-xs transition-colors cursor-pointer"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[16px] text-blue-600">download</span>
-            <span>Keycard</span>
-          </button>
-        </div>
-
-        {/* Operational Verification Sparkline */}
-        <div className="bg-slate-50 p-3 rounded border border-slate-200 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between font-mono text-xs">
-            <span className="text-slate-500 uppercase text-[10px]">Shift Triage Throughput</span>
-            <span className="text-[#0891b2] font-bold">94.8% SLA</span>
-          </div>
-          <svg className="w-full h-8 text-[#0891b2] overflow-visible" fill="none" viewBox="0 0 280 32">
-            <path
-              d="M0,24 L25,20 L50,22 L75,14 L100,16 L125,8 L150,11 L175,6 L200,9 L225,4 L250,7 L280,3"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-            />
-            <circle cx="280" cy="3" fill="currentColor" r="3" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Standing Orders Directives Card */}
-      <div className="bg-white rounded-lg p-4 shadow-sm flex flex-col gap-2 border border-slate-200">
-        <div className="text-xs text-slate-900 uppercase font-bold flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px] text-[#0891b2]">assignment</span>
-            <span>Standing Orders</span>
-          </span>
-          <span className="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
-        </div>
-        <p className="font-mono text-xs text-slate-600 m-0 leading-relaxed">
-          Mandatory radio watch on VHF Ch 16 &amp; 67. All unidentified radar contacts crossing Sector 04 boundary require immediate MMSI AIS cross-check within 90 seconds.
-        </p>
       </div>
     </div>
   );

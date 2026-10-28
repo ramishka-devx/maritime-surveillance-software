@@ -47,15 +47,9 @@ export default function ProfileHeaderBar({ user: propUser }) {
     <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 relative overflow-hidden select-none font-sans">
       <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-cyan-500/5 blur-2xl pointer-events-none" />
       <div className="flex flex-col gap-1 min-w-0">
-        <h1 className="text-xl font-bold text-slate-900 uppercase tracking-tight m-0">
+        <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight m-0">
           My Profile
         </h1>
-        <div className="flex items-center gap-2 font-mono text-xs text-slate-500 tracking-wider uppercase">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#0891b2]" />
-          <span>OPERATOR CONSOLE</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-emerald-700 font-semibold">SESSION ACTIVE</span>
-        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

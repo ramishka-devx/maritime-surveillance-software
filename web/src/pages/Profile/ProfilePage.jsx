@@ -33,14 +33,14 @@ export default function ProfilePage() {
         <ProfileHeaderBar user={user} />
 
         {/* 2. Main Workplace Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-          {/* Left Column: Operator Identity Dossier Card (4 cols on XL) */}
-          <div className="xl:col-span-4">
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
+          {/* Left Column: Operator Identity Dossier Card */}
+          <div className="w-full lg:w-72 shrink-0">
             <ProfileDossierCard user={user} />
           </div>
 
-          <div className="xl:col-span-8 flex flex-col gap-5">
-            <ProfileAccountTab user={user}/>
+          <div className="flex-1 min-w-0 flex flex-col gap-5 w-full">
+            <ProfileAccountTab user={user} />
           </div>
         </div>
       </div>

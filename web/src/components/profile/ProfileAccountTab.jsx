@@ -195,10 +195,9 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
               notifications_active
             </span>
             <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase m-0">
-              Acoustic &amp; Dispatch Preferences
+              Preferences
             </h2>
           </div>
-          <span className="font-mono text-xs text-emerald-700 font-semibold">AUDIO SYNTH: READY</span>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -224,99 +223,12 @@ export default function ProfileAccountTab({ user, onSaveNotice }) {
               className="w-4 h-4 accent-[#0891b2] cursor-pointer"
             />
           </div>
-
-          {/* Toggle 2: Sound */}
-          <div className="bg-slate-50 p-3.5 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-200 shadow-xs">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded bg-white text-red-600 border border-slate-200 mt-0.5 shadow-xs">
-                <span className="material-symbols-outlined text-[18px]">campaign</span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm text-slate-900 font-semibold">
-                    Acoustic Critical Alert Synthesis
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-mono text-[10px] font-bold border border-red-200">
-                    DEFCON PRIORITY
-                  </span>
-                </div>
-                <span className="text-[11px] text-slate-500 font-mono mt-0.5">
-                  Audible 850Hz pulsed alert tone for geofence breaches, transponder loss, and DEFCON escalations.
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 self-end sm:self-center">
-              <button
-                type="button"
-                onClick={handleTestTone}
-                className="flex items-center gap-1 py-1 px-2.5 rounded bg-white hover:bg-slate-100 text-[#0891b2] font-mono text-xs border border-cyan-200 shadow-xs transition-colors"
-              >
-                <span className="material-symbols-outlined text-[16px]">volume_up</span>
-                <span>Test Tone</span>
-              </button>
-              <input
-                type="checkbox"
-                checked={soundAlerts}
-                onChange={(e) => setSoundAlerts(e.target.checked)}
-                className="w-4 h-4 accent-[#0891b2] cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {/* Toggle 3: SAT-SMS */}
-          <div className="bg-slate-50 p-3.5 rounded flex items-center justify-between gap-4 border border-slate-200 shadow-xs">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded bg-white text-blue-600 border border-slate-200 mt-0.5 shadow-xs">
-                <span className="material-symbols-outlined text-[18px]">cell_tower</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs sm:text-sm text-slate-900 font-semibold">
-                  High-Priority Telegram / SAT-SMS Relay
-                </span>
-                <span className="text-[11px] text-slate-500 font-mono mt-0.5">
-                  Automated cellular ping to duty officer phone when off-watch in the event of critical alert surges.
-                </span>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={smsRelay}
-              onChange={(e) => setSmsRelay(e.target.checked)}
-              className="w-4 h-4 accent-[#0891b2] cursor-pointer"
-            />
-          </div>
-
-          {/* Toggle 4: Ack Chime */}
-          <div className="bg-slate-50 p-3.5 rounded flex items-center justify-between gap-4 border border-slate-200 shadow-xs">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded bg-white text-emerald-600 border border-slate-200 mt-0.5 shadow-xs">
-                <span className="material-symbols-outlined text-[18px]">check_circle</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs sm:text-sm text-slate-900 font-semibold">
-                  Incident Acknowledgment Chime
-                </span>
-                <span className="text-[11px] text-slate-500 font-mono mt-0.5">
-                  Subtle acoustic click confirming successful operator triage submission and logging.
-                </span>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={ackChime}
-              onChange={(e) => setAckChime(e.target.checked)}
-              className="w-4 h-4 accent-[#0891b2] cursor-pointer"
-            />
-          </div>
         </div>
       </div>
 
       {/* Bottom Action Dock */}
-      <div className="bg-slate-50 p-4 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-slate-200 shadow-xs mt-2">
+      <div className="rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2 font-mono text-xs text-slate-500">
-          <span className="material-symbols-outlined text-[16px] text-emerald-600">find_replace</span>
-          <span>Last updated by operator: 2025-05-14 09:21 UTC</span>
         </div>
         <div className="flex items-center gap-3 self-end sm:self-auto font-mono text-xs">
           <button
