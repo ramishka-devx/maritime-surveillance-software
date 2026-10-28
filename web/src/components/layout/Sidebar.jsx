@@ -89,7 +89,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 z-50 flex flex-col pt-7 pb-6 pl-8 pr-6 bg-bs-bg text-bs-ink select-none font-sans">
+    <aside className="fixed left-0 top-0 h-full w-60 z-50 flex flex-col p-5 bg-bs-bg text-bs-ink select-none font-sans">
       <button
         onClick={() => navigate(maintenance ? '/SystemHealth' : '/')}
         className="text-left outline-none focus-visible:outline-bs-accent"
@@ -119,14 +119,6 @@ export default function Sidebar() {
           </nav>
         </div>
       )}
-
-      <div className="mt-auto flex flex-col gap-1">
-        <div className="text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700">Operation status</div>
-        <div className="flex items-center gap-2 text-[14px] font-semibold">
-          <span className="w-2 h-2 rounded-full bg-bs-accent" />
-          Online
-        </div>
-      </div>
     </aside>
   );
 }

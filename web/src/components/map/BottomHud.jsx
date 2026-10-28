@@ -8,7 +8,7 @@ const layers = [
 ];
 
 const iconBtn =
-  'w-9 h-9 grid place-items-center rounded-sm border border-bs-ink/[.16] hover:bg-bs-ink/[.07] outline-none focus-visible:outline-bs-accent';
+  'w-8 h-8 grid place-items-center rounded-sm border border-bs-ink/[.16] hover:bg-bs-ink/[.07] outline-none focus-visible:outline-bs-accent';
 
 export default function BottomHud({
   cursorCoords = '',
@@ -21,7 +21,7 @@ export default function BottomHud({
   onResetBearing,
 }) {
   return (
-    <footer className="h-14 shrink-0 flex items-center gap-5 pl-6 pr-7 bg-bs-bg text-bs-ink select-none">
+    <footer className="h-14 shrink-0 flex items-center gap-5 px-1 bg-bs-bg text-bs-ink select-none">
       {/* Basemap selector */}
       <div role="radiogroup" aria-label="Basemap" className="inline-flex border border-bs-ink/[.16] rounded-sm overflow-hidden">
         {layers.map(({ id, label, icon }) => {
@@ -33,7 +33,7 @@ export default function BottomHud({
               role="radio"
               aria-checked={on}
               onClick={() => onLayerChange?.(id)}
-              className={`inline-flex items-center gap-1.5 px-3 py-[7px] text-[13px] border-l border-bs-ink/[.16] first:border-l-0 outline-none focus-visible:outline-bs-accent focus-visible:-outline-offset-2 ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] border-l border-bs-ink/[.16] first:border-l-0 outline-none focus-visible:outline-bs-accent focus-visible:-outline-offset-2 ${
                 on ? 'bg-bs-accent text-bs-bg' : 'hover:bg-bs-ink/[.07]'
               }`}
             >
