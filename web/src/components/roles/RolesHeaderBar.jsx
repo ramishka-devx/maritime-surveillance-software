@@ -8,15 +8,13 @@ export default function RolesHeaderBar({
   affectedUsersCount = 0,
 }) {
   return (
-    <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30 select-none font-sans">
+    <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 select-none font-sans">
       <div className="flex flex-col gap-1 min-w-0">
         <div className="flex items-baseline gap-3 mt-0.5">
-          <h1 className="text-xl font-bold uppercase tracking-tight text-on-surface m-0">
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">
             Roles &amp; Permissions
           </h1>
-          <span className="hidden sm:inline-block font-mono text-xs text-cyan-400/80">
-            RBAC ACCESS CONTROL
-          </span>
+          
         </div>
       </div>
 
@@ -24,10 +22,10 @@ export default function RolesHeaderBar({
       <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end font-mono text-xs">
         {/* Live Warning Pill */}
         {hasChanges && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-amber-500/10 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)] animate-pulse">
-            <span className="material-symbols-outlined text-[16px] text-amber-400">warning</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-amber-50 border border-amber-300 text-amber-800 shadow-xs animate-pulse">
+            <span className="material-symbols-outlined text-[16px] text-amber-600">warning</span>
             <span className="font-medium text-[11px]">
-              Unsaved changes affect <span className="font-bold underline decoration-amber-400">{affectedUsersCount} {affectedUsersCount === 1 ? 'user' : 'users'}</span>
+              Unsaved changes affect <span className="font-bold underline decoration-amber-500">{affectedUsersCount} {affectedUsersCount === 1 ? 'user' : 'users'}</span>
             </span>
           </div>
         )}
@@ -37,14 +35,14 @@ export default function RolesHeaderBar({
           type="button"
           onClick={onDiscard}
           disabled={!hasChanges || isSaving}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded bg-surface-container-low border border-outline-variant/50 transition-all uppercase tracking-wider ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-sm border transition-all uppercase tracking-wider ${
             !hasChanges || isSaving
-              ? 'opacity-40 cursor-not-allowed text-outline'
-              : 'hover:border-outline text-on-surface hover:text-cyan-400 cursor-pointer'
+              ? 'opacity-40 cursor-not-allowed text-slate-400 bg-white border-slate-200'
+              : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700 hover:text-slate-900 cursor-pointer shadow-xs'
           }`}
           title={hasChanges ? 'Reset matrix changes back to server baseline' : 'No changes to discard'}
         >
-          <span className="material-symbols-outlined text-[16px] text-outline">restart_alt</span>
+          <span className="material-symbols-outlined text-[16px] text-slate-400">restart_alt</span>
           <span>Discard</span>
         </button>
 
@@ -53,10 +51,10 @@ export default function RolesHeaderBar({
           type="button"
           onClick={onSave}
           disabled={!hasChanges || isSaving}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded font-bold uppercase tracking-wider transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-sm font-bold uppercase tracking-wider transition-all ${
             !hasChanges || isSaving
-              ? 'opacity-40 cursor-not-allowed bg-surface-container-high text-outline border border-outline-variant/40'
-              : 'bg-cyan-400 text-black hover:bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.4)] hover:shadow-[0_0_20px_rgba(34,211,238,0.6)] cursor-pointer'
+              ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
+              : 'bg-[#0891b2] text-white hover:bg-[#0e7490] shadow-sm cursor-pointer'
           }`}
         >
           {isSaving ? (

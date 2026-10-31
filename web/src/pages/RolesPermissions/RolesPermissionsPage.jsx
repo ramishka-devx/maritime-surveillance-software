@@ -370,12 +370,12 @@ export default function RolesPermissionsPage() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-surface text-on-surface pb-16 font-sans">
+    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 pb-16 font-sans">
       <div className="flex flex-col w-full max-w-[1920px] mx-auto min-w-0 p-4 pt-3 gap-6">
         {/* Floating Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-cyan-950 border border-cyan-400/50 text-cyan-200 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
-            <span className="material-symbols-outlined text-cyan-400 text-base">verified_user</span>
+          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-950 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
+            <span className="material-symbols-outlined text-[#0891b2] text-base">verified_user</span>
             <span>{toastMessage}</span>
           </div>
         )}
@@ -423,19 +423,19 @@ export default function RolesPermissionsPage() {
 
         {/* 3. New Role Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in font-sans">
-            <div className="bg-surface-container-low border border-outline-variant/60 rounded-lg max-w-md w-full shadow-2xl overflow-hidden">
-              <div className="p-4 border-b border-outline-variant/40 flex items-center justify-between bg-surface-container">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in font-sans">
+            <div className="bg-white border border-slate-200 rounded-lg max-w-md w-full shadow-2xl overflow-hidden">
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-cyan-400 text-lg">admin_panel_settings</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-on-surface m-0 font-mono">
+                  <span className="material-symbols-outlined text-[#0891b2] text-lg">admin_panel_settings</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 m-0 font-mono">
                     Provision New Access Role
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="text-outline hover:text-on-surface p-1 rounded hover:bg-surface-container-high transition-colors"
+                  className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-lg">close</span>
                 </button>
@@ -443,53 +443,53 @@ export default function RolesPermissionsPage() {
 
               <form onSubmit={handleCreateRole} className="p-5 flex flex-col gap-4 font-mono text-xs">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-outline font-semibold uppercase text-[11px]">Role Title</label>
+                  <label className="text-slate-600 font-semibold uppercase text-[11px]">Role Title</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Hydrographic Specialist"
                     value={newRoleForm.name}
                     onChange={(e) => setNewRoleForm({ ...newRoleForm, name: e.target.value })}
-                    className="px-3 py-2 rounded bg-surface-container border border-outline-variant/60 focus:border-cyan-400 text-on-surface placeholder:text-outline text-xs outline-none"
+                    className="px-3 py-2 rounded bg-slate-50 border border-slate-200 focus:border-[#0891b2] focus:bg-white text-slate-900 placeholder:text-slate-400 text-xs outline-none transition-colors"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-outline font-semibold uppercase text-[11px]">Security Tier</label>
+                  <label className="text-slate-600 font-semibold uppercase text-[11px]">Security Tier</label>
                   <select
                     value={newRoleForm.tier}
                     onChange={(e) => setNewRoleForm({ ...newRoleForm, tier: e.target.value })}
-                    className="px-3 py-2 rounded bg-surface-container border border-outline-variant/60 focus:border-cyan-400 text-on-surface text-xs outline-none cursor-pointer"
+                    className="px-3 py-2 rounded bg-slate-50 border border-slate-200 focus:border-[#0891b2] focus:bg-white text-slate-900 text-xs outline-none cursor-pointer transition-colors"
                   >
-                    <option value="Operational // L-1">Operational // L-1</option>
-                    <option value="Specialist // L-2">Specialist // L-2</option>
-                    <option value="Senior Command // L-3">Senior Command // L-3</option>
+                    <option value="Operational // L-1" className="bg-white text-slate-900">Operational // L-1</option>
+                    <option value="Specialist // L-2" className="bg-white text-slate-900">Specialist // L-2</option>
+                    <option value="Senior Command // L-3" className="bg-white text-slate-900">Senior Command // L-3</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-outline font-semibold uppercase text-[11px]">Scope &amp; Responsibilities</label>
+                  <label className="text-slate-600 font-semibold uppercase text-[11px]">Scope &amp; Responsibilities</label>
                   <textarea
                     rows={3}
                     placeholder="Specify operational clearance remit and authority boundaries..."
                     value={newRoleForm.description}
                     onChange={(e) => setNewRoleForm({ ...newRoleForm, description: e.target.value })}
-                    className="px-3 py-2 rounded bg-surface-container border border-outline-variant/60 focus:border-cyan-400 text-on-surface placeholder:text-outline text-xs outline-none resize-none font-sans"
+                    className="px-3 py-2 rounded bg-slate-50 border border-slate-200 focus:border-[#0891b2] focus:bg-white text-slate-900 placeholder:text-slate-400 text-xs outline-none resize-none font-sans transition-colors"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/30 mt-2">
+                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 mt-2">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-3 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-outline text-xs font-semibold cursor-pointer"
+                    className="px-3.5 py-1.5 rounded bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold cursor-pointer shadow-xs transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isCreatingRole}
-                    className="px-4 py-1.5 rounded bg-cyan-400 text-black font-bold uppercase text-xs tracking-wider shadow-[0_0_12px_rgba(34,211,238,0.3)] hover:bg-cyan-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                    className="px-4 py-1.5 rounded bg-[#0891b2] text-white font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-[#0e7490] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
                   >
                     {isCreatingRole && (
                       <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>

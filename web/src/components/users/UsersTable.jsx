@@ -22,39 +22,39 @@ export default function UsersTable({
     const r = String(role || '').toLowerCase();
     if (r === 'super_admin' || r === 'super administrator' || r === 'super admin') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-950/60 text-purple-300 font-mono text-xs uppercase font-semibold border border-purple-500/30">
-          <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 font-mono text-xs uppercase font-semibold border border-purple-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
           Super Admin
         </span>
       );
     }
     if (r === 'administrator' || r === 'admin') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 font-mono text-xs uppercase font-semibold border border-blue-500/30">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-blue-50 text-blue-700 font-mono text-xs uppercase font-semibold border border-blue-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
           Administrator
         </span>
       );
     }
-    if (r === 'analyst') {
+    if (r === 'maintenance') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 font-mono text-xs uppercase font-semibold border border-emerald-500/30">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          Analyst
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 font-mono text-xs uppercase font-semibold border border-emerald-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Maintenance
         </span>
       );
     }
     if (r === 'viewer') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-800/60 text-slate-300 font-mono text-xs uppercase font-semibold border border-slate-600/30">
-          <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-100 text-slate-700 font-mono text-xs uppercase font-semibold border border-slate-300">
+          <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
           Viewer
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-950/60 text-cyan-300 font-mono text-xs uppercase font-semibold border border-cyan-500/30">
-        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-cyan-50 text-[#0891b2] font-mono text-xs uppercase font-semibold border border-cyan-200">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#0891b2]" />
         Operator
       </span>
     );
@@ -64,23 +64,23 @@ export default function UsersTable({
     const s = String(status || '').toUpperCase();
     if (s === 'ACTIVE' || s === 'VERIFIED') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 font-semibold border border-emerald-500/30 text-[10px]">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 text-[10px]">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           ACTIVE
         </span>
       );
     }
     if (s === 'PENDING') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 font-semibold border border-amber-500/30 text-[10px]">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-amber-50 text-amber-800 font-semibold border border-amber-200 text-[10px]">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
           PENDING
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-red-950/60 text-red-300 font-semibold border border-red-500/30 text-[10px]">
-        <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-rose-50 text-rose-700 font-semibold border border-rose-200 text-[10px]">
+        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
         DEACTIVATED
       </span>
     );
@@ -95,10 +95,10 @@ export default function UsersTable({
 
   return (
     <div className="px-4 pt-3 pb-6 flex flex-col gap-2 font-sans select-none">
-      <div className="w-full overflow-x-auto rounded bg-surface-container-lowest border border-outline-variant/30">
+      <div className="w-full overflow-x-auto rounded-sm bg-white border border-slate-200 shadow-xs">
         <table className="w-full text-left border-collapse font-mono text-xs">
           <thead>
-            <tr className="bg-surface-container-high text-outline text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+            <tr className="bg-slate-50 text-slate-600 text-[11px] uppercase tracking-wider border-b border-slate-200">
               <th className="py-2.5 px-4 font-semibold">User / Ident</th>
               <th className="py-2.5 px-4 font-semibold">Clearance Role</th>
               <th className="py-2.5 px-4 font-semibold">Account Status</th>
@@ -107,12 +107,12 @@ export default function UsersTable({
               <th className="py-2.5 px-4 font-semibold text-center w-16">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-outline-variant/10 text-on-surface">
+          <tbody className="divide-y divide-slate-100 text-slate-900">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-cyan-400 font-mono text-xs">
+                <td colSpan={6} className="py-12 text-center text-[#0891b2] font-mono text-xs">
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-3xl animate-spin text-cyan-400">
+                    <span className="material-symbols-outlined text-3xl animate-spin text-[#0891b2]">
                       sync
                     </span>
                     <span>Retrieving operational personnel registry...</span>
@@ -121,9 +121,9 @@ export default function UsersTable({
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-outline font-mono text-xs">
+                <td colSpan={6} className="py-12 text-center text-slate-400 font-mono text-xs">
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-3xl text-outline/50">
+                    <span className="material-symbols-outlined text-3xl text-slate-300">
                       person_off
                     </span>
                     <span>No user records found matching the active filter.</span>
@@ -153,8 +153,8 @@ export default function UsersTable({
                   <tr
                     key={userId}
                     className={`${
-                      isActive ? 'bg-surface-container-low' : 'bg-surface-container/60 opacity-75'
-                    } hover:bg-surface-container transition-colors group`}
+                      isActive ? 'bg-white' : 'bg-slate-50/60 opacity-80'
+                    } hover:bg-slate-50 transition-colors group`}
                   >
                     {/* User Ident */}
                     <td className="py-2.5 px-4">
@@ -162,8 +162,8 @@ export default function UsersTable({
                         <div
                           className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs shrink-0 ${
                             isActive
-                              ? 'bg-cyan-950/80 text-cyan-400 border border-cyan-500/30'
-                              : 'bg-surface-container-highest text-outline'
+                              ? 'bg-cyan-50 text-[#0891b2] border border-cyan-200'
+                              : 'bg-slate-100 text-slate-500 border border-slate-200'
                           }`}
                         >
                           {u.profileImg || u.profile_img ? (
@@ -181,16 +181,16 @@ export default function UsersTable({
                         </div>
                         <div className="flex flex-col min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-on-surface font-sans text-xs group-hover:text-cyan-400 transition-colors truncate">
+                            <span className="font-bold text-slate-900 font-sans text-xs group-hover:text-[#0891b2] transition-colors truncate">
                               {userName}
                             </span>
                             {u.username && (
-                              <span className="text-[10px] text-cyan-400/80 font-mono">
+                              <span className="text-[10px] text-[#0891b2] font-mono">
                                 @{u.username}
                               </span>
                             )}
                           </div>
-                          <span className="text-[11px] text-outline truncate">{userEmail}</span>
+                          <span className="text-[11px] text-slate-500 truncate">{userEmail}</span>
                         </div>
                       </div>
                     </td>
@@ -206,12 +206,12 @@ export default function UsersTable({
                     </td>
 
                     {/* Last Login */}
-                    <td className="py-2.5 px-4 text-right text-on-surface whitespace-nowrap text-[11px]">
+                    <td className="py-2.5 px-4 text-right text-slate-700 whitespace-nowrap text-[11px]">
                       {lastLoginText}
                     </td>
 
                     {/* Provisioned */}
-                    <td className="py-2.5 px-4 text-right text-outline whitespace-nowrap text-[11px]">
+                    <td className="py-2.5 px-4 text-right text-slate-500 whitespace-nowrap text-[11px]">
                       {provisionedText}
                     </td>
 
@@ -220,7 +220,7 @@ export default function UsersTable({
                       <button
                         type="button"
                         onClick={(e) => toggleRowMenu(userId, e)}
-                        className="p-1 rounded hover:bg-surface-container-highest text-outline hover:text-on-surface transition-colors cursor-pointer"
+                        className="p-1 rounded-sm hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                         title="User Actions"
                       >
                         <span className="material-symbols-outlined text-[18px]">more_vert</span>
@@ -233,16 +233,16 @@ export default function UsersTable({
                             className="fixed inset-0 z-20 cursor-default"
                             onClick={() => setActiveMenuId(null)}
                           />
-                          <div className="absolute right-4 top-10 z-30 w-48 rounded bg-surface-container-high border border-outline-variant/40 shadow-xl py-1 text-left font-mono text-xs">
+                          <div className="absolute right-4 top-10 z-30 w-48 rounded-sm bg-white border border-slate-200 shadow-xl py-1 text-left font-mono text-xs">
                             <button
                               type="button"
                               onClick={() => {
                                 setActiveMenuId(null);
                                 if (onEditUser) onEditUser(u);
                               }}
-                              className="w-full px-3 py-1.5 text-left text-on-surface hover:bg-surface-container-highest flex items-center gap-2 cursor-pointer transition-colors"
+                              className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer transition-colors"
                             >
-                              <span className="material-symbols-outlined text-[16px] text-cyan-400">
+                              <span className="material-symbols-outlined text-[16px] text-[#0891b2]">
                                 edit
                               </span>
                               <span>Edit Credentials</span>
@@ -253,9 +253,9 @@ export default function UsersTable({
                                 setActiveMenuId(null);
                                 if (onResetPassword) onResetPassword(u);
                               }}
-                              className="w-full px-3 py-1.5 text-left text-on-surface hover:bg-surface-container-highest flex items-center gap-2 cursor-pointer transition-colors"
+                              className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer transition-colors"
                             >
-                              <span className="material-symbols-outlined text-[16px] text-blue-300">
+                              <span className="material-symbols-outlined text-[16px] text-blue-600">
                                 vpn_key
                               </span>
                               <span>Reset Password</span>
@@ -268,8 +268,8 @@ export default function UsersTable({
                               }}
                               className={`w-full px-3 py-1.5 text-left flex items-center gap-2 cursor-pointer transition-colors ${
                                 isActive
-                                  ? 'text-red-400 hover:bg-red-950/40'
-                                  : 'text-emerald-400 hover:bg-emerald-950/40'
+                                  ? 'text-rose-600 hover:bg-rose-50'
+                                  : 'text-emerald-600 hover:bg-emerald-50'
                               }`}
                             >
                               <span className="material-symbols-outlined text-[16px]">
@@ -290,22 +290,22 @@ export default function UsersTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between py-2 px-3 bg-surface-container-low rounded border border-outline-variant/20 gap-2 font-mono text-xs">
-        <span className="text-outline text-[11px]">
+      <div className="flex flex-col sm:flex-row items-center justify-between py-2 px-3 bg-slate-50 rounded-sm border border-slate-200 gap-2 font-mono text-xs">
+        <span className="text-slate-500 text-[11px]">
           Showing {users.length > 0 ? 1 : 0}–{users.length} of {totalRecords || users.length} records
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onPageChange && onPageChange(1)}
             disabled={currentPage <= 1}
-            className="p-1 rounded bg-surface-container text-outline hover:text-on-surface disabled:opacity-40 cursor-pointer"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">first_page</span>
           </button>
           <button
             onClick={() => onPageChange && onPageChange(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="p-1 rounded bg-surface-container text-outline hover:text-on-surface disabled:opacity-40 cursor-pointer"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">chevron_left</span>
           </button>
@@ -316,10 +316,10 @@ export default function UsersTable({
               <button
                 key={pageNum}
                 onClick={() => onPageChange && onPageChange(pageNum)}
-                className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                className={`px-2 py-0.5 rounded-sm font-bold cursor-pointer transition-colors ${
                   currentPage === pageNum
-                    ? 'bg-cyan-400 text-black'
-                    : 'bg-surface-container text-outline hover:text-on-surface'
+                    ? 'bg-[#0891b2] text-white shadow-xs'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
                 }`}
               >
                 {pageNum}
@@ -330,14 +330,14 @@ export default function UsersTable({
           <button
             onClick={() => onPageChange && onPageChange(currentPage + 1)}
             disabled={currentPage >= (totalPages || 1)}
-            className="p-1 rounded bg-surface-container text-outline hover:text-on-surface disabled:opacity-40 cursor-pointer"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>
           <button
             onClick={() => onPageChange && onPageChange(totalPages || 1)}
             disabled={currentPage >= (totalPages || 1)}
-            className="p-1 rounded bg-surface-container text-outline hover:text-on-surface disabled:opacity-40 cursor-pointer"
+            className="p-1 rounded-sm bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-40 cursor-pointer shadow-xs"
           >
             <span className="material-symbols-outlined text-[16px]">last_page</span>
           </button>

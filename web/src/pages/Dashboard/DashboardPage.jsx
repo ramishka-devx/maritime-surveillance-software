@@ -232,12 +232,11 @@ export default function DashboardPage() {
   const todayUtc = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-bs-bg text-bs-ink font-sans pr-7 pb-12" aria-busy={loading}>
+    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12" aria-busy={loading}>
       {/* Title row */}
-      <div className="flex flex-wrap items-end gap-4 mt-7">
+      <div className="flex flex-wrap items-end gap-4">
         <div>
-          <div className={kicker}>All monitored waters</div>
-          <h1 className="mt-1 text-[36px] font-semibold leading-[1.1] tracking-[-0.015em]">Dashboard</h1>
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Dashboard</h1>
           {loading && error && (
             <p role="alert" className="mt-1 text-[13px] italic text-bs-accent-2-700">
               Couldn't load the dashboard ({error}). Retrying every 30 s.
@@ -251,7 +250,7 @@ export default function DashboardPage() {
               role="radio"
               aria-checked={timeRange === r}
               onClick={() => setTimeRange(r)}
-              className={`px-3 py-[7px] text-[13px] uppercase border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
+              className={`px-3 py-1.5 text-[13px] uppercase border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
                 timeRange === r ? 'bg-bs-accent text-bs-bg' : 'hover:bg-bs-ink/[.07]'
               }`}
             >
@@ -261,7 +260,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={handleExport}
-          className={`inline-flex items-center gap-1.5 px-[18px] py-2.5 rounded-sm border border-bs-ink/[.16] text-[13px] font-semibold hover:bg-bs-ink/[.07] ${focusRing}`}
+          className={`inline-flex items-center gap-1.5 px-[18px] py-1.5 rounded-sm border border-bs-ink/[.16] text-[13px] font-semibold hover:bg-bs-ink/[.07] ${focusRing}`}
         >
           <Download size={16} />
           Export report

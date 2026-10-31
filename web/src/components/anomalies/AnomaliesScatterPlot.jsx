@@ -142,14 +142,14 @@ export default function AnomaliesScatterPlot({
   const selectedY = getY(selectedSpeed);
 
   return (
-    <div className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-4 flex flex-col justify-between shadow-sm font-sans select-none">
+    <div className="bg-white border border-slate-200 rounded-sm p-4 flex flex-col justify-between shadow-xs font-sans select-none">
       {/* Card Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-y-2 mb-3 pb-2 border-b border-outline-variant/20">
+      <div className="flex flex-wrap items-center justify-between gap-y-2 mb-3 pb-2 border-b border-slate-200">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-cyan-400 text-[18px]">
+          <span className="material-symbols-outlined text-[#0891b2] text-[18px]">
             scatter_plot
           </span>
-          <span className="text-xs font-bold uppercase tracking-wide text-on-surface">
+          <span className="text-xs font-bold uppercase tracking-wide text-slate-900">
             Speed vs. Anomaly Score Distribution
           </span>
         </div>
@@ -157,18 +157,18 @@ export default function AnomaliesScatterPlot({
         {/* Date Selector & Legend Controls */}
         <div className="flex flex-wrap items-center gap-3">
           {/* AIS Date Picker */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-lowest border border-outline-variant/40 text-[11px]">
-            <span className="material-symbols-outlined text-cyan-400 text-[14px]">calendar_month</span>
-            <span className="font-mono text-outline uppercase text-[10px]">AIS Date:</span>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-slate-50 border border-slate-200 text-[11px]">
+            <span className="material-symbols-outlined text-[#0891b2] text-[14px]">calendar_month</span>
+            <span className="font-mono text-slate-500 uppercase text-[10px] font-semibold">AIS Date:</span>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent font-mono text-cyan-300 text-xs focus:outline-none cursor-pointer"
+              className="bg-transparent font-mono text-slate-800 text-xs focus:outline-none cursor-pointer"
             />
             <button
               onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-              className="px-1.5 py-0.2 rounded bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/30 text-cyan-400 font-mono text-[10px] transition-colors"
+              className="px-1.5 py-0.2 rounded-sm bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-[#0891b2] font-mono text-[10px] font-semibold transition-colors cursor-pointer"
               title="Reset to current live AIS feed date"
             >
               TODAY
@@ -178,23 +178,23 @@ export default function AnomaliesScatterPlot({
           {/* Legend */}
           <div className="flex items-center gap-3 font-mono text-[11px]">
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-outline" />
-              <span className="text-outline">Nominal</span>
+              <span className="h-2 w-2 rounded-full bg-slate-400" />
+              <span className="text-slate-600">Nominal</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-amber-400" />
-              <span className="text-slate-300">p99 Exceedance</span>
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              <span className="text-slate-700">p99 Exceedance</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-              <span className="text-red-400 font-semibold">Critical (&gt;0.85)</span>
+              <span className="text-red-600 font-semibold">Critical (&gt;0.85)</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* High Fidelity SVG Scatter Plot */}
-      <div className="w-full relative h-[260px] bg-surface-container-lowest/80 rounded border border-outline-variant/20 overflow-hidden flex items-center justify-center p-2">
+      <div className="w-full relative h-[260px] bg-slate-50/60 rounded-sm border border-slate-200 overflow-hidden flex items-center justify-center p-2">
         <svg
           className="w-full h-full select-none"
           preserveAspectRatio="none"
@@ -203,14 +203,14 @@ export default function AnomaliesScatterPlot({
           <defs>
             {/* Outlier zone gradient */}
             <linearGradient id="outlierZone" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.03" />
-              <stop offset="60%" stopColor="#EF4444" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#EF4444" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="#0891b2" stopOpacity="0.04" />
+              <stop offset="60%" stopColor="#ef4444" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#ef4444" stopOpacity="0.14" />
             </linearGradient>
 
             {/* Dot glow */}
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feGaussianBlur stdDeviation="2" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
@@ -219,19 +219,19 @@ export default function AnomaliesScatterPlot({
           </defs>
 
           {/* Grid Background Lines (0 to 35 knots) */}
-          <line x1="50" y1="210" x2="780" y2="210" stroke="#1E2A40" strokeWidth="1" />
-          <line x1="50" y1="155" x2="780" y2="155" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="50" y1="100" x2="780" y2="100" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="50" y1="45" x2="780" y2="45" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="50" y1="15" x2="780" y2="15" stroke="#1E2A40" strokeWidth="1" />
+          <line x1="50" y1="210" x2="780" y2="210" stroke="#e2e8f0" strokeWidth="1" />
+          <line x1="50" y1="155" x2="780" y2="155" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="50" y1="100" x2="780" y2="100" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="50" y1="45" x2="780" y2="45" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="50" y1="15" x2="780" y2="15" stroke="#e2e8f0" strokeWidth="1" />
 
           {/* X-axis lines (0.0 to 1.0) */}
-          <line x1="50" y1="15" x2="50" y2="210" stroke="#1E2A40" strokeWidth="1" />
-          <line x1="196" y1="15" x2="196" y2="210" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="342" y1="15" x2="342" y2="210" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="488" y1="15" x2="488" y2="210" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="634" y1="15" x2="634" y2="210" stroke="#1E2A40" strokeWidth="1" strokeDasharray="2 2" />
-          <line x1="780" y1="15" x2="780" y2="210" stroke="#1E2A40" strokeWidth="1" />
+          <line x1="50" y1="15" x2="50" y2="210" stroke="#e2e8f0" strokeWidth="1" />
+          <line x1="196" y1="15" x2="196" y2="210" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="342" y1="15" x2="342" y2="210" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="488" y1="15" x2="488" y2="210" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="634" y1="15" x2="634" y2="210" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" />
+          <line x1="780" y1="15" x2="780" y2="210" stroke="#e2e8f0" strokeWidth="1" />
 
           {/* Anomaly Shaded Boundary Area */}
           <rect
@@ -248,18 +248,18 @@ export default function AnomaliesScatterPlot({
             y1={avgY}
             x2="780"
             y2={avgY}
-            stroke="#22D3EE"
-            strokeWidth="1"
+            stroke="#0891b2"
+            strokeWidth="1.2"
             strokeDasharray="4 4"
-            strokeOpacity="0.45"
+            strokeOpacity="0.8"
           />
           <text
             x="56"
             y={Math.max(25, avgY - 4)}
-            fill="#8AEBFF"
+            fill="#0891b2"
             fontFamily="JetBrains Mono"
             fontSize="9"
-            opacity="0.85"
+            fontWeight="600"
           >
             FLEET AVERAGE SOG ({selectedDate}): {avgSpeed.toFixed(1)} KN
           </text>
@@ -270,23 +270,23 @@ export default function AnomaliesScatterPlot({
             y1="15"
             x2={thresholdX}
             y2="210"
-            stroke="#EF4444"
+            stroke="#ef4444"
             strokeWidth="1.5"
             strokeDasharray="3 3"
           />
           <text
             x={Math.min(720, thresholdX + 5)}
             y="30"
-            fill="#FFB4AB"
+            fill="#dc2626"
             fontFamily="JetBrains Mono"
             fontSize="9"
-            fontWeight="600"
+            fontWeight="700"
           >
             THRESHOLD: {Number(scoreThreshold).toFixed(2)}
           </text>
 
           {/* Dense Baseline Scatter Cluster */}
-          <g fill="#3C494C" opacity="0.45">
+          <g fill="#94a3b8" opacity="0.5">
             <circle cx="85" cy="180" r="2.5" />
             <circle cx="102" cy="142" r="2" />
             <circle cx="115" cy="150" r="2.5" />
@@ -328,13 +328,13 @@ export default function AnomaliesScatterPlot({
                   className="cursor-pointer"
                   onClick={() => onSelectVessel && onSelectVessel(item)}
                 >
-                  <circle cx={cx} cy={cy} r="5" fill="#EF4444" />
+                  <circle cx={cx} cy={cy} r="5" fill="#ef4444" />
                   <circle
                     cx={cx}
                     cy={cy}
                     r="8.5"
                     fill="none"
-                    stroke="#EF4444"
+                    stroke="#ef4444"
                     strokeWidth="1.2"
                     opacity="0.75"
                   />
@@ -342,10 +342,10 @@ export default function AnomaliesScatterPlot({
                     <text
                       x={cx + 9}
                       y={cy + 3}
-                      fill="#FFB4AB"
+                      fill="#b91c1c"
                       fontFamily="JetBrains Mono"
                       fontSize="8"
-                      fontWeight="600"
+                      fontWeight="700"
                     >
                       {item.name?.slice(0, 14)} [{sc.toFixed(2)}]
                     </text>
@@ -364,15 +364,15 @@ export default function AnomaliesScatterPlot({
                   className="cursor-pointer"
                   onClick={() => onSelectVessel && onSelectVessel(item)}
                 >
-                  <circle cx={cx} cy={cy} r="4" fill="#F59E0B" opacity="0.9" />
+                  <circle cx={cx} cy={cy} r="4" fill="#f59e0b" opacity="0.9" />
                   {!isSelected && (
                     <text
                       x={cx + 7}
                       y={cy + 3}
-                      fill="#F59E0B"
+                      fill="#b45309"
                       fontFamily="JetBrains Mono"
                       fontSize="7.5"
-                      opacity="0.85"
+                      fontWeight="600"
                     >
                       {item.name?.slice(0, 12)} ({spd.toFixed(1)}kn)
                     </text>
@@ -390,9 +390,9 @@ export default function AnomaliesScatterPlot({
                 cx={cx}
                 cy={cy}
                 r="3.5"
-                fill="#38bdf8"
-                opacity="0.75"
-                className="cursor-pointer hover:fill-cyan-400 hover:opacity-100 transition-colors"
+                fill="#0284c7"
+                opacity="0.65"
+                className="cursor-pointer hover:fill-[#0891b2] hover:opacity-100 transition-colors"
                 onClick={() => onSelectVessel && onSelectVessel(item)}
               >
                 <title>
@@ -405,13 +405,13 @@ export default function AnomaliesScatterPlot({
           {/* Dynamic Target Focus Reticle: Locks to selectedVessel */}
           {selectedVessel && (
             <g filter="url(#glow)">
-              <circle cx={selectedX} cy={selectedY} r="5.5" fill="#22D3EE" />
+              <circle cx={selectedX} cy={selectedY} r="5.5" fill="#0891b2" />
               <circle
                 cx={selectedX}
                 cy={selectedY}
                 r="11"
                 fill="none"
-                stroke="#22D3EE"
+                stroke="#0891b2"
                 strokeWidth="1.5"
                 strokeDasharray="3 2"
               />
@@ -420,7 +420,7 @@ export default function AnomaliesScatterPlot({
                 y1={selectedY}
                 x2={selectedX - 8}
                 y2={selectedY}
-                stroke="#22D3EE"
+                stroke="#0891b2"
                 strokeWidth="1.5"
               />
               <line
@@ -428,7 +428,7 @@ export default function AnomaliesScatterPlot({
                 y1={selectedY}
                 x2={selectedX + 16}
                 y2={selectedY}
-                stroke="#22D3EE"
+                stroke="#0891b2"
                 strokeWidth="1.5"
               />
               <line
@@ -436,7 +436,7 @@ export default function AnomaliesScatterPlot({
                 y1={selectedY - 16}
                 x2={selectedX}
                 y2={selectedY - 8}
-                stroke="#22D3EE"
+                stroke="#0891b2"
                 strokeWidth="1.5"
               />
               <line
@@ -444,7 +444,7 @@ export default function AnomaliesScatterPlot({
                 y1={selectedY + 8}
                 x2={selectedX}
                 y2={selectedY + 16}
-                stroke="#22D3EE"
+                stroke="#0891b2"
                 strokeWidth="1.5"
               />
 
@@ -455,14 +455,15 @@ export default function AnomaliesScatterPlot({
                 width="140"
                 height="18"
                 rx="3"
-                fill="#0C1321"
-                stroke="#22D3EE"
-                strokeWidth="1"
+                fill="#ffffff"
+                stroke="#0891b2"
+                strokeWidth="1.2"
+                className="shadow-xs"
               />
               <text
                 x={Math.min(650, Math.max(55, selectedX - 60)) + 6}
                 y={Math.max(18, selectedY - 26) + 12}
-                fill="#22D3EE"
+                fill="#0891b2"
                 fontFamily="JetBrains Mono"
                 fontSize="8.5"
                 fontWeight="700"
@@ -473,29 +474,29 @@ export default function AnomaliesScatterPlot({
           )}
 
           {/* Y-Axis Labels (Knots) */}
-          <text x="18" y="19" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">35kn</text>
-          <text x="18" y="49" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">30kn</text>
-          <text x="18" y="104" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">20kn</text>
-          <text x="18" y="159" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">10kn</text>
-          <text x="24" y="213" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">0kn</text>
+          <text x="18" y="19" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">35kn</text>
+          <text x="18" y="49" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">30kn</text>
+          <text x="18" y="104" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">20kn</text>
+          <text x="18" y="159" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">10kn</text>
+          <text x="24" y="213" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">0kn</text>
 
           {/* X-Axis Labels (Anomaly Score) */}
-          <text x="45" y="228" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">0.00</text>
-          <text x="188" y="228" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">0.20</text>
-          <text x="334" y="228" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">0.40</text>
-          <text x="480" y="228" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">0.60</text>
-          <text x="626" y="228" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">0.80</text>
-          <text x="765" y="228" fill="#859397" fontFamily="JetBrains Mono" fontSize="9">1.00</text>
-          <text x="380" y="238" fill="#859397" fontFamily="Inter" fontSize="9" fontWeight="600" textAnchor="middle">
+          <text x="45" y="228" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">0.00</text>
+          <text x="188" y="228" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">0.20</text>
+          <text x="334" y="228" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">0.40</text>
+          <text x="480" y="228" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">0.60</text>
+          <text x="626" y="228" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">0.80</text>
+          <text x="765" y="228" fill="#64748b" fontFamily="JetBrains Mono" fontSize="9">1.00</text>
+          <text x="380" y="238" fill="#64748b" fontFamily="Inter" fontSize="9" fontWeight="600" textAnchor="middle">
             ISOLATION FOREST ANOMALY SCORE →
           </text>
         </svg>
       </div>
 
       {/* Telemetry Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-y-1 text-xs text-outline mt-2 pt-4 border-t border-outline-variant/15 font-mono">
-        <span className="flex items-center gap-1.5 text-cyan-300">
-          <span className="material-symbols-outlined text-[15px] text-cyan-400">navigation</span>
+      <div className="flex flex-wrap items-center justify-between gap-y-1 text-xs text-slate-600 mt-2 pt-4 border-t border-slate-200 font-mono">
+        <span className="flex items-center gap-1.5 text-slate-800">
+          <span className="material-symbols-outlined text-[15px] text-[#0891b2]">navigation</span>
           Selected: MMSI {selectedVessel?.mmsi || '211284000'} ({selectedVessel?.name || 'MV NORDIC SENTINEL'}) • SOG: {selectedSpeed.toFixed(1)} kn • Score: {selectedScore.toFixed(2)}
         </span>
       </div>
