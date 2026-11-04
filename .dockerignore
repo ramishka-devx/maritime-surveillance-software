@@ -1,0 +1,10 @@
+**/node_modules
+**/.env
+**/.env.*
+**/dist
+**/__pycache__
+**/.pytest_cache
+.git
+venv-AI
+AI
+test

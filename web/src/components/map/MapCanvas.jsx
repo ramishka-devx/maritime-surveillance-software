@@ -3,10 +3,9 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  Popup,
   Polyline,
-  Polygon,
   CircleMarker,
+  Tooltip,
   useMap,
   useMapEvents,
 } from 'react-leaflet';
@@ -126,9 +125,13 @@ const VesselMarker = memo(function VesselMarker({ vessel, isSelected, onSelect }
 // Map Controller Component to listen for events & center changes
 // Padded viewport as the API's bbox string ("minLon,minLat,maxLon,maxLat"). The padding
 // keeps vessels just off-screen loaded so short pans don't show empty edges.
+// Rounded outward to 0.01° (stable strings, fewer refetches); plain rounding could shrink a
+// zoomed-in box (~0.01° wide) past the vessels on screen, so they vanished.
 function viewportBbox(map) {
   const b = map.getBounds().pad(0.25);
-  return [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map((n) => n.toFixed(2)).join(',');
+  const down = (n) => (Math.floor(n * 100) / 100).toFixed(2);
+  const up = (n) => (Math.ceil(n * 100) / 100).toFixed(2);
+  return [down(b.getWest()), down(b.getSouth()), up(b.getEast()), up(b.getNorth())].join(',');
 }
 
 function MapEventsHandler({ onCursorCoordsChange, onMapReady, onViewportChange }) {
@@ -159,6 +162,37 @@ function MapEventsHandler({ onCursorCoordsChange, onMapReady, onViewportChange }
 }
 
 // Map Controller Component to smoothly focus and fly to selected vessel
+// Selected vessel's recorded track: solid segments, dashed where reports stopped for a while,
+// and a start dot. Fits the map to it once per track.
+function VesselTrack({ segments }) {
+  const map = useMap();
+  useEffect(() => {
+    const all = segments.flat();
+    if (all.length > 1) map.fitBounds(all, { padding: [60, 60], maxZoom: 13 });
+  }, [segments, map]);
+
+  const start = segments[0]?.[0];
+  return (
+    <>
+      {segments.slice(1).map((seg, i) => (
+        <Polyline
+          key={`gap-${i}`}
+          positions={[segments[i][segments[i].length - 1], seg[0]]}
+          pathOptions={{ color: '#006786', weight: 1.5, dashArray: '4, 6', opacity: 0.7 }}
+        />
+      ))}
+      {segments.map((seg, i) => (
+        <Polyline key={`seg-${i}`} positions={seg} pathOptions={{ color: '#0088b0', weight: 2.5, opacity: 0.9 }} />
+      ))}
+      {start && (
+        <CircleMarker center={start} radius={4} pathOptions={{ color: '#006786', fillColor: '#f3f2f2', fillOpacity: 1, weight: 2 }}>
+          <Tooltip direction="top">Track start</Tooltip>
+        </CircleMarker>
+      )}
+    </>
+  );
+}
+
 function MapFocusController({ focusTarget }) {
   const map = useMap();
   useEffect(() => {
@@ -171,163 +205,7 @@ function MapFocusController({ focusTarget }) {
   return null;
 }
 
-// Built-in Sri Lanka Maritime Fleet Dataset (aligns with simulator zones & radar tracking)
-export const defaultMaritimeFleet = [
-  {
-    id: '211284000',
-    mmsi: '211284000',
-    name: 'MV NORDIC SENTINEL',
-    type: 'Crude Oil Tanker',
-    flag: 'Panama (PA)',
-    callSign: 'LAFX8',
-    imo: '9482718',
-    position: [6.88, 79.52],
-    speed: 14.8,
-    course: 42,
-    heading: 44,
-    draught: '12.4 m',
-    length: '244 m',
-    beam: '42 m',
-    destination: 'COLOMBO (ETA 06-18:00)',
-    navStatus: 'Underway Using Engine',
-    threatLevel: 'CRITICAL',
-    threatReason: 'AIS Spoofing & Identity Clone Detected (94% Conf.)',
-    threatDetail: 'Synthetic kinematic signatures detected. Radar return offset 1.2nm from transponder position.',
-    lastReport: '3s ago (AIS Base Stn 04)',
-  },
-  {
-    id: '235089200',
-    mmsi: '235089200',
-    name: 'OCEAN VOYAGER',
-    type: 'Fishing Trawler',
-    flag: 'Sri Lanka (LK)',
-    callSign: '4QZY4',
-    imo: '8812904',
-    position: [5.78, 80.35],
-    speed: 6.8,
-    course: 15,
-    heading: 15,
-    draught: '4.5 m',
-    length: '56 m',
-    beam: '11 m',
-    destination: 'GALLE FISHING GROUNDS',
-    navStatus: 'Engaged in Fishing',
-    threatLevel: 'CRITICAL',
-    threatReason: 'Geofence Incursion into Sector Bravo-4',
-    threatDetail: 'Entered designated naval exclusion zone without transponder authorization.',
-    lastReport: '1m ago',
-  },
-  {
-    id: '244780000',
-    mmsi: '244780000',
-    name: 'STELLA MARIS',
-    type: 'Container Ship',
-    flag: 'Singapore (SG)',
-    callSign: '9VHA',
-    imo: '9320872',
-    position: [5.85, 81.25],
-    speed: 16.2,
-    course: 110,
-    heading: 110,
-    draught: '9.8 m',
-    length: '198 m',
-    beam: '30 m',
-    destination: 'HAMBANTOTA',
-    navStatus: 'Underway Using Engine',
-    threatLevel: 'WARNING',
-    threatReason: 'Transponder Dark Event',
-    threatDetail: 'Intermittent signal loss across Dondra Head TSS inbound lane.',
-    lastReport: '4m ago',
-  },
-  {
-    id: '352981000',
-    mmsi: '352981000',
-    name: 'PACIFIC OPAL',
-    type: 'Bulk Carrier',
-    flag: 'Marshall Islands (MH)',
-    callSign: 'V7AB8',
-    imo: '9510294',
-    position: [7.65, 82.20],
-    speed: 13.5,
-    course: 220,
-    heading: 220,
-    draught: '13.2 m',
-    length: '229 m',
-    beam: '32 m',
-    destination: 'TRINCOMALEE',
-    navStatus: 'Underway Using Engine',
-    threatLevel: 'WARNING',
-    threatReason: 'Gross Course Deviation (>45°)',
-    threatDetail: 'Departed assigned corridor into oncoming traffic zone.',
-    lastReport: '8m ago',
-  },
-  {
-    id: '311000452',
-    mmsi: '311000452',
-    name: 'SEA SWIFT',
-    type: 'Fast Supply Vessel',
-    flag: 'Bahamas (BS)',
-    callSign: 'C6XY9',
-    imo: '9604128',
-    position: [8.85, 81.65],
-    speed: 2.1,
-    course: 80,
-    heading: 80,
-    draught: '3.8 m',
-    length: '52 m',
-    beam: '10 m',
-    destination: 'OFFSHORE RENDEZVOUS',
-    navStatus: 'Restricted Manoeuvrability',
-    threatLevel: 'INFO',
-    threatReason: 'Ship-to-Ship Transfer Alert',
-    threatDetail: 'Loitering in proximity with unregistered target.',
-    lastReport: '14m ago',
-  },
-  {
-    id: '271998120',
-    mmsi: '271998120',
-    name: 'SLNS GAJABAHU',
-    type: 'Patrol Corvette',
-    flag: 'Sri Lanka (LK)',
-    callSign: '4QVK',
-    imo: '9840112',
-    position: [6.95, 79.75],
-    speed: 22.4,
-    course: 38,
-    heading: 40,
-    draught: '5.2 m',
-    length: '90 m',
-    beam: '13 m',
-    destination: 'COLOMBO SECTOR PATROL',
-    navStatus: 'Underway Using Engine',
-    threatLevel: 'NORMAL',
-    threatReason: 'Coast Guard Unit',
-    threatDetail: 'Active enforcement cutter monitoring Sector 04.',
-    lastReport: '1s ago',
-  },
-  {
-    id: '228031000',
-    mmsi: '228031000',
-    name: 'TALK ABOUT COTE',
-    type: 'Passenger / Ferry',
-    flag: 'Sri Lanka (LK)',
-    callSign: '4QCF',
-    imo: '9320128',
-    position: [8.95, 79.55],
-    speed: 18.6,
-    course: 305,
-    heading: 305,
-    draught: '5.7 m',
-    length: '142 m',
-    beam: '24 m',
-    destination: 'MANNAR FERRY TERMINAL',
-    navStatus: 'Underway Using Engine',
-    threatLevel: 'NORMAL',
-    threatReason: 'Scheduled Ferry',
-    threatDetail: 'Cross-strait ferry on timetable transit.',
-    lastReport: '5s ago',
-  },
-];
+const NO_VESSELS = [];
 
 export default memo(MapCanvas);
 
@@ -335,21 +213,20 @@ function MapCanvas({
   selectedVesselId = null,
   onSelectVessel,
   activeLayer = 'vector',
-  showRestricted = true,
-  showTracks = true,
   onCursorCoordsChange,
   onMapReady,
   onViewportChange,
   focusTarget = null,
   filters = null,
   onFleetUpdate = null,
+  track = null,
   vessels: propVessels = null,
 }) {
   const mapRef = useRef(null);
 
   // Live vessels come from VesselContext (passed in by MapPage), which already polls the API
   // and merges in the reference fleet; polling here too doubled the requests and re-renders.
-  const allVessels = propVessels && propVessels.length > 0 ? propVessels : defaultMaritimeFleet;
+  const allVessels = propVessels || NO_VESSELS;
 
   // Stable click handler so memoised markers don't re-render when the parent passes a new
   // inline onSelectVessel each render.
@@ -459,51 +336,10 @@ function MapCanvas({
     };
   }, [activeLayer]);
 
-  // Historical breadcrumb track positions
-  const historicalTrackPoints = [
-    [6.75, 79.35],
-    [6.80, 79.42],
-    [6.84, 79.48],
-    [6.88, 79.52],
-  ];
-
-  // TSS Shipping Lanes (Southern Sri Lanka Dondra Head Separation Scheme)
-  const northBoundLane = [
-    [5.65, 79.20],
-    [5.72, 80.50],
-    [5.78, 81.80],
-  ];
-  const southBoundLane = [
-    [5.48, 79.20],
-    [5.55, 80.50],
-    [5.60, 81.80],
-  ];
-  const separationZone = [
-    [5.56, 79.20],
-    [5.63, 80.50],
-    [5.69, 81.80],
-  ];
-
-  // Restricted Area: Colombo Port & Naval Exclusion Zone
-  const sectorBravo4Zone = [
-    [6.93, 79.81],
-    [6.97, 79.81],
-    [6.97, 79.86],
-    [6.93, 79.86],
-  ];
-
-  // Marine Conservation Sanctuary: Gulf of Mannar Biosphere
-  const marineSanctuaryZone = [
-    [8.85, 79.30],
-    [9.25, 79.30],
-    [9.25, 79.75],
-    [8.85, 79.75],
-  ];
-
   return (
     <div className="absolute inset-0 z-0 overflow-hidden" id="map-viewport">
       <MapContainer
-        center={[7.87, 80.2]}
+        center={[52.59, 6.158]}
         zoom={7}
         zoomSnap={0.5}
         minZoom={3}
@@ -533,124 +369,7 @@ function MapCanvas({
         {/* Global Smooth Focus Controller */}
         <MapFocusController focusTarget={focusTarget} />
 
-        {/* TSS Traffic Corridors */}
-        <Polyline
-          positions={northBoundLane}
-          pathOptions={{
-            color: '#99e0ff',
-            weight: 1.5,
-            dashArray: '6, 6',
-            opacity: 0.9,
-          }}
-        />
-        <Polyline
-          positions={separationZone}
-          pathOptions={{
-            color: '#7d7979',
-            weight: 1.2,
-            dashArray: '2, 5',
-            opacity: 0.8,
-          }}
-        />
-        <Polyline
-          positions={southBoundLane}
-          pathOptions={{
-            color: '#99e0ff',
-            weight: 1.5,
-            dashArray: '6, 6',
-            opacity: 0.9,
-          }}
-        />
-
-        {/* Restricted Security Zones & Sanctuaries */}
-        {showRestricted && (
-          <>
-            <Polygon
-              positions={sectorBravo4Zone}
-              pathOptions={{
-                color: '#d6006c',
-                fillColor: '#fff1f4',
-                fillOpacity: 0.7,
-                weight: 1.4,
-                dashArray: '6, 4',
-              }}
-            >
-              <Popup>
-                <div className="font-sans text-xs">
-                  <strong className="text-bs-accent-2-700 block">
-                    Restricted area: Sector Bravo-4
-                  </strong>
-                  <p className="text-gray-700 text-[11px] mt-1">
-                    Naval Munitions Holding Area. Unauthorized maritime transit strictly prohibited under MDA protocols.
-                  </p>
-                </div>
-              </Popup>
-            </Polygon>
-
-            <Polygon
-              positions={marineSanctuaryZone}
-              pathOptions={{
-                color: '#006786',
-                fillColor: '#e9f8ff',
-                fillOpacity: 0.6,
-                weight: 1.2,
-                dashArray: '4, 4',
-              }}
-            >
-              <Popup>
-                <div className="font-sans text-xs">
-                  <strong className="text-bs-accent-700 block">
-                    Special scientific sanctuary
-                  </strong>
-                  <p className="text-gray-700 text-[11px] mt-1">
-                    Marine habitat preservation area. Anchorage & high-speed maneuvering restricted.
-                  </p>
-                </div>
-              </Popup>
-            </Polygon>
-          </>
-        )}
-
-        {/* Historical Track for Selected Vessel */}
-        {showTracks && (
-          <Polyline
-            positions={historicalTrackPoints}
-            pathOptions={{
-              color: '#0088b0',
-              weight: 1.6,
-              dashArray: '1, 5',
-              lineCap: 'round',
-              opacity: 1,
-            }}
-          />
-        )}
-
-        {/* Navigation Buoys / Aids to Navigation */}
-        <CircleMarker
-          center={[5.92, 80.59]}
-          radius={5}
-          pathOptions={{ color: '#201e1d', fillColor: '#f3f2f2', fillOpacity: 1, weight: 1.5 }}
-        >
-          <Popup>
-            <div className="font-mono text-xs">
-              <strong>DONDRA HEAD LIGHTHOUSE</strong>
-              <div className="text-[10px] text-gray-600">Fl.W.10s // Southern TSS Cardinal</div>
-            </div>
-          </Popup>
-        </CircleMarker>
-
-        <CircleMarker
-          center={[6.95, 79.83]}
-          radius={5}
-          pathOptions={{ color: '#f3f2f2', fillColor: '#d6006c', fillOpacity: 1, weight: 1.5 }}
-        >
-          <Popup>
-            <div className="font-mono text-xs">
-              <strong>COLOMBO FAIRWAY BUOY</strong>
-              <div className="text-[10px] text-gray-600">Fl.R.5s // Harbour Approach</div>
-            </div>
-          </Popup>
-        </CircleMarker>
+        {track?.length > 0 && <VesselTrack segments={track} />}
 
         {/* Real-time Fleet Vessel Markers (Filtered with Selected Pinning) */}
         <VesselCanvasLayer vessels={canvasVessels} onSelect={handleSelect} />

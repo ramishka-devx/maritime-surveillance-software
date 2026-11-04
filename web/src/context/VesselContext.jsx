@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { useVesselUpdates } from '../hooks/useVesselUpdates.js';
 import { toUiVessel } from '../lib/vessels.js';
-import { defaultMaritimeFleet } from '../components/map/MapCanvas.jsx';
 import { isMaintenance } from '../auth/roles.js';
 
 const VesselContext = createContext(null);
@@ -21,16 +20,9 @@ export function VesselProvider({ children }) {
   // Real-time polling via useVesselUpdates if backend is connected
   const { vessels: apiVessels } = useVesselUpdates(token, 8000, viewport);
 
-  // Live backend AIS vessels merged with default maritime fleet fallback
+  // Live backend AIS vessels (only those with a position).
   const allVessels = useMemo(() => {
-    if (apiVessels && apiVessels.length > 0) {
-      const formattedApi = apiVessels.filter((v) => v.lat && v.lon).map(toUiVessel);
-
-      const apiMmsiSet = new Set(formattedApi.map((v) => v.mmsi));
-      const complement = defaultMaritimeFleet.filter((v) => !apiMmsiSet.has(v.mmsi));
-      return [...formattedApi, ...complement];
-    }
-    return defaultMaritimeFleet || [];
+    return (apiVessels || []).filter((v) => v.lat && v.lon).map(toUiVessel);
   }, [apiVessels]);
 
   const [selectedVessel, setSelectedVessel] = useState(null);

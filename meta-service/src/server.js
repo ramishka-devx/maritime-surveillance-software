@@ -49,31 +49,37 @@ import '../cron/partition-cron.js';
     }
   }
 
-  // Schedule daily maintenance notifications
-  const interval = '* 6 * * *';
-  // const interval = '*/10 * * * * *';
+  // CRON_ENABLED=false runs the API only, e.g. a local server sharing the hosted DB, so the
+  // detectors (in-memory watermarks) don't raise every alert twice.
+  if (env.cronEnabled) {
+    // Schedule daily maintenance notifications
+    const interval = '* 6 * * *';
+    // const interval = '*/10 * * * * *';
 
-  cron.schedule(
-    interval,
-    () => {
-      logger.info('Running scheduled maintenance notification check...');
-      sendDailyMaintenanceNotifications();
-    },
-    {
-      timezone: 'UTC',
-    }
-  );
+    cron.schedule(
+      interval,
+      () => {
+        logger.info('Running scheduled maintenance notification check...');
+        sendDailyMaintenanceNotifications();
+      },
+      {
+        timezone: 'UTC',
+      }
+    );
 
-  // Streamed Geofence Detector: checks incoming AIS positions against restricted areas every 30 seconds
-  const geofenceInterval = '*/30 * * * * *';
-  cron.schedule(geofenceInterval, () => {
-    runGeofenceDetector();
-  });
+    // Streamed Geofence Detector: checks incoming AIS positions against restricted areas every 30 seconds
+    const geofenceInterval = '*/30 * * * * *';
+    cron.schedule(geofenceInterval, () => {
+      runGeofenceDetector();
+    });
 
-  // Dark-vessel detector: every 5 minutes.
-  cron.schedule('*/5 * * * *', () => {
-    runDarkVesselDetector();
-  });
+    // Dark-vessel detector: every 5 minutes.
+    cron.schedule('*/5 * * * *', () => {
+      runDarkVesselDetector();
+    });
+  } else {
+    logger.warn('CRON_ENABLED=false: maintenance, geofence and dark-vessel jobs are off.');
+  }
 
   function shutdown() {
     logger.info('Shutting down...');

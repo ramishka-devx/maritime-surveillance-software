@@ -494,10 +494,10 @@ export default function AnomaliesScatterPlot({
       </div>
 
       {/* Telemetry Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-y-1 text-xs text-slate-600 mt-2 pt-4 border-t border-slate-200 font-mono">
-        <span className="flex items-center gap-1.5 text-slate-800">
-          <span className="material-symbols-outlined text-[15px] text-[#0891b2]">navigation</span>
-          Selected: MMSI {selectedVessel?.mmsi || '211284000'} ({selectedVessel?.name || 'MV NORDIC SENTINEL'}) • SOG: {selectedSpeed.toFixed(1)} kn • Score: {selectedScore.toFixed(2)}
+      <div className="flex flex-wrap items-center justify-between gap-y-1 text-xs text-outline mt-2 pt-4 border-t border-outline-variant/15 font-mono">
+        <span className="flex items-center gap-1.5 text-cyan-300">
+          <span className="material-symbols-outlined text-[15px] text-cyan-400">navigation</span>
+          Selected: MMSI {selectedVessel?.mmsi || '—'} ({selectedVessel?.name || '—'}) • SOG: {selectedSpeed.toFixed(1)} kn • Score: {selectedScore.toFixed(2)}
         </span>
       </div>
     </div>
