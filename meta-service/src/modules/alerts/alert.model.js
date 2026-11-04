@@ -3,12 +3,17 @@ import { query } from '../../config/db.config.js';
 // mmsi/vessel_name prefer the alert's own AIS link (ships), falling back to the vessels registry.
 const ALERT_COLUMNS = `a.alert_id, a.vessel_id, a.type, a.severity, a.status, a.title, a.description,
         a.created_by, a.assigned_to, a.created_at, a.updated_at, a.resolved_at, a.restricted_area_id,
+        a.sts_encounter_id, se.mmsi_a AS sts_mmsi_a, se.mmsi_b AS sts_mmsi_b,
+        se.started_at AS sts_started_at, se.last_seen_together_at AS sts_last_seen_together_at,
+        se.ended_at AS sts_ended_at, se.min_distance_m AS sts_min_distance_m,
+        se.centroid_lat AS sts_centroid_lat, se.centroid_lon AS sts_centroid_lon,
         a.lat, a.lon, a.confidence_score::float AS confidence_score,
         NULLIF(concat_ws(' ', u.first_name, u.last_name), '') AS assignee_name,
         COALESCE(a.mmsi::text, v.mmsi) AS mmsi, COALESCE(v.name, s.ship_name) AS vessel_name`;
 const ALERT_FROM = `alerts a
       LEFT JOIN vessels v ON v.vessel_id = a.vessel_id
       LEFT JOIN ships s ON s.mmsi = a.mmsi
+      LEFT JOIN sts_encounters se ON se.encounter_id = a.sts_encounter_id
       LEFT JOIN users u ON u.user_id = a.assigned_to`;
 const SEVERITY_ORDER = `CASE a.severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END`;
 
@@ -25,6 +30,7 @@ export const AlertModel = {
       assigned_to,
       mmsi,
       restricted_area_id,
+      sts_encounter_id,
       lat,
       lon,
       confidence_score
@@ -33,8 +39,8 @@ export const AlertModel = {
     const result = await query(
       `INSERT INTO alerts (
         vessel_id, type, severity, status, title, description, created_by, assigned_to,
-        mmsi, restricted_area_id, lat, lon, confidence_score
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        mmsi, restricted_area_id, sts_encounter_id, lat, lon, confidence_score
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         vessel_id ?? null,
         type,
@@ -46,6 +52,7 @@ export const AlertModel = {
         assigned_to ?? null,
         mmsi ?? null,
         restricted_area_id ?? null,
+        sts_encounter_id ?? null,
         lat ?? null,
         lon ?? null,
         confidence_score ?? null

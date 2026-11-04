@@ -125,6 +125,7 @@ function parseShipStaticData(msg) {
     imo: normalizeImo(report.ImoNumber),
     callsign: normalizeAisText(report.CallSign),
     destination: normalizeAisText(report.Destination),
+    draught: normalizeNumber(report.MaximumStaticDraught ?? report.MaximumStaticDraughtMeters),
     dimensions,
     width,
     length,

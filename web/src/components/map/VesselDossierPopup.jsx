@@ -24,6 +24,7 @@ function Dossier({ history }) {
   if (history.error) return <p className="mt-5 text-[13px] text-bs-accent-2-700">{history.error}</p>;
   const s = trackSummary(history.points);
   const alerts = history.alerts || [];
+  const stsAlerts = alerts.filter((alert) => alert.type === 'sts_transfer');
   const kn = (v) => (v == null ? '—' : `${v.toFixed(1)} kn`);
   return (
     <div className="mt-5">
@@ -60,6 +61,14 @@ function Dossier({ history }) {
         </ul>
       ) : (
         <p className="mt-1 text-[13px] italic text-bs-neutral-700">No alerts for this vessel.</p>
+      )}
+      {stsAlerts.length > 0 && (
+        <div className="mt-4 border-l-2 border-bs-accent-2 pl-3">
+          <div className={kicker}>Recent STS encounters</div>
+          <p className="mt-1 text-[13px] text-bs-accent-2-700">
+            {stsAlerts.length} encounter alert{stsAlerts.length === 1 ? '' : 's'} involving this vessel.
+          </p>
+        </div>
       )}
       <Link to="/Alerts" className="mt-2 inline-block text-[13px] text-bs-accent-700 hover:underline underline-offset-[3px]">
         Open alerts page

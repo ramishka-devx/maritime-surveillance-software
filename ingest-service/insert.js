@@ -19,7 +19,7 @@ async function ensureShipType(client, shipTypeId) {
 
 async function getExistingShip(client, mmsi) {
   const result = await client.query(
-    `SELECT mmsi, ship_name, ship_type, dimensions
+    `SELECT mmsi, ship_name, ship_type, dimensions, draught
      FROM ships
      WHERE mmsi = $1
      LIMIT 1`,
@@ -64,8 +64,8 @@ async function upsertShip(client, data) {
   await ensureShipType(client, shipType);
 
   await client.query(
-    `INSERT INTO ships (mmsi, ship_name, ship_type, dimensions, imo, callsign, destination, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+    `INSERT INTO ships (mmsi, ship_name, ship_type, dimensions, imo, callsign, destination, draught, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
      ON CONFLICT (mmsi)
      DO UPDATE SET
        ship_name = COALESCE(EXCLUDED.ship_name, ships.ship_name),
@@ -74,6 +74,7 @@ async function upsertShip(client, data) {
        imo = COALESCE(EXCLUDED.imo, ships.imo),
        callsign = COALESCE(EXCLUDED.callsign, ships.callsign),
        destination = COALESCE(EXCLUDED.destination, ships.destination),
+      draught = COALESCE(EXCLUDED.draught, ships.draught),
        updated_at = NOW()`,
     [
       data.mmsi,
@@ -82,9 +83,18 @@ async function upsertShip(client, data) {
       dimensions ? JSON.stringify(dimensions) : null,
       data.imo ?? null,
       data.callsign ?? null,
-      data.destination ?? null
+      data.destination ?? null,
+      data.draught ?? null
     ]
   );
+
+  if (existingShip?.draught != null && data.draught != null && Math.abs(Number(existingShip.draught) - Number(data.draught)) >= 0.5) {
+    await client.query(
+      `INSERT INTO anomalies (mmsi, anomaly_type, details, detected_at)
+       VALUES ($1, 'route', $2, NOW())`,
+      [data.mmsi, JSON.stringify({ draught_changed: true, previous: existingShip.draught, current: data.draught })]
+    );
+  }
 
   return {
     shipType,
@@ -189,7 +199,8 @@ async function insertPosition(client, data, ship) {
   // out-of-order (older) report from overwriting a newer one.
   await client.query(
     `UPDATE ships
-     SET lat = $2, lon = $3, sog = $4, cog = $5, heading = $6, nav_status = $7,
+     SET lat = $2, lon = $3, position = ST_SetSRID(ST_MakePoint($3, $2), 4326)::geography,
+         sog = $4, cog = $5, heading = $6, nav_status = $7,
          last_position_at = $8
      WHERE mmsi = $1 AND (last_position_at IS NULL OR last_position_at < $8)`,
     [data.mmsi, data.lat, data.lon, data.sog, data.cog, data.heading, data.nav_status, data.time]

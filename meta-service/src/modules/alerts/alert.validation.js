@@ -11,7 +11,8 @@ export const ALERT_TYPES = [
   'dark_vessel',
   'manual',
   'loitering',
-  'route_deviation'
+  'route_deviation',
+  'sts_transfer'
 ];
 
 export const listSchema = Joi.object({

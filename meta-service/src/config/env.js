@@ -49,5 +49,13 @@ export const env = {
     minSog: Number(process.env.DARK_MIN_SOG || 3),
     minReports: Number(process.env.DARK_MIN_REPORTS || 10),
     rearmHours: Number(process.env.DARK_REARM_HOURS || 6),
+  },
+  sts: {
+    positionWindowMinutes: Number(process.env.STS_POSITION_WINDOW_MIN || 5),
+    proximityMeters: Number(process.env.STS_PROXIMITY_M || 500),
+    separationMeters: Number(process.env.STS_SEPARATION_M || 1000),
+    slowSpeedKnots: Number(process.env.STS_SLOW_SPEED_KN || 3),
+    minimumDurationMinutes: Number(process.env.STS_MIN_DURATION_MIN || 30),
+    rearmHours: Number(process.env.STS_REARM_HOURS || 12),
   }
 };

@@ -6,6 +6,7 @@ import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
 import { runGeofenceDetector } from './cron/geofenceDetector.js';
 import { runDarkVesselDetector } from './cron/darkVesselDetector.js';
+import { runStsEncounterDetector } from './cron/stsEncounterDetector.js';
 import '../cron/partition-cron.js';
 import { createServer } from 'node:http';
 import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
@@ -81,6 +82,10 @@ import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
     // Dark-vessel detector: every 5 minutes.
     cron.schedule('*/5 * * * *', () => {
       runDarkVesselDetector();
+    });
+
+    cron.schedule('* * * * *', () => {
+      runStsEncounterDetector();
     });
   } else {
     logger.warn('CRON_ENABLED=false: maintenance, geofence and dark-vessel jobs are off.');

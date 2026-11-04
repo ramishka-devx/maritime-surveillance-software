@@ -66,6 +66,44 @@ const fmtArea = (km2) =>
   km2 >= 1 ? `${km2.toFixed(km2 < 10 ? 1 : 0)} km² · ${(km2 / 3.4299).toFixed(1)} NM²` : `${Math.round(km2 * 100)} ha`;
 
 // GET /api/restricted-areas returns GeoJSON geometry as a string; keep the outer ring.
+function toArea(row) {
+  let geo = row.geometry;
+  if (typeof geo === 'string') {
+    try {
+      geo = JSON.parse(geo);
+    } catch {
+      geo = null;
+    }
+  }
+  const ring = geo?.type === 'Polygon' ? geo.coordinates[0] : geo?.type === 'MultiPolygon' ? geo.coordinates[0][0] : [];
+  const coords = ring.map(([lon, lat]) => ({ lat: Number(lat), lon: Number(lon) }));
+  if (coords.length > 1 && coords[0].lat === coords.at(-1).lat && coords[0].lon === coords.at(-1).lon) coords.pop();
+  return { id: row.id, name: row.name || `Area #${row.id}`, type: row.type, coordinates: coords };
+}
+
+function ago(iso) {
+  const min = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (min < 60) return `${min} min ago`;
+  if (min < 48 * 60) return `${Math.round(min / 60)} h ago`;
+  return `${Math.round(min / 1440)} d ago`;
+}
+
+function AreaDetailsModal({ drafts, onChange, onCancel, onSave, saving, error, source }) {
+  const firstInput = useRef(null);
+  useEffect(() => {
+    firstInput.current?.focus();
+    const onKey = (e) => e.key === 'Escape' && !saving && onCancel();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onCancel, saving]);
+
+  const included = drafts.filter((d) => d.include);
+  const valid = included.length > 0 && included.every((d) => d.name.trim() && d.type);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] grid place-items-center p-5 bg-bs-neutral-800/50" onMouseDown={(e) => e.target === e.currentTarget && !saving && onCancel()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="area-modal-title" className="w-[min(560px,100%)] max-h-[85vh] flex flex-col bg-bs-bg text-bs-ink shadow-bs-lg rounded-[4px]">
+        <div className="px-6 pb-2 overflow-y-auto flex flex-col gap-4">
           {drafts.map((d, i) => (
             <div key={d.key} className={`flex flex-col gap-2.5 ${drafts.length > 1 ? 'pb-4 border-b border-bs-ink/[.08] last:border-b-0' : ''}`}>
               {drafts.length > 1 && (
