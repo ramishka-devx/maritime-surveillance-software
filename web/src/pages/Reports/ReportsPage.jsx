@@ -8,9 +8,9 @@ const kicker = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700';
 const focusRing = 'outline-none focus-visible:outline-bs-accent';
 const inputClass = `px-2.5 py-1.5 rounded-sm border border-bs-ink/[.16] bg-white text-[14px] tabular-nums ${focusRing}`;
 
-// Match meta-service: ais_positions keeps 7 days (partition-cron.js), alert history is
+// Match meta-service: ais_positions keeps 2 days (partition-cron.js), alert history is
 // capped at 31 days (report.validation.js).
-const POSITION_RETENTION_DAYS = 7;
+const POSITION_RETENTION_DAYS = 2;
 const MAX_RANGE_DAYS = 31;
 const DAY_MS = 24 * 3600 * 1000;
 

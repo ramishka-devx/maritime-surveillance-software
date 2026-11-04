@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { pool } from '../src/config/db.config.js';
 
-const AIS_RETENTION_DAYS = 7;
+const AIS_RETENTION_DAYS = 2;
 
 // Creates today's + the next two daily ais_positions partitions and drops ones older than
 // AIS_RETENTION_DAYS (both functions live in the AisReadPath migration).

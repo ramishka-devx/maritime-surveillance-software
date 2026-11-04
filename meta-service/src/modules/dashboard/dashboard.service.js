@@ -16,7 +16,7 @@ const ACTIVE_HOURS = 1;
 const DENSITY_HOURS = 24;
 const DENSITY_COLS = 30;
 const DENSITY_ROWS = 20;
-// ais_positions keeps 7 days (partition-cron.js); older bins have no position history.
+// ais_positions keeps 2 days (partition-cron.js); older bins have no position history.
 const POSITION_RETENTION_MS = 7 * DAY;
 
 // UTC-aligned window ending with the current bin, plus the equal window before it.

@@ -184,7 +184,7 @@ export default function DashboardPage() {
       value: kpis.active_vessels.toLocaleString(),
       note: 'Reporting in the last hour',
       accent: true,
-      // null = before the 7-day position history
+      // null = before the 2-day position history
       spark: buckets.map((b) => b.active_vessels).filter((v) => v !== null),
       stroke: ink('accent'),
     },

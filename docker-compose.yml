@@ -44,10 +44,18 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Log on the kafkadata volume (the image default is /tmp inside the container).
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # Consumers read each message within seconds; keep 6 h for replay. Retention only
+      # deletes closed segments, so use 100 MB segments (~1 h of AIS) instead of 1 GB.
+      KAFKA_LOG_RETENTION_HOURS: 6
+      KAFKA_LOG_SEGMENT_BYTES: 104857600
     volumes:
       - kafkadata:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      # Port check, not kafka-topics.sh: that starts a JVM (~10 s of CPU) on every probe, which
+      # kept a core busy on the 2-vCPU VM and timed out under load.
+      test: ["CMD", "bash", "-c", "</dev/tcp/127.0.0.1/9092"]
       interval: 10s
       timeout: 10s
       retries: 15

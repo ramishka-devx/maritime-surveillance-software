@@ -12,7 +12,7 @@ const router = Router();
  * @openapi
  * /api/reports/daily-activity.csv:
  *   get:
- *     summary: Daily Activity CSV (REQ-F-060) - one row per vessel seen on a UTC day with position count, min/max SOG and first/last observed position. Header-only when the day has no data (ais_positions keeps 7 days). 503 if the report doesn't start within 5 s.
+ *     summary: Daily Activity CSV (REQ-F-060) - one row per vessel seen on a UTC day with position count, min/max SOG and first/last observed position. Header-only when the day has no data (ais_positions keeps 2 days). 503 if the report doesn't start within 5 s.
  *     tags: [Reports]
  *     parameters:
  *       - in: query
