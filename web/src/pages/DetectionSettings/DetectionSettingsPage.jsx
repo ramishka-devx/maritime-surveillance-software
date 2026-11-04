@@ -1,22 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RotateCcw, Save } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { apiRequest } from '../../lib/api.js';
+import Skeleton from '../../components/ui/Skeleton.jsx';
+import { btn, btnNeutral, btnPrimary, focusRing, kicker, pageShell, pageTitle, td, th } from '../../components/ui/bs.js';
 
-const kicker = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700';
-const focusRing = 'outline-none focus-visible:outline-bs-accent';
-const inputClass = `w-28 px-2 py-1 rounded-sm border border-bs-ink/[.16] bg-white text-[14px] tabular-nums text-right disabled:bg-transparent disabled:border-transparent ${focusRing}`;
-const buttonClass = `inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-sm text-[13px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${focusRing}`;
-
-const GROUPS = [
-  { id: 'speed', title: 'Speed anomaly', note: 'Positions above their vessel type’s p99 speed are scored by the IsolationForest model.' },
-  { id: 'alerts', title: 'Alerts', note: 'How repeated detections are turned into alerts.' },
-  { id: 'loitering', title: 'Loitering', note: 'Rule-based: a vessel staying within a small radius at low speed.' },
+// Two columns: speed on the left, alerts + loitering on the right.
+const COLUMNS = [
+  [{ id: 'speed', title: 'Speed anomaly' }],
+  [
+    { id: 'alerts', title: 'Alerts' },
+    { id: 'loitering', title: 'Loitering' },
+  ],
 ];
+
+const num = `h-8 w-24 px-2 text-right tabular-nums text-[13px] bg-bs-surface border rounded-sm hover:border-bs-ink/45 focus-visible:border-bs-accent disabled:opacity-60 ${focusRing} focus-visible:outline-offset-0`;
+const groupHead = `${kicker} pb-2 border-b border-bs-ink/[.16]`;
+// Threshold rows hold inputs, so use less vertical padding than the shared `td`.
+const tdTight = `${td} !py-1.5`;
 
 const fmtTime = (iso) => (iso ? new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
 const fmtKn = (v) => (v === null || v === undefined ? '—' : `${Number(v).toFixed(1)} kn`);
-const fmtValue = (v) => (v === null || v === undefined ? 'empty' : String(v));
+const fmtValue = (v) => (v === null || v === undefined ? 'auto' : String(v));
 
 // Form text <-> setting value. Empty means null (only the fallback p99 allows it).
 const toText = (v) => (v === null || v === undefined ? '' : String(v));
@@ -30,9 +35,64 @@ function describeChange(entry, labels) {
   }
   if (d.threshold) {
     const t = d.threshold;
-    return `${t.label} p99 override: ${t.from === null ? 'none' : `${t.from} kn`} → ${t.to === null ? 'none' : `${t.to} kn`}`;
+    return `${t.label} override: ${t.from === null ? 'none' : `${t.from} kn`} → ${t.to === null ? 'none' : `${t.to} kn`}`;
   }
   return `${entry.method} ${entry.path}`;
+}
+
+// Same shape as the loaded page: two columns of groups (heading, then label/help rows with
+// an input on the right), then the threshold table.
+function SkeletonRow({ lines = 2 }) {
+  return (
+    <div className="flex items-start gap-4 py-3 border-b border-bs-ink/[.08]">
+      <div className="flex-1 flex flex-col gap-1.5">
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-3 w-full max-w-[420px]" />
+        {lines > 1 && <Skeleton className="h-3 w-2/3 max-w-[260px]" />}
+      </div>
+      <Skeleton className="h-8 w-24 shrink-0" />
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  // Help-text line counts per row, roughly as the real settings wrap.
+  const group = (lines) => (
+    <section>
+      <div className="pb-2 border-b border-bs-ink/[.16]">
+        <Skeleton className="h-3 w-28" />
+      </div>
+      {lines.map((n, i) => (
+        <SkeletonRow key={i} lines={n} />
+      ))}
+    </section>
+  );
+  return (
+    <>
+      <div className="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-x-12 gap-y-8 items-start">
+        <div className="flex flex-col gap-8">{group([2, 2, 1, 2, 2, 2])}</div>
+        <div className="flex flex-col gap-8">
+          {group([2])}
+          {group([2, 1, 1, 1])}
+        </div>
+      </div>
+      <section className="mt-12">
+        <div className="pb-2 border-b border-bs-ink/[.16]">
+          <Skeleton className="h-3 w-52" />
+        </div>
+        <Skeleton className="h-3 w-80 mt-3" />
+        <div className="mt-4 pb-2.5 border-b border-bs-ink/[.16]">
+          <Skeleton className="h-3 w-24" />
+        </div>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="flex items-center gap-4 py-1.5 border-b border-bs-ink/[.08]">
+            <Skeleton className="h-4 w-40 flex-1 max-w-[220px]" />
+            <Skeleton className="h-8 w-20 ml-auto" />
+          </div>
+        ))}
+      </section>
+    </>
+  );
 }
 
 export default function DetectionSettingsPage() {
@@ -40,21 +100,30 @@ export default function DetectionSettingsPage() {
   const canEdit = isSuperAdmin();
 
   const [data, setData] = useState(null);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [notice, setNotice] = useState(null);
   const [form, setForm] = useState({});
   const [overrides, setOverrides] = useState({});
   const [busy, setBusy] = useState(false);
+
+  const showNotice = (text, isError = false) => {
+    setNotice({ text, isError });
+    setTimeout(() => setNotice((n) => (n?.text === text ? null : n)), 5000);
+  };
+
+  const reset = (d) => {
+    setForm(Object.fromEntries(d.settings.map((s) => [s.key, toText(s.value)])));
+    setOverrides(Object.fromEntries(d.thresholds.map((t) => [t.type_group, toText(t.p99_override)])));
+  };
 
   const load = useCallback(async () => {
     try {
       const d = await apiRequest('/api/detection-settings', { token });
       setData(d);
-      setForm(Object.fromEntries(d.settings.map((s) => [s.key, toText(s.value)])));
-      setOverrides(Object.fromEntries(d.thresholds.map((t) => [t.type_group, toText(t.p99_override)])));
-      setError('');
+      reset(d);
+      setLoadError('');
     } catch (e) {
-      setError(e.message || 'Could not load detection settings');
+      setLoadError(e.message || 'Could not load detection settings.');
     }
   }, [token]);
 
@@ -63,165 +132,132 @@ export default function DetectionSettingsPage() {
   }, [load]);
 
   const labels = useMemo(() => Object.fromEntries((data?.settings || []).map((s) => [s.key, s.label])), [data]);
-  const changed = useMemo(
-    () => (data?.settings || []).filter((s) => toText(s.value) !== (form[s.key] ?? '')),
-    [data, form]
-  );
+  const changedSettings = (data?.settings || []).filter((s) => toText(s.value) !== (form[s.key] ?? ''));
+  const changedThresholds = (data?.thresholds || []).filter((t) => toText(t.p99_override) !== (overrides[t.type_group] ?? ''));
+  const changes = changedSettings.length + changedThresholds.length;
+  const computedAt = (data?.thresholds || []).reduce((m, t) => (t.computed_at && (!m || t.computed_at > m) ? t.computed_at : m), null);
 
-  const run = async (fn, okMessage) => {
+  // Settings in one PUT, then each changed override. Stops at the first failure.
+  const save = async () => {
     setBusy(true);
-    setError('');
-    setNotice('');
     try {
-      await fn();
-      await load();
-      setNotice(okMessage);
+      if (changedSettings.length) {
+        await apiRequest('/api/detection-settings', {
+          token,
+          method: 'PUT',
+          body: Object.fromEntries(changedSettings.map((s) => [s.key, toValue(form[s.key])])),
+        });
+      }
+      for (const t of changedThresholds) {
+        await apiRequest(`/api/detection-settings/thresholds/${t.type_group}`, {
+          token,
+          method: 'PUT',
+          body: { p99_override: toValue(overrides[t.type_group] ?? '') },
+        });
+      }
+      showNotice(`Saved ${changes} change${changes === 1 ? '' : 's'}. analytic-service picks them up within a minute.`);
     } catch (e) {
-      setError(e.message || 'Saving failed');
+      showNotice(e.message || 'Saving failed.', true);
     } finally {
+      await load();
       setBusy(false);
     }
   };
 
-  const saveSettings = () =>
-    run(
-      () =>
-        apiRequest('/api/detection-settings', {
-          token,
-          method: 'PUT',
-          body: Object.fromEntries(changed.map((s) => [s.key, toValue(form[s.key])])),
-        }),
-      `Saved ${changed.length} setting${changed.length === 1 ? '' : 's'}. analytic-service picks changes up within a minute.`
-    );
-
-  const saveOverride = (t, value) =>
-    run(
-      () =>
-        apiRequest(`/api/detection-settings/thresholds/${t.type_group}`, {
-          token,
-          method: 'PUT',
-          body: { p99_override: value },
-        }),
-      value === null ? `Cleared the ${t.label} override.` : `${t.label} threshold set to ${value} kn.`
-    );
-
-  if (!data) {
-    return (
-      <div className="w-full h-full bg-slate-100 text-bs-ink font-sans pt-3 px-4">
-        <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Detection settings</h1>
-        <p className={`mt-4 text-[14px] ${error ? 'text-bs-accent-2-700 italic' : 'text-bs-neutral-700'}`}>{error || 'Loading…'}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-16" aria-busy={busy}>
-      <div className="flex flex-wrap items-end gap-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Detection settings</h1>
-          <p className="mt-1 text-[13px] text-bs-neutral-700">
-            {canEdit
-              ? 'Changes are audited and reach analytic-service within a minute, without a restart.'
-              : 'Read-only. Only a System Administrator can change detection settings.'}
-          </p>
-        </div>
-        {canEdit && (
-          <div className="ml-auto flex gap-2">
-            <button
-              onClick={() => setForm(Object.fromEntries(data.settings.map((s) => [s.key, toText(s.value)])))}
-              disabled={busy || !changed.length}
-              className={`${buttonClass} border border-bs-ink/[.16] hover:bg-bs-ink/[.07]`}
-            >
-              <RotateCcw size={15} /> Discard
+    <div className={pageShell} aria-busy={busy || !data}>
+      <div className="flex flex-wrap items-center gap-4 min-h-[42px]">
+        <h1 className={pageTitle}>Detection settings</h1>
+        {data && !canEdit && <span className="text-[13px] italic text-bs-neutral-700">Read-only</span>}
+        {canEdit && changes > 0 && (
+          <div className="ml-auto flex items-center gap-2.5">
+            <span role="status" className="text-[13px] italic text-bs-accent-2-700">Unsaved changes</span>
+            <button type="button" onClick={() => reset(data)} disabled={busy} className={`${btn} ${btnNeutral}`}>
+              Discard
             </button>
-            <button
-              onClick={saveSettings}
-              disabled={busy || !changed.length}
-              className={`${buttonClass} bg-bs-accent text-bs-bg hover:bg-bs-accent-700`}
-            >
-              <Save size={15} /> {busy ? 'Saving…' : `Save${changed.length ? ` (${changed.length})` : ''}`}
+            <button type="button" onClick={save} disabled={busy} className={`${btn} ${btnPrimary}`}>
+              {busy ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         )}
       </div>
 
-      {error && (
-        <p role="alert" className="mt-3 mb-0 text-[13px] italic text-bs-accent-2-700">
-          {error}
-        </p>
+      {!data && loadError && (
+        <p role="alert" className="mt-8 text-[14px] italic text-bs-accent-2-700">{loadError}</p>
       )}
-      {notice && (
-        <p role="status" className="mt-3 mb-0 text-[13px]">
-          {notice}
-        </p>
-      )}
+      {!data && !loadError && <LoadingSkeleton />}
 
-      <div className="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-x-12 gap-y-10">
-        {GROUPS.map((g) => (
-          <section key={g.id}>
-            <h2 className={kicker}>{g.title}</h2>
-            <p className="mt-1 mb-3 text-[13px] text-bs-neutral-700">{g.note}</p>
-            <div className="flex flex-col divide-y divide-bs-ink/[.08]">
-              {data.settings
-                .filter((s) => s.group === g.id)
-                .map((s) => (
-                  <label key={s.key} className="flex items-start gap-4 py-2.5">
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-[14px] font-medium">{s.label}</span>
-                      <span className="block text-[12px] text-bs-neutral-700">{s.help}</span>
-                      <span className="block text-[11px] text-bs-neutral-700 mt-0.5">
-                        Default {fmtValue(s.default)}
-                        {s.updated_by_name ? ` · changed by ${s.updated_by_name}, ${fmtTime(s.updated_at)}` : ''}
-                      </span>
-                    </span>
-                    <input
-                      type="number"
-                      step="any"
-                      value={form[s.key] ?? ''}
-                      placeholder={s.default === null ? 'auto' : undefined}
-                      disabled={!canEdit || busy}
-                      onChange={(e) => setForm((f) => ({ ...f, [s.key]: e.target.value }))}
-                      className={inputClass}
-                    />
-                  </label>
+      {data && (
+        <>
+          <div className="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-x-12 gap-y-8 items-start">
+            {COLUMNS.map((col, i) => (
+              <div key={i} className="flex flex-col gap-8 min-w-0">
+                {col.map((g) => (
+                  <section key={g.id}>
+                    <div className={groupHead}>{g.title}</div>
+                    {data.settings
+                      .filter((s) => s.group === g.id)
+                      .map((s) => {
+                        const text = form[s.key] ?? '';
+                        const dirty = text !== toText(s.value);
+                        const offDefault = toText(s.default) !== text;
+                        return (
+                          <label key={s.key} className="flex items-start gap-4 py-3 border-b border-bs-ink/[.08]">
+                            <span className="flex-1 min-w-0">
+                              <span className="block text-[14px]">{s.label}</span>
+                              <span className="block mt-0.5 text-[12px] text-bs-neutral-700">{s.help}</span>
+                            </span>
+                            <span className="shrink-0 flex flex-col items-end gap-1">
+                              {canEdit ? (
+                                <input
+                                  type="number"
+                                  step="any"
+                                  value={text}
+                                  placeholder={s.default === null ? 'auto' : undefined}
+                                  disabled={busy}
+                                  onChange={(e) => setForm((f) => ({ ...f, [s.key]: e.target.value }))}
+                                  className={`${num} ${dirty ? 'border-bs-accent' : 'border-bs-ink/[.16]'}`}
+                                />
+                              ) : (
+                                <span className="text-[14px] tabular-nums">{fmtValue(s.value)}</span>
+                              )}
+                              {offDefault && <span className="text-[11px] text-bs-neutral-700">default {fmtValue(s.default)}</span>}
+                            </span>
+                          </label>
+                        );
+                      })}
+                  </section>
                 ))}
-            </div>
-          </section>
-        ))}
-      </div>
+              </div>
+            ))}
+          </div>
 
-      <section className="mt-12">
-        <h2 className={kicker}>Speed thresholds by vessel type (p99 SOG)</h2>
-        <p className="mt-1 mb-3 text-[13px] text-bs-neutral-700">
-          Computed by analytic-service at each model refit. An override replaces the computed value for that vessel type.
-          Types with fewer than {data.values['speed.min_group_samples']} samples use the fallback, or their own p99 if higher.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[13px] tabular-nums">
-            <thead>
-              <tr className={`${kicker} text-left`}>
-                <th className="py-2 pr-4 font-normal">Vessel type</th>
-                <th className="py-2 pr-4 font-normal text-right">Samples</th>
-                <th className="py-2 pr-4 font-normal text-right">Computed</th>
-                <th className="py-2 pr-4 font-normal text-right">Override</th>
-                <th className="py-2 pr-4 font-normal text-right">In use</th>
-                <th className="py-2 font-normal">Computed at</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-bs-ink/[.08]">
-              {data.thresholds.map((t) => {
-                const text = overrides[t.type_group] ?? '';
-                const dirty = text !== toText(t.p99_override);
-                return (
-                  <tr key={t.type_group}>
-                    <td className="py-2 pr-4">
-                      {t.label} <span className="text-bs-neutral-700">({t.type_group})</span>
-                    </td>
-                    <td className="py-2 pr-4 text-right">{t.sample_count}</td>
-                    <td className="py-2 pr-4 text-right">{fmtKn(t.p99_computed)}</td>
-                    <td className="py-2 pr-4 text-right">
-                      {canEdit ? (
-                        <span className="inline-flex items-center gap-1.5">
+          <section className="mt-12">
+            <div className={groupHead}>Speed thresholds by vessel type</div>
+            <p className="mt-2 text-[12px] text-bs-neutral-700">
+              p99 speed per type, {computedAt ? `computed ${fmtTime(computedAt)}` : 'not computed yet'}. An override replaces the computed value.
+            </p>
+            <table className="mt-2 w-full text-[14px] border-collapse tabular-nums">
+              <thead>
+                <tr className="text-left text-[11px] tracking-[0.08em] uppercase text-bs-ink/60">
+                  <th className={th}>Vessel type</th>
+                  <th className={`${th} text-right`}>Samples</th>
+                  <th className={`${th} text-right`}>Computed</th>
+                  <th className={`${th} text-right`}>Override</th>
+                  <th className={`${th} text-right`}>In use</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.thresholds.map((t) => {
+                  const text = overrides[t.type_group] ?? '';
+                  const dirty = text !== toText(t.p99_override);
+                  return (
+                    <tr key={t.type_group} className="border-b border-bs-ink/[.08] hover:bg-bs-ink/[.04]">
+                      <td className={tdTight}>{t.label}</td>
+                      <td className={`${tdTight} text-right text-bs-neutral-700`}>{t.sample_count}</td>
+                      <td className={`${tdTight} text-right`}>{fmtKn(t.p99_computed)}</td>
+                      <td className={`${tdTight} text-right`}>
+                        {canEdit ? (
                           <input
                             type="number"
                             step="0.1"
@@ -229,48 +265,45 @@ export default function DetectionSettingsPage() {
                             max="100"
                             value={text}
                             placeholder="none"
+                            aria-label={`${t.label} override (kn)`}
                             disabled={busy}
                             onChange={(e) => setOverrides((o) => ({ ...o, [t.type_group]: e.target.value }))}
-                            className={`${inputClass} w-20`}
+                            className={`${num} w-20 ${dirty ? 'border-bs-accent' : 'border-bs-ink/[.16]'}`}
                           />
-                          <button
-                            onClick={() => saveOverride(t, toValue(text))}
-                            disabled={busy || !dirty}
-                            className={`${buttonClass} px-2 py-1 border border-bs-ink/[.16] hover:bg-bs-ink/[.07]`}
-                          >
-                            Set
-                          </button>
-                        </span>
-                      ) : (
-                        fmtKn(t.p99_override)
-                      )}
-                    </td>
-                    <td className="py-2 pr-4 text-right font-semibold">{fmtKn(t.p99_effective)}</td>
-                    <td className="py-2 text-bs-neutral-700">{fmtTime(t.computed_at)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                        ) : (
+                          fmtKn(t.p99_override)
+                        )}
+                      </td>
+                      <td className={`${tdTight} text-right font-semibold`}>{fmtKn(t.p99_effective)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </section>
 
-      <section className="mt-12 max-w-[960px]">
-        <h2 className={kicker}>Change history</h2>
-        {data.history.length === 0 ? (
-          <p className="mt-2 text-[13px] text-bs-neutral-700">No changes yet.</p>
-        ) : (
-          <ul className="mt-2 flex flex-col divide-y divide-bs-ink/[.08] list-none p-0">
+          <section className="mt-12 max-w-[960px]">
+            <div className={groupHead}>Change history</div>
+            {data.history.length === 0 && <p className="py-3 m-0 text-[14px] italic text-bs-neutral-700">No changes yet.</p>}
             {data.history.map((h) => (
-              <li key={h.activity_id} className="py-2 text-[13px] flex flex-wrap gap-x-4">
-                <span className="text-bs-neutral-700 w-40 shrink-0">{fmtTime(h.created_at)}</span>
-                <span className="font-medium w-40 shrink-0">{h.user_name || 'Unknown user'}</span>
+              <div key={h.activity_id} className="flex flex-wrap gap-x-4 py-3 border-b border-bs-ink/[.08] text-[14px]">
+                <span className="w-44 shrink-0 font-mono text-[13px] text-bs-neutral-700">{fmtTime(h.created_at)}</span>
+                <span className="w-40 shrink-0">{h.user_name || 'Unknown user'}</span>
                 <span className="flex-1 min-w-[240px]">{describeChange(h, labels)}</span>
-              </li>
+              </div>
             ))}
-          </ul>
-        )}
-      </section>
+          </section>
+        </>
+      )}
+
+      {notice && (
+        <div role="status" className="fixed left-1/2 -translate-x-1/2 bottom-6 z-[900] max-w-[80%] px-4 py-2.5 bg-bs-bg shadow-bs-lg text-[13px] flex items-center gap-3">
+          <span className={notice.isError ? 'italic text-bs-accent-2-700' : 'italic'}>{notice.text}</span>
+          <button type="button" onClick={() => setNotice(null)} aria-label="Dismiss" className={`text-bs-neutral-700 ${focusRing}`}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
