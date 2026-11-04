@@ -1,6 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Crosshair, FileText, Maximize2, Minus, ShieldCheck, TriangleAlert, X } from 'lucide-react';
 import { formatLatLon } from '../../lib/coords.js';
+import { trackSummary } from '../../lib/track.js';
 
 const kicker = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700';
 const iconBtn =
@@ -12,6 +14,60 @@ const num = (v) => {
   const n = parseFloat(v);
   return Number.isFinite(n) ? n : null;
 };
+const hhmm = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const sevTag = (sev) =>
+  sev === 'critical' || sev === 'high' ? 'bg-bs-accent-2-100 text-bs-accent-2-700' : 'bg-bs-neutral-100 text-bs-neutral-800';
+
+// Dossier section: the vessel's last 24 h from the history API, plus its alerts.
+function Dossier({ history }) {
+  if (history.loading) return <p className="mt-5 text-[13px] italic text-bs-neutral-700">Loading history…</p>;
+  if (history.error) return <p className="mt-5 text-[13px] text-bs-accent-2-700">{history.error}</p>;
+  const s = trackSummary(history.points);
+  const alerts = history.alerts || [];
+  const kn = (v) => (v == null ? '—' : `${v.toFixed(1)} kn`);
+  return (
+    <div className="mt-5">
+      <div className={kicker}>Last 24 hours</div>
+      {s ? (
+        <dl className="mt-1 text-[13px] divide-y divide-bs-ink/[.08]">
+          {[
+            ['Reports', s.reports],
+            ['Distance', `${s.distanceNm.toFixed(1)} nm`],
+            ['Time span', `${hhmm(s.from)} – ${hhmm(s.to)}`],
+            ['Average speed', kn(s.avgSog)],
+            ['Max speed', kn(s.maxSog)],
+          ].map(([label, value]) => (
+            <div key={label} className="flex justify-between gap-4 py-[7px]">
+              <dt className="text-bs-neutral-700 shrink-0">{label}</dt>
+              <dd className="text-right tabular-nums">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <p className="mt-1 text-[13px] italic text-bs-neutral-700">No positions recorded in the last 24 h.</p>
+      )}
+
+      <div className={`${kicker} mt-4`}>Alerts</div>
+      {alerts.length ? (
+        <ul className="mt-1 text-[13px] divide-y divide-bs-ink/[.08]">
+          {alerts.slice(0, 5).map((a) => (
+            <li key={a.alert_id} className="flex items-center gap-2 py-[7px]">
+              <span className={`text-[11px] px-2 py-px rounded-sm capitalize ${sevTag(a.severity)}`}>{a.severity}</span>
+              <span className="truncate">{a.title}</span>
+              <span className="ml-auto shrink-0 text-[12px] italic text-bs-neutral-700">{a.status}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-1 text-[13px] italic text-bs-neutral-700">No alerts for this vessel.</p>
+      )}
+      <Link to="/Alerts" className="mt-2 inline-block text-[13px] text-bs-accent-700 hover:underline underline-offset-[3px]">
+        Open alerts page
+      </Link>
+    </div>
+  );
+}
+
 const metres = (v) => (v == null || v === '' ? null : String(v).includes('m') ? String(v) : `${v} m`);
 
 export default function VesselDossierPopup({
@@ -20,9 +76,11 @@ export default function VesselDossierPopup({
   isMinimized = false,
   onToggleMinimize,
   onClose,
+  trackOn = false,
+  dossierOn = false,
+  history = {},
   onTrack,
-  onIntercept,
-  onViewProfile,
+  onDossier,
 }) {
   if (!vessel) return null;
 
@@ -83,7 +141,7 @@ export default function VesselDossierPopup({
   const Banner = isAlert ? TriangleAlert : ShieldCheck;
 
   return (
-    <div style={pos} className="absolute top-[76px] w-[380px] z-30 bg-bs-bg text-bs-ink shadow-bs-lg px-6 pt-5 pb-6 font-sans">
+    <div style={pos} className="absolute top-[76px] w-[380px] max-h-[calc(100%-100px)] overflow-y-auto scroll-thin z-30 bg-bs-bg text-bs-ink shadow-bs-lg px-6 pt-5 pb-6 font-sans">
       {/* Name, status, identifiers */}
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
@@ -161,25 +219,25 @@ export default function VesselDossierPopup({
         ))}
       </dl>
 
+      {dossierOn && <Dossier history={history} />}
+
       {/* Actions */}
       <div className="mt-5 flex gap-2.5">
-        <button onClick={onTrack} className={`${actionBtn} border-bs-ink/[.16] hover:bg-bs-ink/[.07]`}>
-          <Crosshair size={16} />
-          Track
-        </button>
         <button
-          onClick={onIntercept}
-          className={`${actionBtn} border-bs-accent-2 text-bs-accent-2-700 hover:bg-bs-accent-2-100`}
+          onClick={onTrack}
+          aria-pressed={trackOn}
+          className={`${actionBtn} ${trackOn ? 'border-bs-accent text-bs-accent-700 bg-bs-accent-100' : 'border-bs-ink/[.16] hover:bg-bs-ink/[.07]'}`}
         >
-          <TriangleAlert size={16} />
-          Intercept
+          <Crosshair size={16} />
+          {trackOn && history.loading ? 'Loading…' : trackOn ? 'Hide track' : 'Track'}
         </button>
         <button
-          onClick={onViewProfile}
+          onClick={onDossier}
+          aria-pressed={dossierOn}
           className={`${actionBtn} border-transparent bg-bs-accent text-bs-bg hover:bg-bs-accent-700`}
         >
           <FileText size={16} />
-          Dossier
+          {dossierOn ? 'Hide dossier' : 'Dossier'}
         </button>
       </div>
     </div>

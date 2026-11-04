@@ -1,80 +1,60 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Check, ChevronRight, Crosshair, TriangleAlert } from 'lucide-react';
+import { apiRequest } from '../../lib/api.js';
+import { useAuth } from '../../auth/AuthContext.jsx';
+
+const SEVERITY_TYPE = { critical: 'CRITICAL', high: 'WARNING', medium: 'WARNING', low: 'INFO' };
+
+function ago(iso) {
+  if (!iso) return '';
+  const min = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (min < 60) return `${min} min ago`;
+  if (min < 48 * 60) return `${Math.round(min / 60)} h ago`;
+  return `${Math.round(min / 1440)} d ago`;
+}
+
+const toStreamAlert = (a) => ({
+  id: a.alert_id,
+  title: a.title,
+  vesselName: a.vessel_name || 'Unknown vessel',
+  mmsi: a.mmsi,
+  type: SEVERITY_TYPE[a.severity] || 'INFO',
+  time: ago(a.created_at),
+  details: a.description,
+  lat: a.lat,
+  lon: a.lon,
+  acknowledged: a.status === 'acknowledged',
+});
 
 export default function AlertsStream({
   isOpen = false,
   onToggle,
   onFocusAlert,
 }) {
+  const { token } = useAuth();
   const [filter, setFilter] = useState('ALL');
-  const [alerts, setAlerts] = useState([
-    {
-      id: 'ALT-9041',
-      title: 'AIS Identity Spoofing Detected',
-      vesselName: 'MV NORDIC SENTINEL',
-      mmsi: '211284000',
-      type: 'CRITICAL',
-      time: '2s ago',
-      details: 'Dual position reports received. Kinematics exceed hull displacement limits by 3.4x.',
-      confidence: '94%',
-      targetCoords: { x: 580, y: 340 },
-      acknowledged: false,
-    },
-    {
-      id: 'ALT-9040',
-      title: 'Geofence Incursion: Sector Bravo-4',
-      vesselName: 'OCEAN VOYAGER',
-      mmsi: '235089200',
-      type: 'CRITICAL',
-      time: '1m ago',
-      details: 'Unscheduled entry into naval munitions holding zone without clearance beacon.',
-      confidence: '98%',
-      targetCoords: { x: 920, y: 280 },
-      acknowledged: false,
-    },
-    {
-      id: 'ALT-9039',
-      title: 'AIS Transponder Dark Event',
-      vesselName: 'STELLA MARIS',
-      mmsi: '244780000',
-      type: 'WARNING',
-      time: '4m ago',
-      details: 'Signal lost in Dover TSS inbound corridor. Last recorded speed was 16.2 KTS.',
-      confidence: '89%',
-      targetCoords: { x: 640, y: 310 },
-      acknowledged: false,
-    },
-    {
-      id: 'ALT-9038',
-      title: 'Gross Course Deviation (>45°)',
-      vesselName: 'PACIFIC OPAL',
-      mmsi: '352981000',
-      type: 'WARNING',
-      time: '8m ago',
-      details: 'Departed assigned TSS lane into oncoming separation zone. Potential collision hazard.',
-      confidence: '91%',
-      targetCoords: { x: 1130, y: 390 },
-      acknowledged: true,
-    },
-    {
-      id: 'ALT-9037',
-      title: 'Potential Ship-to-Ship (STS) Rendezvous',
-      vesselName: 'SEA SWIFT // UNREGISTERED',
-      mmsi: '311000452',
-      type: 'INFO',
-      time: '14m ago',
-      details: 'Two targets drifting in contact distance (<50m) in unmonitored sector for 22 mins.',
-      confidence: '86%',
-      targetCoords: { x: 480, y: 140 },
-      acknowledged: false,
-    },
-  ]);
+  const [alerts, setAlerts] = useState([]);
+
+  useEffect(() => {
+    if (!token) return undefined;
+    let stale = false;
+    const load = () =>
+      apiRequest('/api/alerts?status=open,acknowledged,escalated&sort=severity&limit=100', { token })
+        .then((res) => !stale && setAlerts((res.rows || []).map(toStreamAlert)))
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 15000);
+    return () => {
+      stale = true;
+      clearInterval(timer);
+    };
+  }, [token]);
 
   const handleAcknowledge = (id, e) => {
     e.stopPropagation();
-    setAlerts((prev) =>
-      prev.map((alt) => (alt.id === id ? { ...alt, acknowledged: true } : alt))
-    );
+    apiRequest(`/api/alerts/${id}/status`, { token, method: 'PUT', body: { status: 'acknowledged' } })
+      .then(() => setAlerts((prev) => prev.map((alt) => (alt.id === id ? { ...alt, acknowledged: true } : alt))))
+      .catch(() => {});
   };
 
   const filteredAlerts = alerts.filter((a) => {
@@ -140,7 +120,10 @@ export default function AlertsStream({
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto border-t border-bs-ink/[.16] divide-y divide-bs-ink/[.08]">
+      <div className="flex-1 overflow-y-auto scroll-thin border-t border-bs-ink/[.16] divide-y divide-bs-ink/[.08]">
+        {filteredAlerts.length === 0 && (
+          <p className="px-5 py-6 text-[13px] italic text-bs-neutral-700">No open alerts.</p>
+        )}
         {filteredAlerts.map((alert) => (
           <div
             key={alert.id}
@@ -152,7 +135,6 @@ export default function AlertsStream({
                 {alert.type.toLowerCase()}
               </span>
               <span className="italic text-bs-neutral-700">{alert.time}</span>
-              <span className="ml-auto text-bs-neutral-700 tabular-nums">{alert.confidence} confidence</span>
             </div>
             <h4 className="mt-1.5 text-[14px] font-semibold leading-snug">{alert.title}</h4>
             <div className="text-[12px] text-bs-accent-700 font-semibold">

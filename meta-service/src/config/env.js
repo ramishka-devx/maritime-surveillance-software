@@ -6,6 +6,7 @@ export const env = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   permissionsBypass: process.env.PERMISSIONS_BYPASS === 'true',
+  cronEnabled: process.env.CRON_ENABLED !== 'false',
   admin: {
     // If set, allows creating a super_admin via public /api/users/register by providing this secret.
     // Leave empty to disable super_admin self-registration.

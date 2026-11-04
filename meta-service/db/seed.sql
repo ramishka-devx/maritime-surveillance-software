@@ -51,27 +51,3 @@ ON CONFLICT DO NOTHING;
 -- Keep identity sequences in sync after explicit inserts
 SELECT setval(pg_get_serial_sequence('roles', 'role_id'), (SELECT COALESCE(MAX(role_id), 1) FROM roles), true);
 SELECT setval(pg_get_serial_sequence('users', 'user_id'), (SELECT COALESCE(MAX(user_id), 1) FROM users), true);
-INSERT INTO vessels (vessel_id, mmsi, imo, name, callsign, flag, vessel_type, length_m, width_m)
-VALUES
-	(1, '123456789', 'IMO1234567', 'SERAN GUARD', 'SG001', 'Unknown', 'Patrol', 35.50, 7.20)
-ON CONFLICT (vessel_id) DO UPDATE
-SET mmsi = EXCLUDED.mmsi,
-		imo = EXCLUDED.imo,
-		name = EXCLUDED.name,
-		callsign = EXCLUDED.callsign,
-		flag = EXCLUDED.flag,
-		vessel_type = EXCLUDED.vessel_type,
-		length_m = EXCLUDED.length_m,
-		width_m = EXCLUDED.width_m;
-
-SELECT setval(pg_get_serial_sequence('vessels', 'vessel_id'), (SELECT COALESCE(MAX(vessel_id), 1) FROM vessels), true);
-
--- Positions (sample)
-INSERT INTO vessel_positions (vessel_id, recorded_at, lat, lon, sog_kn, cog_deg, heading_deg, nav_status, source)
-VALUES
-	(1, NOW(), 6.524379, 3.379206, 12.4, 86.2, 85, 'Under way using engine', 'ais');
-
--- Alerts (sample)
-INSERT INTO alerts (vessel_id, type, severity, status, title, description, created_by, assigned_to)
-VALUES
-	(1, 'manual', 'medium', 'open', 'Test alert', 'Sample alert for maritime surveillance', 1, 2);

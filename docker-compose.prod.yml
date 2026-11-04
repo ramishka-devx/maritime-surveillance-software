@@ -1,0 +1,72 @@
+# Production overlay: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Secrets come from ./.env on the server (see .env.prod.example).
+services:
+  postgres:
+    # Loopback only: not reachable from the internet; local dev connects through an SSH tunnel.
+    ports: !override ["127.0.0.1:5432:5432"]
+    restart: unless-stopped
+
+  kafka:
+    ports: !reset []
+    restart: unless-stopped
+    environment:
+      KAFKA_HEAP_OPTS: -Xmx256m -Xms256m
+
+  meta-service:
+    build: { context: ., dockerfile: meta-service/Dockerfile }
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-ais_db}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 1d
+      PERMISSIONS_BYPASS: "false"
+      # Every request reaches Express from the nginx container's IP, so this limit is shared.
+      RATE_LIMIT_MAX: 2000
+
+  ingest-service:
+    build: { context: ., dockerfile: ingest-service/Dockerfile }
+    restart: unless-stopped
+    depends_on:
+      kafka-init: { condition: service_completed_successfully }
+      meta-service: { condition: service_started }
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-ais_db}
+      AIS_STREAM_IO_API_KEY: ${AIS_STREAM_IO_API_KEY}
+      KAFKA_ENABLED: "true"
+      KAFKA_BROKERS: kafka:19092
+
+  analytic-service:
+    build: { context: ., dockerfile: analytic-service/Dockerfile }
+    restart: unless-stopped
+    depends_on:
+      kafka-init: { condition: service_completed_successfully }
+    environment:
+      KAFKA_BROKERS: kafka:19092
+      KAFKA_TOPIC: ais.raw.messages
+      KAFKA_GROUP_ID: analytic-speed-anomalies
+      META_SERVICE_URL: http://meta-service:5000
+      META_SERVICE_TOKEN: ${META_SERVICE_TOKEN:-}
+      ANOMALY_CONTAMINATION: "0.01"
+      ANOMALY_N_ESTIMATORS: "200"
+      ANOMALY_WINDOW_SIZE: "1000"
+      ANOMALY_MIN_SAMPLES: "100"
+
+  web:
+    build: { context: ., dockerfile: web/Dockerfile }
+    restart: unless-stopped
+    depends_on: [meta-service]
+    ports:
+      - "80:80"

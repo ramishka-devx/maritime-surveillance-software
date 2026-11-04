@@ -6,6 +6,9 @@ import VesselDossierPopup from '../../components/map/VesselDossierPopup.jsx';
 import AlertsStream from '../../components/map/AlertsStream.jsx';
 import BottomHud from '../../components/map/BottomHud.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
+import { useAuth } from '../../auth/AuthContext.jsx';
+import { apiRequest } from '../../lib/api.js';
+import { splitSegments } from '../../lib/track.js';
 
 export default function MapPage() {
   const {
@@ -48,6 +51,36 @@ export default function MapPage() {
 
   const handleMapReady = useCallback((map) => setMapInstance(map), []);
 
+  // Track / Dossier for the selected vessel. Keyed by MMSI, so picking another vessel
+  // simply starts from a blank state; the 24 h history is fetched once and shared.
+  const { token } = useAuth();
+  const selMmsi = selectedVessel?.mmsi ? String(selectedVessel.mmsi) : null;
+  const [historyState, setHistoryState] = useState({ mmsi: null });
+  const history = historyState.mmsi === selMmsi ? historyState : { mmsi: selMmsi };
+
+  const toggleHistory = (key) => {
+    if (!selMmsi) return;
+    const next = { ...history, [key]: !history[key] };
+    if (!next[key] || history.points || history.loading) return setHistoryState(next);
+
+    setHistoryState({ ...next, loading: true, error: null });
+    const from = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const update = (patch) => setHistoryState((h) => (h.mmsi === selMmsi ? { ...h, loading: false, ...patch } : h));
+    Promise.all([
+      apiRequest(`/api/ais/positions/${selMmsi}?from=${encodeURIComponent(from)}&limit=5000`, { token }),
+      apiRequest(`/api/alerts?mmsi=${selMmsi}&limit=20`, { token })
+        .then((r) => r.rows || [])
+        .catch(() => []),
+    ])
+      .then(([rows, alerts]) => update({ points: [...(rows || [])].reverse(), alerts }))
+      .catch((err) => update({ error: err.message || 'Could not load vessel history' }));
+  };
+
+  const trackSegments = useMemo(
+    () => (history.track && history.points ? splitSegments(history.points) : null),
+    [history.track, history.points]
+  );
+
   const flaggedCount = useMemo(
     () => fleetStats.allVessels.filter((v) => getVesselThreat(v) !== 'normal').length,
     [fleetStats.allVessels]
@@ -79,7 +112,7 @@ export default function MapPage() {
 
   const handleResetBearing = useCallback(() => {
     if (mapInstance) {
-      mapInstance.setView([7.87, 80.2], 7, { animate: true });
+      mapInstance.setView([52.59, 6.158], 7, { animate: true });
     }
   }, [mapInstance]);
 
@@ -87,24 +120,12 @@ export default function MapPage() {
     const found = vessels.find((v) => String(v.mmsi) === String(alert.mmsi));
     if (found) {
       focusVessel(found);
-    } else {
+    } else if (alert.lat != null && alert.lon != null) {
+      // Vessel isn't in the current view's feed: open the alert at its recorded position.
       focusVessel({
         name: alert.vesselName,
-        callSign: 'TGT-ACT',
-        flag: 'Classified / Monitored',
-        type: alert.title,
         mmsi: alert.mmsi,
-        imo: '9182341',
-        position: [6.92, 79.84],
-        coordinates: "06°55'10.4\"N 079°48'12.0\"E",
-        sog: '16.4 KTS',
-        cog: '055° T',
-        heading: '056°',
-        draught: '10.2 m',
-        length: '188 m',
-        beam: '28 m',
-        destination: 'COLOMBO SECTOR PATROL',
-        navStatus: 'Restricted Manoeuvrability',
+        position: [Number(alert.lat), Number(alert.lon)],
         threatLevel: alert.type,
         threatReason: alert.title,
         threatDetail: alert.details,
@@ -129,6 +150,7 @@ export default function MapPage() {
           vessels={vessels}
           filters={filters}
           onFleetUpdate={setFleetStats}
+          track={trackSegments}
         />
 
         {/* Colour key: type colours for normal traffic, magenta box for alerts */}
@@ -161,9 +183,11 @@ export default function MapPage() {
             isMinimized={isDossierMinimized}
             onToggleMinimize={() => setIsDossierMinimized(!isDossierMinimized)}
             onClose={() => setSelectedVessel(null)}
-            onTrack={() => alert(`Tracking active: ${selectedVessel.name}`)}
-            onIntercept={() => alert(`Vector intercept generated for ${selectedVessel.name}`)}
-            onViewProfile={() => alert(`Opening comprehensive dossier for MMSI ${selectedVessel.mmsi}`)}
+            trackOn={!!history.track}
+            dossierOn={!!history.dossier}
+            history={history}
+            onTrack={() => toggleHistory('track')}
+            onDossier={() => toggleHistory('dossier')}
           />
         )}
 

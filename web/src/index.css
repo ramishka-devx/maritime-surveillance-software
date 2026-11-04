@@ -78,3 +78,18 @@
   color: rgb(var(--bs-accent-700));
 }
 
+
+@layer utilities {
+  /* Quiet overlay-panel scrollbar: thin ink thumb, no track. */
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--bs-ink) / 0.25) transparent;
+  }
+  .scroll-thin::-webkit-scrollbar { width: 6px; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: rgb(var(--bs-ink) / 0.25);
+    border-radius: 3px;
+  }
+  .scroll-thin::-webkit-scrollbar-thumb:hover { background: rgb(var(--bs-ink) / 0.4); }
+}
