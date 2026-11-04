@@ -37,25 +37,25 @@ function getBinStyles(bin, threshold) {
   if (bin.max <= threshold) {
     if (bin.max <= 0.6) {
       return {
-        color: 'bg-surface-container-highest hover:bg-outline-variant',
-        textClass: 'text-outline opacity-80',
+        color: 'bg-slate-200 hover:bg-slate-300',
+        textClass: 'text-slate-500',
       };
     }
     return {
-      color: 'bg-cyan-500/40 hover:bg-cyan-400/60',
-      textClass: 'text-cyan-400/90',
+      color: 'bg-[#0891b2]/40 hover:bg-[#0891b2]/60',
+      textClass: 'text-[#0891b2] font-semibold',
     };
   }
   // At or above detection threshold
   if (bin.min >= 0.85 || bin.min >= threshold + 0.1) {
     return {
-      color: 'bg-red-500 hover:bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.4)]',
-      textClass: 'text-red-400 font-bold',
+      color: 'bg-red-500 hover:bg-red-600 shadow-xs',
+      textClass: 'text-red-600 font-bold',
     };
   }
   return {
-    color: 'bg-amber-500/80 hover:bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.3)]',
-    textClass: 'text-amber-400 font-bold',
+    color: 'bg-amber-500 hover:bg-amber-600 shadow-xs',
+    textClass: 'text-amber-700 font-bold',
   };
 }
 
@@ -183,20 +183,20 @@ export default function AnomaliesScoreDistribution({
   }, [activeFleet, scoreThreshold, selectedScore, totalEvaluated]);
 
   return (
-    <div className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-4 flex flex-col justify-between shadow-sm font-sans select-none">
+    <div className="bg-white border border-slate-200 rounded-sm p-4 flex flex-col justify-between shadow-xs font-sans select-none">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20 mb-3">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-3">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-cyan-400 text-[18px]">
+            <span className="material-symbols-outlined text-[#0891b2] text-[18px]">
               bar_chart
             </span>
-            <span className="text-xs font-bold uppercase tracking-wide text-on-surface">
+            <span className="text-xs font-bold uppercase tracking-wide text-slate-900">
               Score Distribution
             </span>
             {peerGroup && peerGroup !== 'ALL' && (
               <span
-                className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/40 truncate max-w-[110px]"
+                className="text-[10px] font-mono px-1.5 py-0.2 rounded-sm bg-cyan-50 text-[#0891b2] border border-cyan-200 truncate max-w-[110px] font-semibold"
                 title={`Filtered to ${peerGroup}`}
               >
                 {peerGroup}
@@ -204,7 +204,7 @@ export default function AnomaliesScoreDistribution({
             )}
           </div>
           <span
-            className="font-mono text-xs text-emerald-400 font-semibold"
+            className="font-mono text-xs text-emerald-600 font-bold"
             title="95th Percentile Anomaly Score across evaluated tracks"
           >
             p95: {p95Score}
@@ -212,21 +212,21 @@ export default function AnomaliesScoreDistribution({
         </div>
 
         {/* Metrics Strip */}
-        <div className="flex items-center justify-between text-xs font-mono bg-surface-container-lowest px-2.5 py-1.5 rounded border border-outline-variant/30 mb-3">
-          <span className="text-outline" title="Arithmetic Mean of fleet anomaly scores">
-            Mean: <span className="text-on-surface font-semibold">{meanScore}</span>
+        <div className="flex items-center justify-between text-xs font-mono bg-slate-50 px-2.5 py-1.5 rounded-sm border border-slate-200 mb-3">
+          <span className="text-slate-500" title="Arithmetic Mean of fleet anomaly scores">
+            Mean: <span className="text-slate-900 font-bold">{meanScore}</span>
           </span>
           <span
-            className="text-outline"
+            className="text-slate-500"
             title="Proportion of critical severity tracks (score >= 0.85)"
           >
-            Contamination: <span className="text-cyan-400 font-semibold">{contaminationPct}</span>
+            Contamination: <span className="text-[#0891b2] font-bold">{contaminationPct}</span>
           </span>
           <span
-            className="text-outline"
+            className="text-slate-500"
             title={`Tracks exceeding threshold score > ${Number(scoreThreshold).toFixed(2)} (${outlierCount}/${totalEvaluated})`}
           >
-            Outliers: <span className="text-red-400 font-semibold">{outliersPct}</span>
+            Outliers: <span className="text-red-600 font-bold">{outliersPct}</span>
           </span>
         </div>
 
@@ -246,7 +246,7 @@ export default function AnomaliesScoreDistribution({
               {/* Selected vessel indicator */}
               {bin.isSelected && (
                 <span
-                  className="material-symbols-outlined text-cyan-400 text-[12px] animate-bounce -mb-0.5"
+                  className="material-symbols-outlined text-[#0891b2] text-[12px] animate-bounce -mb-0.5"
                   title={`Selected vessel (${selectedVessel?.name}) falls in this score bin`}
                 >
                   arrow_drop_down
@@ -256,16 +256,16 @@ export default function AnomaliesScoreDistribution({
               <span
                 className={`font-mono text-[9px] mb-1 leading-none ${
                   bin.isSelected
-                    ? 'text-cyan-300 font-bold'
-                    : bin.textClass || 'text-outline opacity-80'
+                    ? 'text-[#0891b2] font-bold'
+                    : bin.textClass || 'text-slate-500'
                 }`}
               >
                 {bin.count}
               </span>
               <div
-                className={`w-full rounded-t transition-all ${bin.color} ${
+                className={`w-full rounded-t-sm transition-all ${bin.color} ${
                   bin.isSelected
-                    ? 'ring-2 ring-cyan-400 ring-offset-1 ring-offset-[#0b1220] brightness-125'
+                    ? 'ring-2 ring-[#0891b2] ring-offset-1 ring-offset-white brightness-110'
                     : ''
                 }`}
                 style={{ height: bin.height }}
@@ -273,10 +273,10 @@ export default function AnomaliesScoreDistribution({
               <span
                 className={`font-mono text-[9px] mt-1.5 leading-none ${
                   bin.isSelected
-                    ? 'text-cyan-300 font-bold'
+                    ? 'text-[#0891b2] font-bold'
                     : bin.textClass
                     ? bin.textClass.replace('font-bold', 'font-semibold')
-                    : 'text-outline'
+                    : 'text-slate-500'
                 }`}
               >
                 {bin.label}
@@ -287,25 +287,25 @@ export default function AnomaliesScoreDistribution({
 
         {/* Hover / Selection Detail Ribbon */}
         {hoveredBin ? (
-          <div className="mt-1 px-2 py-1 bg-surface-container-lowest rounded border border-outline-variant/30 text-[10px] font-mono flex items-center justify-between text-outline">
+          <div className="mt-1 px-2 py-1 bg-slate-50 rounded-sm border border-slate-200 text-[10px] font-mono flex items-center justify-between text-slate-600">
             <span>
-              Range <strong className="text-cyan-400">{hoveredBin.label}</strong>:
+              Range <strong className="text-[#0891b2]">{hoveredBin.label}</strong>:
             </span>
             <span>
-              <strong className="text-white">{hoveredBin.count}</strong> tracks ({hoveredBin.pct}%)
+              <strong className="text-slate-900">{hoveredBin.count}</strong> tracks ({hoveredBin.pct}%)
             </span>
           </div>
         ) : selectedVessel ? (
-          <div className="mt-1 px-2 py-1 bg-surface-container-lowest rounded border border-outline-variant/30 text-[10px] font-mono flex items-center justify-between text-outline">
+          <div className="mt-1 px-2 py-1 bg-slate-50 rounded-sm border border-slate-200 text-[10px] font-mono flex items-center justify-between text-slate-600">
             <span className="truncate max-w-[180px]">
-              Target: <strong className="text-cyan-400">{selectedVessel.name || selectedVessel.mmsi}</strong>
+              Target: <strong className="text-[#0891b2]">{selectedVessel.name || selectedVessel.mmsi}</strong>
             </span>
             <span>
-              Score: <strong className="text-amber-400">{(selectedScore || 0).toFixed(2)}</strong>
+              Score: <strong className="text-amber-700">{(selectedScore || 0).toFixed(2)}</strong>
             </span>
           </div>
         ) : (
-          <div className="mt-1 px-2 py-1 bg-surface-container-lowest/40 rounded border border-outline-variant/20 text-[10px] font-mono flex items-center justify-between text-outline/60">
+          <div className="mt-1 px-2 py-1 bg-slate-50/70 rounded-sm border border-slate-200 text-[10px] font-mono flex items-center justify-between text-slate-500">
             <span>Evaluated Fleet Population:</span>
             <span>{totalEvaluated} live tracks</span>
           </div>
@@ -313,14 +313,14 @@ export default function AnomaliesScoreDistribution({
       </div>
 
       {/* Histogram Footer Attribution */}
-      <div className="mt-3 pt-2 border-t border-outline-variant/20 flex flex-col gap-1 text-xs font-mono">
+      <div className="mt-3 pt-2 border-t border-slate-200 flex flex-col gap-1 text-xs font-mono">
         <div className="flex items-center justify-between">
-          <span className="text-outline">Algorithm Baseline:</span>
-          <span className="text-slate-300">iForest ({totalEvaluated} tracks · 100 Trees)</span>
+          <span className="text-slate-500">Algorithm Baseline:</span>
+          <span className="text-slate-800 font-semibold">iForest ({totalEvaluated} tracks · 100 Trees)</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-outline">Detection Threshold:</span>
-          <span className="text-cyan-400 font-bold">score &gt; {Number(scoreThreshold).toFixed(3)}</span>
+          <span className="text-slate-500">Detection Threshold:</span>
+          <span className="text-[#0891b2] font-bold">score &gt; {Number(scoreThreshold).toFixed(3)}</span>
         </div>
       </div>
     </div>

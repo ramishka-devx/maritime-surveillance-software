@@ -21,6 +21,7 @@ import aisRoutes from './modules/ais/ais.routes.js';
 import restrictedAreaRoutes from './modules/restricted-areas/restricted-area.routes.js';
 import anomalyRoutes from './modules/anomalies/anomaly.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+import reportRoutes from './modules/reports/report.routes.js';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api', positionRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/anomalies', anomalyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api/restricted-areas', restrictedAreaRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/activities', activityRoutes);

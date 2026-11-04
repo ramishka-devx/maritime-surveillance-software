@@ -1,12 +1,16 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, PenLine, Upload, X } from 'lucide-react';
-import AreaMap from '../../components/restricted/AreaMap.jsx';
 import Skeleton from '../../components/ui/Skeleton.jsx';
 import { apiRequest } from '../../lib/api.js';
 import { parseGeoJsonFile } from '../../lib/geoJsonParser.js';
 import { useAuth } from '../../auth/AuthContext.jsx';
+
+// Lazy-load the Leaflet map so it doesn't block the initial page render.
+// Leaflet initialises a canvas + downloads tiles synchronously, which can
+// freeze the tab for several seconds before the API response even arrives.
+const AreaMap = React.lazy(() => import('../../components/restricted/AreaMap.jsx'));
 
 // Area types. Geofence alerts are critical for military-style types (restricted-area.service.js
 // checks for military/security/danger/defense/prohibited) and high for the rest.
@@ -22,10 +26,28 @@ const typeLabel = (t) => TYPES.find((x) => x.id === t)?.label || t || 'Restricte
 const isCritical = (t) => /military|security|danger|defen[cs]e|prohibited/i.test(t || '');
 
 const INCURSION_DAYS = 7;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes – treat cache as fresh
 const focusRing = 'outline-none focus-visible:outline-bs-accent';
 const btn = `inline-flex items-center justify-center gap-1.5 px-[18px] py-2.5 rounded-sm border text-[13px] font-semibold disabled:opacity-45 disabled:cursor-not-allowed ${focusRing}`;
 const kicker = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700';
 const field = `w-full h-[38px] px-2.5 text-[13px] bg-bs-surface border border-bs-ink/[.16] rounded-sm hover:border-bs-ink/45 focus-visible:border-bs-accent ${focusRing} focus-visible:outline-offset-0`;
+
+// Module-level cache — survives React re-mounts (navigation away and back).
+// Areas are large (1.8 MB of geometry), so we keep a single copy here rather
+// than re-parsing them every navigation.
+const _areasCache = {
+  areas: null,       // transformed area objects
+  incursions: [],    // geofence alert rows
+  fetchedAt: 0,      // Date.now() at last successful fetch
+};
+
+// Build a quick lookup map for deduplication: id → area
+function mergeAreas(prev, incoming) {
+  if (!prev) return incoming;
+  const byId = new Map(prev.map((a) => [a.id, a]));
+  for (const a of incoming) byId.set(a.id, a); // overwrite changed, add new
+  return Array.from(byId.values());
+}
 
 // Polygon area on a local equirectangular projection; fine for areas up to a few hundred km.
 function areaKm2(coords) {
@@ -172,11 +194,16 @@ function AreaDetailsModal({ drafts, onChange, onCancel, onSave, saving, error, s
 export default function RestrictedAreasPage() {
   const navigate = useNavigate();
   const { token } = useAuth();
-  const [areas, setAreas] = useState(null);
-  const [incursions, setIncursions] = useState([]);
+
+  // Seed state from the module-level cache so the map renders immediately on
+  // every navigation-back, even before the background refresh completes.
+  const [areas, setAreas] = useState(() => _areasCache.areas);
+  const [incursions, setIncursions] = useState(() => _areasCache.incursions);
   const [loadError, setLoadError] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  // true only while a background re-fetch is in-flight (doesn't blank the map)
+  const [backgroundLoading, setBackgroundLoading] = useState(false);
 
   // Drawing: points placed so far, and the cursor for the rubber-band edge.
   const [drawing, setDrawing] = useState(false);
@@ -191,10 +218,23 @@ export default function RestrictedAreasPage() {
   const [notice, setNotice] = useState(null);
   const fileInput = useRef(null);
 
-  // Areas, plus geofence alerts from the last week to count incursions per area.
+  // Areas + geofence alerts from the last week.
+  // Strategy:
+  //  - If the cache is fresh (< TTL) AND this is not an explicit refresh → show
+  //    cached data immediately and skip the network call entirely.
+  //  - Otherwise → apply cached data instantly (if any) while silently fetching
+  //    in the background, then merge the result without clearing the map.
   useEffect(() => {
     if (!token) return undefined;
     let stale = false;
+    const forceFetch = refresh > 0; // explicit save-triggered reload
+    const cacheAge = Date.now() - _areasCache.fetchedAt;
+    const cacheIsWarm = _areasCache.areas !== null && cacheAge < CACHE_TTL_MS;
+
+    // If cache is warm and nothing forced a refresh, use it as-is.
+    if (cacheIsWarm && !forceFetch) return undefined;
+
+    setBackgroundLoading(true);
     const from = new Date(Date.now() - INCURSION_DAYS * 24 * 3600 * 1000).toISOString();
     Promise.all([
       apiRequest('/api/restricted-areas', { token }),
@@ -202,11 +242,28 @@ export default function RestrictedAreasPage() {
     ])
       .then(([rows, alerts]) => {
         if (stale) return;
-        setAreas((Array.isArray(rows) ? rows : rows?.rows || []).map(toArea).filter((a) => a.coordinates.length >= 3));
-        setIncursions(alerts?.rows || []);
+        const fresh = (Array.isArray(rows) ? rows : rows?.rows || [])
+          .map(toArea)
+          .filter((a) => a.coordinates.length >= 3);
+        const freshIncursions = alerts?.rows || [];
+
+        // Merge into existing areas so the map never goes blank during refresh.
+        setAreas((prev) => mergeAreas(prev, fresh));
+        setIncursions(freshIncursions);
         setLoadError(null);
+        setBackgroundLoading(false);
+
+        // Update the module-level cache.
+        _areasCache.areas = mergeAreas(_areasCache.areas, fresh);
+        _areasCache.incursions = freshIncursions;
+        _areasCache.fetchedAt = Date.now();
       })
-      .catch((err) => !stale && setLoadError(err.message || 'Failed to load restricted areas'));
+      .catch((err) => {
+        if (stale) return;
+        // Only surface an error if we have nothing to show.
+        if (!_areasCache.areas) setLoadError(err.message || 'Failed to load restricted areas');
+        setBackgroundLoading(false);
+      });
     return () => {
       stale = true;
     };
@@ -307,28 +364,40 @@ export default function RestrictedAreasPage() {
       setDrafts([]);
       setNotice(`${saved} area${saved === 1 ? '' : 's'} saved. Monitoring starts within 30 s.`);
     }
-    if (saved) setRefresh((n) => n + 1);
+    if (saved) {
+      _areasCache.fetchedAt = 0; // bust cache so refresh always fetches
+      setRefresh((n) => n + 1);
+    }
   };
 
   const selected = areas?.find((a) => a.id === selectedId) || null;
   const selectedIncursions = selected ? incursionsOf(selected.id) : [];
 
   return (
-    <div className="w-full h-full flex bg-bs-bg text-bs-ink font-sans">
+    <div className="w-full h-full flex bg-slate-100 text-bs-ink font-sans px-4">
       {/* Area list + detail */}
-      <aside className="w-[360px] shrink-0 flex flex-col min-h-0 pr-6">
-        <div className="mt-5">
-          <h1 className="text-[32px] font-semibold leading-[1.1] tracking-[-0.015em]">Restricted areas</h1>
+      <aside className="w-[360px] shrink-0 flex flex-col min-h-0 pr-6 pt-3">
+        <div className="">
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Restricted Areas</h1>
           <p className="mt-0.5 text-[14px] italic">
             {areas === null ? (
               loadError ? <span className="text-bs-accent-2-700">{loadError}</span> : <Skeleton className="h-4 w-56 mt-1" />
             ) : (
-              `${areas.length} area${areas.length === 1 ? '' : 's'} monitored · ${incursions.length} incursion${incursions.length === 1 ? '' : 's'} in ${INCURSION_DAYS} days`
+              <span className="inline-flex items-center gap-2">
+                {`${areas.length} area${areas.length === 1 ? '' : 's'} monitored · ${incursions.length} incursion${incursions.length === 1 ? '' : 's'} in ${INCURSION_DAYS} days`}
+                {backgroundLoading && (
+                  <span className="inline-flex items-center gap-1 text-[12px] text-bs-neutral-600 not-italic">
+                    <span className="w-1.5 h-1.5 rounded-full bg-bs-accent animate-pulse" />
+                    Refreshing
+                  </span>
+                )}
+              </span>
             )}
           </p>
         </div>
 
         <div className="mt-5 flex-1 min-h-0 overflow-y-auto flex flex-col gap-0.5 pb-4" role="listbox" aria-label="Restricted areas">
+          {/* Skeleton only on first-ever load when cache is empty */}
           {areas === null &&
             [0, 1, 2].map((i) => (
               <div key={i} className="px-4 py-3 flex flex-col gap-2">
@@ -405,17 +474,28 @@ export default function RestrictedAreasPage() {
 
       {/* Map + tools */}
       <div className="relative flex-1 min-w-0">
-        <AreaMap
-          areas={areas || []}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          drafts={drafts}
-          drawing={drawing}
-          draw={{ points, cursor }}
-          onDrawAdd={(p) => setPoints((prev) => [...prev, p])}
-          onDrawMove={setCursor}
-          onDrawFinish={finishDrawing}
-        />
+        <Suspense
+          fallback={
+            <div className="w-full h-full flex items-center justify-center bg-slate-100">
+              <div className="flex flex-col items-center gap-3 text-slate-400">
+                <Skeleton className="w-full h-full absolute inset-0" />
+                <span className="relative z-10 text-[13px] italic text-slate-500 mt-8">Loading map…</span>
+              </div>
+            </div>
+          }
+        >
+          <AreaMap
+            areas={areas || []}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            drafts={drafts}
+            drawing={drawing}
+            draw={{ points, cursor }}
+            onDrawAdd={(p) => setPoints((prev) => [...prev, p])}
+            onDrawMove={setCursor}
+            onDrawFinish={finishDrawing}
+          />
+        </Suspense>
 
         <div className="absolute left-5 top-5 z-[500] flex gap-2">
           {drawing ? (

@@ -19,12 +19,12 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-surface text-on-surface p-4 pt-3 pb-16 font-sans">
+    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 px-4 pb-16 font-sans">
       <div className="flex flex-col gap-5 max-w-[1920px] mx-auto pb-8">
         {/* Floating Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-cyan-950 border border-cyan-400/50 text-cyan-200 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
-            <span className="material-symbols-outlined text-cyan-400 text-base">check_circle</span>
+          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-900 px-4 py-2.5 rounded-sm shadow-lg flex items-center gap-2 animate-bounce font-mono text-xs">
+            <span className="material-symbols-outlined text-[#0891b2] text-base">check_circle</span>
             <span>{toastMessage}</span>
           </div>
         )}
@@ -33,14 +33,14 @@ export default function ProfilePage() {
         <ProfileHeaderBar user={user} />
 
         {/* 2. Main Workplace Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-          {/* Left Column: Operator Identity Dossier Card (4 cols on XL) */}
-          <div className="xl:col-span-4">
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
+          {/* Left Column: Operator Identity Dossier Card */}
+          <div className="w-full lg:w-72 shrink-0">
             <ProfileDossierCard user={user} />
           </div>
 
-          <div className="xl:col-span-8 flex flex-col gap-5">
-            <ProfileAccountTab user={user}/>
+          <div className="flex-1 min-w-0 flex flex-col gap-5 w-full">
+            <ProfileAccountTab user={user} />
           </div>
         </div>
       </div>

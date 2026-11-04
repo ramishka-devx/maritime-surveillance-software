@@ -298,11 +298,11 @@ export default function AlertsPage() {
   const flag = flagFromMmsi(sel?.mmsi);
 
   return (
-    <div className="w-full h-full flex flex-col bg-bs-bg text-bs-ink font-sans pr-10 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12 overflow-hidden">
       {/* Title + filters */}
-      <div className="flex flex-wrap items-end gap-5 mt-5">
+      <div className="flex flex-wrap items-end gap-5">
         <div>
-          <h1 className="text-[36px] font-semibold leading-[1.1] tracking-[-0.015em]">Alerts</h1>
+          <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Alerts</h1>
           <div className="mt-0.5 text-[14px] italic">
             {alerts === null ? (
               loadError ? <span className="text-bs-accent-2-700">Couldn't load alerts ({loadError}). Retrying.</span> : <Skeleton className="h-4 w-72 mt-1" />
@@ -321,7 +321,7 @@ export default function AlertsPage() {
               role="radio"
               aria-checked={filter === f.name}
               onClick={() => setFilter(f.name)}
-              className={`px-3 py-[7px] text-[13px] border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
+              className={`px-3 py-1.5 text-[13px] border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
                 filter === f.name ? 'bg-bs-accent text-bs-bg' : 'hover:bg-bs-ink/[.07]'
               }`}
             >
@@ -381,7 +381,7 @@ export default function AlertsPage() {
         </div>
 
         {/* Case file */}
-        <div className="flex-1 min-w-0 flex flex-col overflow-y-auto pb-8">
+        <div className="flex-1 min-w-0 flex flex-col overflow-y-auto pb-8 pr-3">
           {!sel ? (
             alerts === null ? (
               <>
@@ -400,7 +400,7 @@ export default function AlertsPage() {
                 <span className="text-bs-neutral-700">· Case SG-{String(sel.alert_id).padStart(4, '0')}</span>
                 <span className={`ml-auto font-semibold ${statusInk(status)}`}>{status}</span>
               </div>
-              <h2 className="mt-2.5 mb-2 text-[26px] font-semibold leading-[1.15] tracking-[-0.01em] [text-wrap:pretty]">{sel.title}</h2>
+              <h2 className="mt-2.5 mb-2 text-[20px] font-semibold leading-[1.15] tracking-[-0.01em] [text-wrap:pretty]">{sel.title}</h2>
               <div className="flex flex-wrap gap-6 text-[13px]">
                 <span>
                   <span className="text-bs-neutral-700">Detected</span>{' '}

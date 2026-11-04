@@ -210,10 +210,10 @@ export default function Header({ onSearch }) {
   const initials = displayName.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 
   return (
-    <header className="fixed top-0 left-60 right-0 h-16 z-40 pr-7 flex items-center gap-8 bg-bs-bg text-bs-ink font-sans select-none">
+    <header className="fixed top-0 left-60 right-0 h-16 z-40 py-2 pl-1 pr-5 flex items-center gap-8 bg-bs-bg text-bs-ink font-sans select-none">
       {/* Global search with live vessel autocomplete & map focus */}
       <div className="relative w-[420px] shrink min-w-[220px]" ref={searchContainerRef}>
-        <Search size={17} className="absolute left-3 top-[11px] text-bs-neutral-700 pointer-events-none" />
+        <Search size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-bs-neutral-700 pointer-events-none" />
         <input
           ref={searchInputRef}
           type="text"
@@ -227,15 +227,15 @@ export default function Header({ onSearch }) {
           onKeyDown={handleKeyDown}
           placeholder={maintenance ? 'Search' : 'Search MMSI, IMO or vessel name'}
           aria-label="Search vessels"
-          className="w-full h-10 pl-[38px] pr-10 text-[14px] text-bs-ink caret-bs-accent bg-bs-surface border border-bs-ink/[.16] rounded-sm placeholder:text-bs-ink/65 hover:border-bs-ink/45 outline-none focus-visible:border-bs-accent focus-visible:outline-bs-accent focus-visible:outline-offset-0"
+          className="w-full h-8 pl-8 pr-9 text-[13px] text-bs-ink caret-bs-accent bg-bs-surface border border-bs-ink/[.16] rounded-sm placeholder:text-bs-ink/65 hover:border-bs-ink/45 outline-none focus-visible:border-bs-accent focus-visible:outline-bs-accent focus-visible:outline-offset-0"
         />
-        <kbd className="absolute right-2.5 top-[9px] px-[7px] text-[12px] font-sans border border-bs-ink/[.16] rounded-sm text-bs-neutral-700">
+        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 h-5 min-w-[18px] px-1 flex items-center justify-center text-[11px] font-sans border border-bs-ink/[.16] rounded text-bs-neutral-700">
           /
         </kbd>
 
         {/* Autocomplete dropdown */}
         {isDropdownOpen && searchValue.trim().length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-bs-bg shadow-bs-lg overflow-hidden">
+          <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-bs-bg shadow-bs-lg overflow-hidden rounded-md">
             {searchResults.length > 0 ? (
               <div>
                 <div className="px-3 py-2 flex items-center justify-between text-[11px] tracking-[0.08em] uppercase text-bs-neutral-700 border-b border-bs-ink/[.16]">

@@ -10,20 +10,20 @@ export default function AnomaliesRosterTable({
   onPageChange,
 }) {
   return (
-    <div className="flex-1 w-full overflow-hidden bg-surface-container-low border border-outline-variant/30 rounded-lg shadow-sm font-sans select-none">
+    <div className="flex-1 w-full overflow-hidden bg-white border border-slate-200 rounded-sm shadow-xs font-sans select-none">
       {/* Table Subheader */}
-      <div className="px-4 py-2 bg-surface-container-lowest flex items-center justify-between border-b border-outline-variant/20">
+      <div className="px-4 py-2 bg-slate-50 flex items-center justify-between border-b border-slate-200">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[16px] text-cyan-400">
+          <span className="material-symbols-outlined text-[16px] text-[#0891b2]">
             table_chart
           </span>
-          <span className="text-xs font-bold uppercase tracking-wider text-on-surface">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
             Target Anomaly Roster ({anomalies.length} Tracks Monitored)
           </span>
         </div>
-        <div className="flex items-center gap-3 font-mono text-xs text-outline">
+        <div className="flex items-center gap-3 font-mono text-xs text-slate-500">
           <span>
-            Sort: <strong className="text-cyan-400">Score (DESC)</strong>
+            Sort: <strong className="text-[#0891b2]">Score (DESC)</strong>
           </span>
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function AnomaliesRosterTable({
       <div className="overflow-x-auto w-full">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-surface-container-lowest text-outline font-mono text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+            <tr className="bg-slate-50 text-slate-600 font-mono text-[11px] uppercase tracking-wider border-b border-slate-200">
               <th className="py-2.5 px-3">Vessel &amp; Flag</th>
               <th className="py-2.5 px-3">Peer Group</th>
               <th className="py-2.5 px-3 text-right">Observed SOG</th>
@@ -43,23 +43,17 @@ export default function AnomaliesRosterTable({
               <th className="py-2.5 px-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-outline-variant/20 font-mono text-xs text-on-surface">
+          <tbody className="divide-y divide-slate-100 font-mono text-xs text-slate-900">
             {anomalies.map((item) => {
               const isSelected = selectedMmsi === item.mmsi;
               const isCritical = item.score >= 0.85;
               const isHigh = item.score >= 0.75 && item.score < 0.85;
 
               const scoreColor = isCritical
-                ? 'text-red-400'
+                ? 'text-red-600'
                 : isHigh
-                ? 'text-amber-400'
-                : 'text-cyan-400';
-
-              const barBgColor = isCritical
-                ? 'bg-red-500 shadow-[0_0_6px_#EF4444]'
-                : isHigh
-                ? 'bg-amber-400 shadow-[0_0_6px_#F59E0B]'
-                : 'bg-cyan-400 shadow-[0_0_6px_#22D3EE]';
+                ? 'text-amber-600'
+                : 'text-[#0891b2]';
 
               return (
                 <tr
@@ -67,25 +61,24 @@ export default function AnomaliesRosterTable({
                   onClick={() => onSelectAnomaly(item)}
                   className={`cursor-pointer transition-colors ${
                     isSelected
-                      ? 'bg-surface-container-high/90 border-l-4 border-cyan-400 shadow-[inset_0_0_12px_rgba(34,211,238,0.12)]'
-                      : 'hover:bg-surface-container/70'
+                      ? 'bg-cyan-50/70 border-l-4 border-[#0891b2]'
+                      : 'hover:bg-slate-50/80'
                   }`}
                 >
                   {/* Vessel & MMSI */}
                   <td className="py-2.5 px-3 font-semibold">
                     <div className="flex items-center gap-1.5">
-                      
-                      <span className="truncate max-w-[140px] text-on-surface font-bold">
+                      <span className="truncate max-w-[140px] text-slate-900 font-bold">
                         {item.name}
                       </span>
                     </div>
-                    <div className="text-[10px] text-outline font-normal">
+                    <div className="text-[10px] text-slate-500 font-normal">
                       {item.mmsi}
                     </div>
                   </td>
 
                   {/* Peer Group */}
-                  <td className="py-2.5 px-3 text-slate-300 font-sans text-xs">
+                  <td className="py-2.5 px-3 text-slate-700 font-sans text-xs">
                     {item.peerGroup}
                   </td>
 
@@ -98,7 +91,7 @@ export default function AnomaliesRosterTable({
                   </td>
 
                   {/* Peer p99 */}
-                  <td className="py-2.5 px-3 text-right text-outline">{item.peerP99}</td>
+                  <td className="py-2.5 px-3 text-right text-slate-500">{item.peerP99}</td>
 
                   {/* Anomaly Score Bar */}
                   <td className="py-2.5 px-3">
@@ -111,25 +104,25 @@ export default function AnomaliesRosterTable({
 
                   {/* Detected At */}
                   <td className="py-2.5 px-3">
-                    <div className="text-on-surface">{item.time}</div>
-                    <div className="text-[10px] text-outline">{item.elapsed}</div>
+                    <div className="text-slate-900 font-semibold">{item.time}</div>
+                    <div className="text-[10px] text-slate-500">{item.elapsed}</div>
                   </td>
 
                   {/* Status Badge */}
                   <td className="py-2.5 px-3">
                     {item.status === 'NEW' && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-400 border border-cyan-400/40 text-[10px] font-bold">
-                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-cyan-50 text-cyan-800 border border-cyan-200 text-[10px] font-bold">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#0891b2] animate-pulse" />
                         NEW
                       </span>
                     )}
                     {item.status === 'CONFIRMED' && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-950/60 text-red-300 border border-red-500/40 text-[10px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold">
                         CONFIRMED
                       </span>
                     )}
                     {item.status === 'FALSE_POS' && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-highest text-outline border border-outline-variant/40 text-[10px]">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-semibold">
                         FALSE POSITIVE
                       </span>
                     )}
@@ -140,19 +133,19 @@ export default function AnomaliesRosterTable({
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => onSelectAnomaly(item)}
-                        className="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-highest text-slate-200 hover:text-white border border-outline-variant/30 text-xs font-medium transition-colors"
+                        className="px-2 py-0.5 rounded-sm bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-medium transition-colors shadow-xs cursor-pointer"
                       >
                         Inspect
                       </button>
                       <button
                         onClick={() => onRejectAnomaly(item)}
-                        className="px-2 py-0.5 rounded bg-red-950/40 text-red-400 hover:bg-red-950/70 border border-red-500/30 text-xs transition-colors"
+                        className="px-2 py-0.5 rounded-sm bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs transition-colors shadow-xs cursor-pointer"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => onConfirmAlert(item)}
-                        className="w-full py-0.5 px-2 rounded bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-mono text-xs font-bold uppercase transition-all shadow-[0_0_12px_rgba(34,211,238,0.35)] flex items-center justify-center gap-1.5"
+                        className="py-0.5 px-2 rounded-sm bg-[#0891b2] hover:bg-[#0e7490] text-white font-mono text-xs font-bold uppercase transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <span>Confirm</span>
                       </button>
@@ -163,7 +156,7 @@ export default function AnomaliesRosterTable({
             })}
             {anomalies.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-outline font-mono text-xs">
+                <td colSpan={9} className="py-12 text-center text-slate-500 font-mono text-xs">
                   No target anomalies detected in selected time window.
                 </td>
               </tr>
@@ -173,7 +166,7 @@ export default function AnomaliesRosterTable({
       </div>
 
       {/* Compact Table Pagination Strip */}
-      <div className="px-4 py-2 bg-surface-container-lowest border-t border-outline-variant/20 flex items-center justify-between font-mono text-xs text-outline">
+      <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 flex items-center justify-between font-mono text-xs text-slate-600">
         <div>
           {anomalies.length === 0
             ? 'Showing 0 anomaly detections'
@@ -183,7 +176,7 @@ export default function AnomaliesRosterTable({
           <button
             onClick={() => onPageChange && onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="p-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface disabled:opacity-40"
+            className="p-1 rounded-sm bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 disabled:opacity-40 shadow-xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">chevron_left</span>
           </button>
@@ -191,10 +184,10 @@ export default function AnomaliesRosterTable({
             <button
               key={page}
               onClick={() => onPageChange && onPageChange(page)}
-              className={`px-2 py-0.5 rounded transition-colors ${
+              className={`px-2 py-0.5 rounded-sm transition-colors cursor-pointer ${
                 currentPage === page
-                  ? 'bg-surface-container-high text-cyan-400 font-bold border border-cyan-400/30'
-                  : 'hover:bg-surface-container text-outline'
+                  ? 'bg-[#0891b2] text-white font-bold shadow-xs'
+                  : 'hover:bg-slate-100 text-slate-600'
               }`}
             >
               {page}
@@ -203,7 +196,7 @@ export default function AnomaliesRosterTable({
           <button
             onClick={() => onPageChange && onPageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="p-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface disabled:opacity-40"
+            className="p-1 rounded-sm bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 disabled:opacity-40 shadow-xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>

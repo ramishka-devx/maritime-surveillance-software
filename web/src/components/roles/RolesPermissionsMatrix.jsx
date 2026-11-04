@@ -164,25 +164,25 @@ export default function RolesPermissionsMatrix({
 
   return (
     <section className="flex flex-col gap-4 w-full font-sans select-none">
-      <div className="bg-surface-container-low border border-outline-variant/30 rounded flex flex-col shadow-md overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-sm flex flex-col shadow-xs overflow-hidden">
         {/* Matrix Panel Header */}
-        <div className="p-4 border-b border-outline-variant/30 bg-surface-container flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-sm sm:text-base font-bold text-on-surface uppercase tracking-tight m-0 font-mono">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase tracking-tight m-0 font-mono">
                 Permissions Matrix — {role?.name || 'Selected'}
               </h2>
               {isSuperAdmin ? (
-                <span className="px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-500/40 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 border border-purple-200 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">security</span>
                   ROOT BYPASS
                 </span>
               ) : role?.is_system === 1 ? (
-                <span className="px-2 py-0.5 rounded bg-purple-950/70 text-purple-300 border border-purple-500/30 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-sm bg-purple-50 text-purple-700 border border-purple-200 font-mono text-[10px] font-bold uppercase tracking-wider">
                   SYSTEM ROLE
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-surface-container-highest text-cyan-300 border border-cyan-500/20 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-sm bg-cyan-50 text-[#0891b2] border border-cyan-200 font-mono text-[10px] font-bold uppercase tracking-wider">
                   CUSTOM ROLE
                 </span>
               )}
@@ -195,10 +195,10 @@ export default function RolesPermissionsMatrix({
               type="button"
               disabled={isSuperAdmin}
               onClick={onSelectAllView}
-              className={`px-2.5 py-1 rounded bg-surface-container-highest border border-outline-variant/40 text-on-surface uppercase transition-colors ${
+              className={`px-2.5 py-1 rounded-sm border transition-colors ${
                 isSuperAdmin
-                  ? 'opacity-40 cursor-not-allowed'
-                  : 'hover:bg-surface-bright cursor-pointer hover:text-cyan-400'
+                  ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer shadow-xs'
               }`}
             >
               Select All View
@@ -207,10 +207,10 @@ export default function RolesPermissionsMatrix({
               type="button"
               disabled={isSuperAdmin}
               onClick={onClearDeletes}
-              className={`px-2.5 py-1 rounded bg-surface-container-highest border border-outline-variant/40 text-on-surface uppercase transition-colors ${
+              className={`px-2.5 py-1 rounded-sm border transition-colors ${
                 isSuperAdmin
-                  ? 'opacity-40 cursor-not-allowed'
-                  : 'hover:bg-surface-bright cursor-pointer hover:text-amber-400'
+                  ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer shadow-xs'
               }`}
             >
               Clear Deletes
@@ -219,10 +219,10 @@ export default function RolesPermissionsMatrix({
               type="button"
               disabled={isSuperAdmin}
               onClick={onResetBaseline}
-              className={`px-2.5 py-1 rounded bg-surface-container-lowest border border-outline-variant/50 text-cyan-400 uppercase font-semibold transition-colors flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-sm border uppercase font-semibold transition-colors flex items-center gap-1 ${
                 isSuperAdmin
-                  ? 'opacity-40 cursor-not-allowed'
-                  : 'hover:bg-surface-container cursor-pointer'
+                  ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-[#0891b2] cursor-pointer shadow-xs'
               }`}
             >
               <span className="material-symbols-outlined text-[14px]">history</span>
@@ -233,47 +233,45 @@ export default function RolesPermissionsMatrix({
 
         {/* Super Admin Notice Banner */}
         {isSuperAdmin && (
-          <div className="px-4 py-3 bg-amber-950/30 border-b border-amber-500/30 flex items-start gap-2.5 text-amber-200 font-mono text-xs">
-            <span className="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">
+          <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 flex items-start gap-2.5 text-amber-900 font-mono text-xs">
+            <span className="material-symbols-outlined text-amber-600 text-[18px] shrink-0 mt-0.5">
               shield_person
             </span>
             <div className="flex flex-col gap-0.5">
-              <span className="font-bold uppercase tracking-wider text-amber-300">
-                Super Administrator Root Bypass Enforced
-              </span>
-              <p className="text-[11px] text-amber-200/80 m-0 leading-relaxed">
-                The <code className="text-amber-300 font-bold px-1 py-0.2 bg-amber-950/60 rounded border border-amber-500/30">super_admin</code> role possesses unconditional kernel bypass privileges across all endpoints. Permissions cannot be altered or revoked for this role.
+              
+              <p className="text-[11px] text-amber-800 m-0 leading-relaxed">
+                Permissions cannot be altered or revoked for this role.
               </p>
             </div>
           </div>
         )}
 
         {/* Matrix Status Legend Bar */}
-        <div className="px-4 py-2 bg-surface-container-lowest border-b border-outline-variant/20 flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
+        <div className="px-4 py-2 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-full bg-cyan-400 text-black flex items-center justify-center font-bold text-[9px]">
+              <span className="w-3.5 h-3.5 rounded-full bg-[#0891b2] text-white flex items-center justify-center font-bold text-[9px]">
                 ✓
               </span>
-              <span className="text-on-surface font-medium text-[11px]">
+              <span className="text-slate-900 font-medium text-[11px]">
                 Granted ({totalActiveCount} / {permissionsList.length})
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-full bg-surface-container-high border border-outline-variant/60 inline-block" />
-              <span className="text-on-surface-variant text-[11px]">Revoked / Denied</span>
+              <span className="w-3.5 h-3.5 rounded-full bg-slate-200 border border-slate-300 inline-block" />
+              <span className="text-slate-500 text-[11px]">Revoked / Denied</span>
             </div>
             {isSuperAdmin && (
               <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-400 flex items-center justify-center text-[9px]">
+                <span className="w-3.5 h-3.5 rounded-full bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center text-[9px]">
                   <span className="material-symbols-outlined text-[10px]">lock</span>
                 </span>
-                <span className="text-amber-400 text-[11px]">Root Bypass (Locked)</span>
+                <span className="text-amber-700 text-[11px] font-semibold">Root Bypass (Locked)</span>
               </div>
             )}
           </div>
-          <div className="text-outline flex items-center gap-1 text-[11px]">
-            <span className="material-symbols-outlined text-[14px] text-cyan-400">
+          <div className="text-slate-500 flex items-center gap-1 text-[11px]">
+            <span className="material-symbols-outlined text-[14px] text-[#0891b2]">
               rule_settings
             </span>
             <span>Live RBAC Synchronization</span>
@@ -283,22 +281,21 @@ export default function RolesPermissionsMatrix({
         {/* Dynamic Grouped Permissions List */}
         <div className="p-4 flex flex-col gap-4">
           {isLoadingPermissions ? (
-            <div className="p-12 text-center text-outline font-mono text-xs flex flex-col items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-cyan-400 text-2xl animate-spin">
+            <div className="p-12 text-center text-slate-400 font-mono text-xs flex flex-col items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-[#0891b2] text-2xl animate-spin">
                 progress_activity
               </span>
               <span>Loading permissions registry from backend...</span>
             </div>
           ) : groupedModules.length === 0 ? (
-            <div className="p-12 text-center text-outline font-mono text-xs flex flex-col items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-outline text-2xl">
+            <div className="p-12 text-center text-slate-400 font-mono text-xs flex flex-col items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-slate-300 text-2xl">
                 rule
               </span>
               <span>No permissions registered for this role.</span>
             </div>
           ) : (
             groupedModules.map((group) => {
-              const config = getModuleConfig(group.name);
               const activeInGroup = group.permissions.filter((p) =>
                 isPermActive(p.permission_id)
               ).length;
@@ -307,16 +304,16 @@ export default function RolesPermissionsMatrix({
               return (
                 <div
                   key={group.name}
-                  className="bg-surface-container/50 border border-outline-variant/30 rounded overflow-hidden shadow-xs"
+                  className="bg-slate-50/40 border border-slate-200 rounded-sm overflow-hidden shadow-xs"
                 >
                   {/* Module Group Header */}
-                  <div className="p-3 py-1.5 bg-surface-container-high/60 border-b border-outline-variant/25 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="p-3 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-mono text-xs font-bold uppercase text-on-surface m-0 tracking-wider">
+                        <h3 className="font-mono text-xs font-bold uppercase text-slate-900 m-0 tracking-wider">
                           {group.name} Module
                         </h3>
-                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-semibold bg-surface-container-highest text-cyan-300 border border-outline-variant/40">
+                        <span className="px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-white text-[#0891b2] border border-slate-200 shadow-xs">
                           {activeInGroup} / {group.permissions.length} GRANTED
                         </span>
                       </div>
@@ -326,7 +323,7 @@ export default function RolesPermissionsMatrix({
                       <button
                         type="button"
                         onClick={() => handleToggleModule(group.permissions)}
-                        className="px-2 py-1 rounded text-[11px] font-mono uppercase bg-surface-container hover:bg-surface-container-highest text-outline hover:text-cyan-400 transition-colors cursor-pointer border border-outline-variant/30 flex items-center gap-1"
+                        className="px-2 py-1 rounded-sm text-[11px] font-mono uppercase bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer border border-slate-200 shadow-xs flex items-center gap-1"
                         title={
                           isAllGroupActive
                             ? `Revoke all ${group.name} permissions`
@@ -342,29 +339,29 @@ export default function RolesPermissionsMatrix({
                   </div>
 
                   {/* Permissions Rows in this Module */}
-                  <div className="divide-y divide-outline-variant/15">
+                  <div className="divide-y divide-slate-100">
                     {group.permissions.map((perm) => {
                       const active = isPermActive(perm.permission_id);
 
                       return (
                         <div
                           key={perm.permission_id}
-                          className="p-3 px-4 flex items-center justify-between gap-4 hover:bg-surface-container-high/40 transition-colors"
+                          className="p-3 px-4 flex items-center justify-between gap-4 hover:bg-white transition-colors"
                         >
                           <div className="flex flex-col gap-0.5 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span
                                 className={`font-mono text-xs font-bold tracking-wide ${
-                                  active ? 'text-cyan-400' : 'text-on-surface'
+                                  active ? 'text-[#0891b2]' : 'text-slate-800'
                                 }`}
                               >
                                 {perm.name}
                               </span>
-                              <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-surface-container-lowest text-outline border border-outline-variant/20">
+                              <span className="px-1.5 py-0.2 rounded-sm font-mono text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
                                 id #{perm.permission_id}
                               </span>
                             </div>
-                            <span className="font-sans text-xs text-on-surface-variant truncate">
+                            <span className="font-sans text-xs text-slate-500 truncate">
                               {perm.description || 'Permission action authorized by service kernel.'}
                             </span>
                           </div>
@@ -383,10 +380,10 @@ export default function RolesPermissionsMatrix({
                               }
                               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
                                 isSuperAdmin
-                                  ? 'opacity-80 cursor-not-allowed bg-amber-500/30 border border-amber-500/40'
+                                  ? 'opacity-80 cursor-not-allowed bg-amber-100 border border-amber-300'
                                   : active
-                                  ? 'bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.4)] cursor-pointer'
-                                  : 'bg-surface-container-highest border border-outline-variant/60 hover:border-outline cursor-pointer'
+                                  ? 'bg-[#0891b2] shadow-xs cursor-pointer'
+                                  : 'bg-slate-200 hover:bg-slate-300 border border-slate-300 cursor-pointer'
                               }`}
                               title={
                                 isSuperAdmin
@@ -399,12 +396,12 @@ export default function RolesPermissionsMatrix({
                               <span
                                 className={`inline-block h-4 w-4 transform rounded-full transition-transform duration-200 ease-in-out flex items-center justify-center ${
                                   active
-                                    ? 'translate-x-6 bg-black text-cyan-400'
-                                    : 'translate-x-1 bg-outline text-transparent'
+                                    ? 'translate-x-6 bg-white text-[#0891b2]'
+                                    : 'translate-x-1 bg-white shadow-xs'
                                 }`}
                               >
                                 {isSuperAdmin ? (
-                                  <span className="material-symbols-outlined text-[10px] text-amber-400">
+                                  <span className="material-symbols-outlined text-[10px] text-amber-600">
                                     lock
                                   </span>
                                 ) : active ? (

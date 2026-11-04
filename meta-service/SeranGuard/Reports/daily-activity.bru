@@ -1,0 +1,24 @@
+meta {
+  name: Reports - Daily Activity CSV
+  type: http
+  seq: 45
+}
+
+get {
+  url: {{baseUrl}}/api/reports/daily-activity.csv?date=2026-11-03
+  body: none
+  auth: inherit
+}
+
+params:query {
+  date: 2026-11-03
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

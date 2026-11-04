@@ -8,6 +8,7 @@ import AlertsPage from './pages/Alerts/AlertsPage.jsx';
 import AnomaliesPage from './pages/Anomalies/AnomaliesPage.jsx';
 import RestrictedAreasPage from './pages/RestrictedAreas/RestrictedAreasPage.jsx';
 import DashboardPage from './pages/Dashboard/DashboardPage.jsx';
+import ReportsPage from './pages/Reports/ReportsPage.jsx';
 import ProfilePage from './pages/Profile/ProfilePage.jsx';
 import UsersPage from './pages/Users/UsersPage.jsx';
 import RolesPermissionsPage from './pages/RolesPermissions/RolesPermissionsPage.jsx';
@@ -85,6 +86,9 @@ export default function App() {
         {/* Dedicated Dashboard Analytics Route */}
         <Route path="/Dashboard" element={<DashboardPage />} />
 
+        {/* CSV reports (Daily Activity, Alert History) */}
+        <Route path="/Reports" element={<ReportsPage />} />
+
         {/* Dedicated Operator Profile Route */}
         <Route path="/Profile" element={<ProfilePage />} />
 
@@ -110,6 +114,7 @@ export default function App() {
       <Route path="/restricted-areas" element={<Navigate to="/RestrictedAreas" replace />} />
       <Route path="/restricted" element={<Navigate to="/RestrictedAreas" replace />} />
       <Route path="/dashboard" element={<Navigate to="/Dashboard" replace />} />
+      <Route path="/reports" element={<Navigate to="/Reports" replace />} />
       <Route path="/profile" element={<Navigate to="/Profile" replace />} />
       <Route path="/my-profile" element={<Navigate to="/Profile" replace />} />
       <Route path="/users" element={<Navigate to="/Users" replace />} />
