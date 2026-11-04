@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Activity,
   CircleUser,
+  FileText,
   HeartPulse,
   LayoutGrid,
   Map as MapIcon,
@@ -13,7 +14,8 @@ import {
 } from 'lucide-react';
 import { useBadgeCounts } from '../../hooks/useBadgeCounts';
 import { useAuth } from '../../auth/AuthContext.jsx';
-import { isMaintenance, isOperator } from '../../auth/roles.js';
+import { usePermission } from '../../auth/usePermission.js';
+import { isAnalyst, isMaintenance, isOperator } from '../../auth/roles.js';
 
 const sectionLabel = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700 mb-2.5';
 
@@ -44,6 +46,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { can } = usePermission();
   const maintenance = isMaintenance(user);
   const { alertCount, anomalyCount, restrictedAreaCount } = useBadgeCounts();
 
@@ -58,6 +61,8 @@ export default function Sidebar() {
       ? 'restricted-areas'
       : pathname.startsWith('/dashboard')
       ? 'dashboard'
+      : pathname.startsWith('/reports')
+      ? 'reports'
       : pathname.startsWith('/users')
       ? 'users'
       : pathname.startsWith('/roles')
@@ -78,12 +83,13 @@ export default function Sidebar() {
     { id: 'alerts', label: 'Alerts', icon: TriangleAlert, badge: alertCount, alert: true, path: '/Alerts' },
     { id: 'anomalies', label: 'Anomalies', icon: Activity, badge: anomalyCount, alert: true, path: '/Anomalies' },
     { id: 'restricted-areas', label: 'Restricted areas', icon: Pentagon, badge: restrictedAreaCount, path: '/RestrictedAreas' },
+    ...(can('reports.view') ? [{ id: 'reports', label: 'Reports', icon: FileText, path: '/Reports' }] : []),
     { id: 'my-profile', label: 'My profile', icon: CircleUser, path: '/Profile' },
   ];
 
   const adminNav = maintenance ? [
     { id: 'system-health', label: 'System health', icon: HeartPulse, path: '/SystemHealth' },
-  ] : isOperator(user) ? [] : [
+  ] : isOperator(user) || isAnalyst(user) ? [] : [
     { id: 'users', label: 'Users', icon: Users, path: '/Users' },
     { id: 'roles-permissions', label: 'Roles & access', icon: ShieldCheck, path: '/RolesPermissions' },
   ];

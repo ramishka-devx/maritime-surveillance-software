@@ -68,7 +68,8 @@ async function seedPermissions() {
         'dashboard.view',
         'alert.view',
         'alert.status.view',
-        'reports.view'
+        'reports.view',
+        'report.download'
       ];
 
       const placeholders = operatorPermissions.map(() => '?').join(',');
@@ -78,6 +79,25 @@ async function seedPermissions() {
         ON CONFLICT DO NOTHING
       `, [operatorRole.role_id, ...operatorPermissions]);
       console.log('Assigned operator permissions');
+    }
+
+    // Analyst role: read-only alerts (BR-032) plus reports (REQ-F-063)
+    const [analystRole] = await query('SELECT role_id FROM roles WHERE name = ? LIMIT 1', ['analyst']);
+    if (analystRole) {
+      const analystPermissions = [
+        'dashboard.view',
+        'alert.view',
+        'reports.view',
+        'report.download'
+      ];
+
+      const placeholders = analystPermissions.map(() => '?').join(',');
+      await query(`
+        INSERT INTO role_permissions (role_id, permission_id)
+        SELECT ?, permission_id FROM permissions WHERE name IN (${placeholders})
+        ON CONFLICT DO NOTHING
+      `, [analystRole.role_id, ...analystPermissions]);
+      console.log('Assigned analyst permissions');
     }
 
     await query('COMMIT');
