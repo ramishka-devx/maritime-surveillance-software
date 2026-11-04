@@ -4,7 +4,8 @@
 INSERT INTO roles (role_id, name, description, is_system, is_active)
 VALUES
 	(1, 'super_admin', 'Super administrator (bypass permission checks)', 1, 1),
-	(2, 'operator', 'Operator', 1, 1)
+	(2, 'operator', 'Operator', 1, 1),
+	(3, 'analyst', 'Analyst', 1, 1)
 ON CONFLICT (role_id) DO UPDATE
 SET name = EXCLUDED.name,
 		description = EXCLUDED.description,

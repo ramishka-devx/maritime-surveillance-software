@@ -17,13 +17,48 @@ function joinUrl(baseUrl, path) {
   return `${base}/${p}`;
 }
 
+function apiUrl(path) {
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'http://127.0.0.1:5000' : '');
+  return joinUrl(apiBaseUrl, path);
+}
+
+// GET a file endpoint (e.g. a CSV report) and return it as a Blob. Failures still come back
+// as the JSON envelope, so their message is thrown like apiRequest's.
+export async function apiDownload(path, { token, timeoutMs = 60000 } = {}) {
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const ac = new AbortController();
+  const timeout = setTimeout(() => ac.abort(), Math.max(0, Number(timeoutMs) || 0));
+  try {
+    const res = await fetch(apiUrl(path), { headers, signal: ac.signal });
+    if (!res.ok) {
+      let json = null;
+      try {
+        json = await res.json();
+      } catch {
+        json = null;
+      }
+      const error = new Error(json?.message || `Download failed (${res.status})`);
+      error.status = res.status;
+      error.details = json;
+      throw error;
+    }
+    return await res.blob();
+  } catch (e) {
+    if (e?.name === 'AbortError') throw new Error('Download timed out');
+    throw e;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function apiRequest(path, { token, method = 'GET', body, timeoutMs = 15000 } = {}) {
   const headers = { ...DEFAULT_HEADERS };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'http://127.0.0.1:5000' : '');
-  const url = joinUrl(apiBaseUrl, path);
+  const url = apiUrl(path);
 
   const ac = new AbortController();
   const timeout = setTimeout(() => ac.abort(), Math.max(0, Number(timeoutMs) || 0));
