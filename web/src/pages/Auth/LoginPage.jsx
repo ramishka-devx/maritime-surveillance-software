@@ -22,7 +22,7 @@ const PORT_MS = 4000;
 
 const focusRing = 'outline-none focus-visible:outline-bs-accent';
 const inputCls =
-  'w-full h-[38px] pl-9 py-1.5 text-[13px] text-bs-ink caret-bs-accent bg-bs-surface border border-bs-ink/[.16] rounded-sm ' +
+  'w-full h-[38px] pl-9 py-1.5 text-[13px] text-bs-ink caret-bs-accent bg-white border border-bs-ink/[.16] rounded-md ' +
   'placeholder:text-bs-ink/65 hover:border-bs-ink/45 focus-visible:border-bs-accent focus-visible:outline-offset-0 ' + focusRing;
 const inputIcon = 'absolute left-3 top-[11px] text-bs-neutral-700 pointer-events-none';
 const bgGlow = '[text-shadow:0_0_12px_rgb(var(--bs-bg)),0_0_4px_rgb(var(--bs-bg))]';
@@ -109,25 +109,25 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-bs-bg text-bs-ink font-sans text-[14px] leading-[1.55] selection:bg-bs-accent/30">
-      <section className="hidden lg:block relative basis-3/5 shrink-0 overflow-hidden">
+      <section className="hidden lg:block relative basis-3/5 shrink-0 overflow-hidden border-r border-bs-ink/10">
         <ChartArt />
         <div className="absolute left-16 top-12 right-16 flex items-center text-[12px]">
           <span className="flex items-center gap-2">
             <span className="w-[7px] h-[7px] rounded-full bg-bs-accent" />
-            <span className="italic">Live AIS feed</span>
+            <span className="font-medium">Live AIS feed</span>
           </span>
           <span className="ml-auto flex items-center gap-2">
             <Clock size={16} className="text-bs-neutral-700" />
             <b className="font-mono font-medium">{clock}</b>
-            <span className="italic">UTC</span>
+            <span className="text-bs-neutral-700">UTC</span>
           </span>
         </div>
-        <div className="absolute left-16 top-[27%] max-w-[620px]">
+        <div className="absolute left-16 top-1/2 -translate-y-1/2 max-w-[560px]">
           <div className="text-[10px] tracking-[0.1em] uppercase font-semibold text-bs-accent-700">Maritime surveillance</div>
-          <h1 className={`mt-3.5 mb-[18px] text-[clamp(52px,8.6vh,76px)] leading-[1.02] tracking-[-0.03em] font-semibold text-balance ${bgGlow}`}>
+          <h1 className={`mt-3.5 mb-[18px] text-[clamp(40px,6.5vh,60px)] leading-[1.05] tracking-[-0.03em] font-semibold text-balance ${bgGlow}`}>
             Maritime domain awareness, <span className="text-bs-accent-700">in real time.</span>
           </h1>
-          <p className="max-w-[420px] text-[clamp(14px,1.8vh,16px)] italic [text-shadow:0_0_8px_rgb(var(--bs-bg))]">
+          <p className="max-w-[420px] text-[clamp(14px,1.8vh,16px)] text-bs-neutral-800 [text-shadow:0_0_8px_rgb(var(--bs-bg))]">
             Every AIS transmission in the sector, read, checked and flagged as it arrives.
           </p>
         </div>
@@ -135,82 +135,87 @@ export default function LoginPage() {
           key={portIdx}
           className="absolute left-16 bottom-10 flex gap-2.5 items-baseline text-[12px] animate-port-in motion-reduce:animate-none"
         >
-          <span className="italic text-bs-neutral-800">{portName}</span>
+          <span className="text-bs-neutral-800">{portName}</span>
           <span className="font-mono">{formatLatLon(portLat, portLon)}</span>
         </div>
       </section>
 
-      <section className="flex-1 min-w-0 flex flex-col pt-12 pb-10 px-[clamp(16px,5vw,72px)]">
-        <div className="flex items-baseline gap-2.5">
-          <span className="font-semibold text-[19px] tracking-[-0.02em]">SerenGuard</span>
-          <span className="italic text-[12px] text-bs-neutral-700">Maritime surveillance</span>
-        </div>
-
-        <form className="my-auto flex flex-col gap-[22px] w-full max-w-[400px]" onSubmit={handleSubmit}>
-          <div>
-            <h2 className="mb-1.5 text-[clamp(22px,2.9vh,26px)] font-semibold leading-[1.12] tracking-[-0.015em]">Sign in</h2>
-            <p className="italic text-[14px] text-bs-neutral-800">Use your operator credentials to open the terminal.</p>
-          </div>
-
-          {error && (
-            <div
-              role="alert"
-              className="flex gap-2.5 items-start px-3 py-2.5 text-[13px] rounded-sm bg-bs-accent-2-100 text-bs-accent-2-700 border-l-[3px] border-bs-accent-2"
-            >
-              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="sg-email" className="block mb-[5px] text-[11px] text-bs-ink/70">Operator email</label>
-            <div className="relative">
-              <User size={16} className={inputIcon} />
-              <input
-                id="sg-email" className={`${inputCls} pr-2.5`} type="text" autoComplete="username" required
-                placeholder="operator@serenguard.ops"
-                value={identifier} onChange={(e) => setIdentifier(e.target.value)}
-              />
+      <section className="flex-1 min-w-0 flex flex-col items-center bg-bs-neutral-100 py-10 px-6">
+        <div className="w-full max-w-[380px] flex flex-col flex-1">
+          <div className="flex items-center gap-3">
+            <img src="/SerenGuard.svg" alt="" width="36" height="36" className="w-9 h-9 rounded-md" />
+            <div className="leading-tight">
+              <div className="font-semibold text-[17px] tracking-[-0.01em]">SerenGuard</div>
+              <div className="text-[12px] text-bs-neutral-700">Maritime surveillance</div>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="sg-pass" className="block mb-[5px] text-[11px] text-bs-ink/70">Password</label>
-            <div className="relative">
-              <Lock size={16} className={inputIcon} />
-              <input
-                id="sg-pass" className={`${inputCls} pr-10`} type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password" required placeholder="Enter password"
-                value={password} onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className={`absolute right-[3px] top-[3px] w-8 h-8 inline-flex items-center justify-center rounded-sm text-bs-neutral-700 ${focusRing}`}
-                aria-label={showPassword ? 'Hide passcode' : 'Show passcode'}
-                onClick={() => setShowPassword((s) => !s)}
+          <form className="my-auto py-10 flex flex-col gap-5" onSubmit={handleSubmit}>
+            <div>
+              <h2 className="mb-1.5 text-[clamp(22px,2.9vh,26px)] font-semibold leading-[1.12] tracking-[-0.015em]">Sign in</h2>
+              <p className="text-[14px] text-bs-neutral-700">Use your operator credentials to continue.</p>
+            </div>
+
+            {error && (
+              <div
+                role="alert"
+                className="flex gap-2.5 items-start px-3 py-2.5 text-[13px] rounded-sm bg-bs-accent-2-100 text-bs-accent-2-700 border-l-[3px] border-bs-accent-2"
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="sg-email" className="block mb-1.5 text-[12px] font-medium text-bs-neutral-800">Operator email</label>
+              <div className="relative">
+                <User size={16} className={inputIcon} />
+                <input
+                  id="sg-email" className={`${inputCls} pr-2.5`} type="text" autoComplete="username" required
+                  placeholder="operator@serenguard.ops"
+                  value={identifier} onChange={(e) => setIdentifier(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit" disabled={submitting}
-            className={`inline-flex items-center justify-center gap-1.5 h-[42px] px-[18px] rounded-sm bg-bs-accent text-bs-bg text-[14px] font-semibold hover:enabled:bg-bs-accent-600 active:enabled:bg-bs-accent-700 disabled:opacity-[.45] disabled:cursor-not-allowed ${focusRing}`}
-          >
-            {submitting ? 'Signing in…' : 'Sign in to terminal'}
-            <ArrowRight size={16} />
-          </button>
+            <div>
+              <label htmlFor="sg-pass" className="block mb-1.5 text-[12px] font-medium text-bs-neutral-800">Password</label>
+              <div className="relative">
+                <Lock size={16} className={inputIcon} />
+                <input
+                  id="sg-pass" className={`${inputCls} pr-10`} type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password" required placeholder="Enter password"
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={`absolute right-[3px] top-[3px] w-8 h-8 inline-flex items-center justify-center rounded-sm text-bs-neutral-700 ${focusRing}`}
+                  aria-label={showPassword ? 'Hide passcode' : 'Show passcode'}
+                  onClick={() => setShowPassword((s) => !s)}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-          <div className="text-[13px]">
-            <span className="italic text-bs-neutral-800">Forgot your passcode?</span>{' '}
-            <a href="#admin-contact" className={`text-bs-accent-700 underline underline-offset-[3px] hover:text-bs-accent-800 ${focusRing}`}>
-              Contact your administrator
-            </a>
-          </div>
-        </form>
+            <button
+              type="submit" disabled={submitting}
+              className={`inline-flex items-center justify-center gap-1.5 mt-1 h-[42px] px-[18px] rounded-md bg-bs-accent text-bs-bg text-[14px] font-semibold hover:enabled:bg-bs-accent-600 active:enabled:bg-bs-accent-700 disabled:opacity-[.45] disabled:cursor-not-allowed ${focusRing}`}
+            >
+              {submitting ? 'Signing in…' : 'Sign in to terminal'}
+              <ArrowRight size={16} />
+            </button>
 
-        <div className="italic text-[12px] text-bs-neutral-800">Authorised personnel only. All activity is logged.</div>
+            <div className="text-[13px] text-center">
+              <span className="text-bs-neutral-700">Forgot your password?</span>{' '}
+              <a href="#admin-contact" className={`text-bs-accent-700 underline underline-offset-[3px] hover:text-bs-accent-800 ${focusRing}`}>
+                Contact your administrator
+              </a>
+            </div>
+          </form>
+
+        <div className="pt-4 border-t border-bs-ink/10 text-[12px] text-bs-neutral-700">Authorised personnel only. All activity is logged.</div>
+        </div>
       </section>
     </div>
   );
