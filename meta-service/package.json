@@ -15,7 +15,8 @@
     "db:seed": "node scripts/run-sql.js db/seed.sql",
     "db:seed-permissions": "node scripts/seed-permissions.js",
     "db:seed-demo-alerts": "node scripts/seed-demo-alerts.js",
-    "db:reset": "node scripts/db-reset.js"
+    "db:reset": "node scripts/db-reset.js",
+    "service-account": "node scripts/create-service-account.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

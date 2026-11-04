@@ -9,7 +9,11 @@ const permissions = [
   'report.download',
   'users.list',
   'users.view',
-  'user.status.update'
+  'user.status.update',
+  'anomalies.create',
+  'detection.view',
+  'detection.manage',
+  'detection.report'
 ];
 
 async function seedPermissions() {
@@ -69,7 +73,8 @@ async function seedPermissions() {
         'alert.view',
         'alert.status.view',
         'reports.view',
-        'report.download'
+        'report.download',
+        'detection.view'
       ];
 
       const placeholders = operatorPermissions.map(() => '?').join(',');
@@ -88,7 +93,8 @@ async function seedPermissions() {
         'dashboard.view',
         'alert.view',
         'reports.view',
-        'report.download'
+        'report.download',
+        'detection.view'
       ];
 
       const placeholders = analystPermissions.map(() => '?').join(',');
@@ -98,6 +104,21 @@ async function seedPermissions() {
         ON CONFLICT DO NOTHING
       `, [analystRole.role_id, ...analystPermissions]);
       console.log('Assigned analyst permissions');
+    }
+
+    // Service role (analytic-service's account, see scripts/create-service-account.js): post
+    // anomalies, read detector settings, report computed thresholds.
+    const [serviceRole] = await query('SELECT role_id FROM roles WHERE name = ? LIMIT 1', ['service']);
+    if (serviceRole) {
+      const servicePermissions = ['anomalies.create', 'detection.view', 'detection.report'];
+
+      const placeholders = servicePermissions.map(() => '?').join(',');
+      await query(`
+        INSERT INTO role_permissions (role_id, permission_id)
+        SELECT ?, permission_id FROM permissions WHERE name IN (${placeholders})
+        ON CONFLICT DO NOTHING
+      `, [serviceRole.role_id, ...servicePermissions]);
+      console.log('Assigned service permissions');
     }
 
     await query('COMMIT');

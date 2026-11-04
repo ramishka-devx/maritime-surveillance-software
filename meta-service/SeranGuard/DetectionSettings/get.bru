@@ -1,0 +1,20 @@
+meta {
+  name: Detection Settings - Get
+  type: http
+  seq: 47
+}
+
+get {
+  url: {{baseUrl}}/api/detection-settings
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

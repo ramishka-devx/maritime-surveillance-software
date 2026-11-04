@@ -9,6 +9,7 @@ import {
   Map as MapIcon,
   Pentagon,
   ShieldCheck,
+  SlidersHorizontal,
   TriangleAlert,
   Users,
 } from 'lucide-react';
@@ -92,6 +93,7 @@ export default function Sidebar() {
   ] : isOperator(user) || isAnalyst(user) ? [] : [
     { id: 'users', label: 'Users', icon: Users, path: '/Users' },
     { id: 'roles-permissions', label: 'Roles & access', icon: ShieldCheck, path: '/RolesPermissions' },
+    { id: 'detection-settings', label: 'Detection settings', icon: SlidersHorizontal, path: '/DetectionSettings' },
   ];
 
   return (

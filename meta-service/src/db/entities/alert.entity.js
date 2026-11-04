@@ -30,6 +30,8 @@ export const Alert = new EntitySchema({
     status: { type: 'varchar', length: 20, default: 'open' },
     title: { type: 'varchar', length: 255 },
     description: { type: 'text', nullable: true },
+    // Anomaly score of the detection that raised it (REQ-F-045); null for rule-based alerts.
+    confidence_score: { type: 'numeric', precision: 4, scale: 3, nullable: true },
     created_by: {
       type: 'integer',
       foreignKey: { target: 'User', name: 'alerts_created_by_fkey' }
