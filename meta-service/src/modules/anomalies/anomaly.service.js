@@ -6,6 +6,7 @@ import { anomalyTitle, kn, motion, vesselLabel } from '../alerts/alert-text.js';
 import { VesselModel } from '../vessels/vessel.model.js';
 import { query } from '../../config/db.config.js';
 import { logger } from '../../config/logger.js';
+import { DetectionSettingsService } from '../detection-settings/detection-settings.service.js';
 
 // Alert raised for each anomaly type ('behavoir' (sic) is the stored behaviour type).
 export const ANOMALY_ALERT = {
@@ -15,11 +16,42 @@ export const ANOMALY_ALERT = {
   loitering: { type: 'loitering', severity: 'medium', label: 'Loitering' }
 };
 
+// Speed alerts take their severity from the anomaly score; without a score (rule-based
+// detectors, or the speed detector running without a model) the type's default applies.
+export function alertSeverity(kind, score, highSeverityScore) {
+  if (kind.type === 'speed' && score !== undefined && score !== null) {
+    return score >= highSeverityScore ? 'high' : 'medium';
+  }
+  return kind.severity;
+}
+
 export const AnomalyService = {
   async create(payload, created_by) {
     const anomaly = await AnomalyModel.create(payload);
 
     try {
+      const kind = ANOMALY_ALERT[payload.anomaly_type] || ANOMALY_ALERT.speed;
+      const settings = await DetectionSettingsService.values();
+
+      // Cooldown: a vessel that keeps tripping the same detector adds observations to its
+      // unresolved alert instead of flooding the queue with new ones.
+      const cooldown = settings['alerts.cooldown_minutes'];
+      if (cooldown > 0 && payload.mmsi) {
+        const recent = await AlertModel.findRecentOpen({ mmsi: payload.mmsi, type: kind.type, minutes: cooldown });
+        if (recent) {
+          await AlertEventModel.add({
+            alert_id: recent.alert_id,
+            kind: 'observation',
+            at: payload.detected_at || null,
+            text: `Detected again${payload.sog != null ? ` at ${payload.sog} kn` : ''}${
+              payload.score != null ? ` (score ${Number(payload.score).toFixed(2)})` : ''
+            }.`,
+            data: { anomaly_id: anomaly?.anomaly_id ?? null, sog: payload.sog ?? null, score: payload.score ?? null }
+          });
+          return { ...anomaly, alert_id: recent.alert_id };
+        }
+      }
+
       // 1. Resolve vessel_id if this MMSI exists in vessels table
       let vesselId = null;
       let vesselName = null;
@@ -43,7 +75,6 @@ export const AnomalyService = {
       }
 
       // 3. Format the alert title and description for this anomaly type
-      const kind = ANOMALY_ALERT[payload.anomaly_type] || ANOMALY_ALERT.speed;
       const vesselDisplay = vesselName ? `${vesselName} (${payload.mmsi})` : `MMSI ${payload.mmsi}`;
       const sogText = payload.sog !== undefined && payload.sog !== null ? `${payload.sog} kn` : null;
       const p99Text = payload.p99_speed !== undefined && payload.p99_speed !== null ? `${payload.p99_speed} kn` : null;
@@ -58,7 +89,8 @@ export const AnomalyService = {
       const descParts = [
         `Automated ${kind.label.toLowerCase()} detected by analytic-service for ${vesselDisplay}.`,
         sogText ? `Observed SOG: ${sogText}.` : null,
-        p99Text ? `Peer p99 speed threshold: ${p99Text}.` : null,
+        p99Text ? `Vessel-type p99 speed threshold: ${p99Text}.` : null,
+        payload.score != null ? `Anomaly score: ${Number(payload.score).toFixed(3)}.` : null,
         cogText ? `Course over ground: ${cogText}.` : null,
         payload.details ? `Diagnostics: ${JSON.stringify(payload.details)}` : null
       ].filter(Boolean);
@@ -66,11 +98,11 @@ export const AnomalyService = {
       const alert = await AlertModel.create({
         vessel_id: vesselId,
         mmsi: payload.mmsi,
-        // analytic-service sends latitude in details.lat (anomalies has no lat column).
-        lat: payload.details?.lat ?? null,
+        lat: payload.lat ?? null,
         lon: payload.lon ?? null,
+        confidence_score: payload.score ?? null,
         type: kind.type,
-        severity: kind.severity,
+        severity: alertSeverity(kind, payload.score, settings['speed.high_severity_score']),
         status: 'open',
         title: title.slice(0, 255),
         description: descParts.join(' '),
@@ -86,7 +118,13 @@ export const AnomalyService = {
           kind: 'raised',
           at: payload.detected_at || null,
           text: `analytic-service flagged ${kind.label.toLowerCase()}${how ? `, ${how}` : ''}${norm}.`.replace(/^a/, 'A'),
-          data: { anomaly_id: anomaly?.anomaly_id ?? null, sog: payload.sog ?? null, p99_speed: payload.p99_speed ?? null }
+          data: {
+            anomaly_id: anomaly?.anomaly_id ?? null,
+            sog: payload.sog ?? null,
+            p99_speed: payload.p99_speed ?? null,
+            score: payload.score ?? null,
+            model_version: payload.model_version ?? null
+          }
         });
       }
 

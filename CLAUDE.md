@@ -53,7 +53,8 @@ npm run db:migration:generate -- src/db/migrations/<Name>   # diff entities vs D
 npm run dev                   # nodemon src/server.js
 npm run lint                  # eslint src/**/*.js
 npm run format                # prettier
-node --test tests/            # node:test suite (no npm script)
+node --test tests/*.test.js   # node:test suite (no npm script; Node 24 rejects a bare directory)
+npm run service-account       # analytic-service's machine login (after db:seed-permissions)
 ```
 `scripts/run-sql.js` (used for the seeds) creates the database if missing and splits on
 `;` (comment- and dollar-quote-aware). `db/patches/` now only holds legacy MySQL RBAC
@@ -68,7 +69,8 @@ cp .env.sample .env
 uvicorn app.main:app --reload   # serves on :8000; the Kafka consumer starts with the app
 ```
 `cp .env.example .env` (the committed example; `.env.sample` is git-ignored).
-There is no test runner or linter configured. `.pytest_cache` exists but no tests are checked in.
+Tests: `pip install -r requirements-dev.txt && pytest` (no linter configured). They don't
+import the Kafka consumer, so they run without a broker.
 For Kafka replay, use a fresh `KAFKA_GROUP_ID` so offsets aren't already committed.
 
 ### ingest-service
@@ -109,7 +111,7 @@ add it there or write an explicit `RETURNING`.
 ### Schema: TypeORM entities + migrations (schema only, not queries)
 
 `meta-service/src/db/` owns the schema for the whole shared DB:
-- `entities/*.entity.js` — one JS `EntitySchema` per table (16 tables).
+- `entities/*.entity.js` — one JS `EntitySchema` per table (20 tables).
 - `migrations/*.js` — `InitialSchema` is the hand-written baseline (all `IF NOT EXISTS`, so
   it also just records itself on a DB built from the old SQL files).
 - `data-source.js` — used **only** by the TypeORM CLI. The app does not import it; models
@@ -164,7 +166,9 @@ Standard middleware chain per protected route:
   builds `src/lib/api.js` falls back to `http://127.0.0.1:5000`. Override with
   `VITE_API_BASE_URL` / `VITE_API_PROXY_TARGET`.
 - analytic-service: `META_SERVICE_URL` (default `http://localhost:5000`) +
-  `META_SERVICE_TOKEN` (a JWT) for posting anomalies.
+  `META_SERVICE_EMAIL` / `META_SERVICE_PASSWORD` of the `service`-role account
+  (`npm run service-account`). `meta_client.py` logs in again on 401 and every 12 h, so token
+  expiry doesn't stop anomaly posting. A fixed `META_SERVICE_TOKEN` still works but can't renew.
 
 ### AIS parsing is duplicated
 
@@ -175,11 +179,26 @@ ISO 8601). Keep them in sync when the upstream format changes.
 
 ### Speed-anomaly detection
 
-`analytic-service` buffers position reports keyed by static group
-`(width, length, ship_type)` — or by `mmsi` when static data is unavailable — and only
-scores once a buffer reaches `ANOMALY_MIN_SAMPLES`. It flags a row if IsolationForest
-marks it an outlier **or** `sog` exceeds the buffer's p99. The batch/offline version
-lives in `speed_anomalies.py` and is exposed at `POST /detection/speed-anomalies`.
+SRS §3.4 pipeline, in `analytic-service/app/modules/detection/speed_model.py`:
+1. **Gate:** SOG above the p99 SOG of the vessel-type group (`type_groups.py`: exact AIS code
+   for 30-39 / 50-59, tens otherwise, 0 unknown). Admin override first; groups under
+   `speed.min_group_samples` use the fallback, raised to their own p99 if that's higher
+   (otherwise high-speed ferries get flagged at their normal speed).
+2. **Score:** IsolationForest on **relative speed** (sog / that p99), score = `-score_samples`
+   (0-1, ~0.45 normal). Raw (sog, width, length, type) features couldn't separate a 40 kn
+   cargo ship from a normal one. Scores saturate beyond the training range, so they mean
+   confidence, not magnitude. Alert at `speed.score_threshold`, log only in the warning band.
+- The model is never fitted per message: a background refit every `speed.refit_minutes`,
+  saved to `models/speed_model.joblib`, bootstrapped from `AI/ais_dataset.csv`. Each fit
+  reports per-type p99 to meta-service (`speed_thresholds.p99_computed`).
+- Loitering (`loitering.py`) is rule-based; at-anchor / moored vessels are exempt.
+- All thresholds are rows in `detection_settings` / `speed_thresholds`, edited by super admins
+  (`detection.manage`, audited) and polled by analytic-service every `SETTINGS_POLL_S`.
+- meta-service: `anomalies.score` → `alerts.confidence_score`; speed-alert severity comes from
+  `speed.high_severity_score`; a repeat detection within `alerts.cooldown_minutes` becomes an
+  'observation' event on the vessel's unresolved alert instead of a new alert.
+- The batch version (`speed_anomalies.py`, `POST /detection/speed-anomalies`) runs the same
+  pipeline over a CSV.
 
 ### web: auth and vessel map
 

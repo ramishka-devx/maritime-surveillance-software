@@ -1,0 +1,27 @@
+meta {
+  name: Detection Settings - Update (admin)
+  type: http
+  seq: 48
+}
+
+put {
+  url: {{baseUrl}}/api/detection-settings
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "speed.score_threshold": 0.72,
+    "alerts.cooldown_minutes": 45
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

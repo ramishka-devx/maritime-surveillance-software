@@ -1,0 +1,26 @@
+meta {
+  name: Detection Settings - Set p99 override (admin)
+  type: http
+  seq: 49
+}
+
+put {
+  url: {{baseUrl}}/api/detection-settings/thresholds/60
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "p99_override": 32
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

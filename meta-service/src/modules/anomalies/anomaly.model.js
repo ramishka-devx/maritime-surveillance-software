@@ -11,15 +11,19 @@ export const AnomalyModel = {
       nav_status,
       p99_speed,
       details,
+      lat,
       lon,
       alt,
+      score,
+      model_version,
       detected_at
     } = payload;
 
     const result = await query(
       `INSERT INTO anomalies (
-        mmsi, anomaly_type, sog, cog, heading, nav_status, p99_speed, details, lon, alt, detected_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, NOW()))`,
+        mmsi, anomaly_type, sog, cog, heading, nav_status, p99_speed, details, lat, lon, alt,
+        score, model_version, detected_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, NOW()))`,
       [
         mmsi,
         anomaly_type,
@@ -29,8 +33,11 @@ export const AnomalyModel = {
         nav_status ?? null,
         p99_speed ?? null,
         details ?? null,
+        lat ?? null,
         lon ?? null,
         alt ?? null,
+        score ?? null,
+        model_version ?? null,
         detected_at ?? null
       ]
     );
@@ -80,7 +87,8 @@ export const AnomalyModel = {
     const rows = await query(
       `SELECT
         a.anomaly_id, a.mmsi, a.anomaly_type, a.sog, a.cog, a.heading,
-        a.nav_status, a.p99_speed, a.details, a.lon, a.alt, a.detected_at,
+        a.nav_status, a.p99_speed, a.details, a.lat, a.lon, a.alt, a.score::float AS score,
+        a.model_version, a.detected_at,
         COALESCE(s.ship_name, v.name) as ship_name,
         COALESCE(s.ship_type::text, v.vessel_type) as ship_type,
         v.flag, v.callsign, v.imo
@@ -105,7 +113,8 @@ export const AnomalyModel = {
     const rows = await query(
       `SELECT
         a.anomaly_id, a.mmsi, a.anomaly_type, a.sog, a.cog, a.heading,
-        a.nav_status, a.p99_speed, a.details, a.lon, a.alt, a.detected_at,
+        a.nav_status, a.p99_speed, a.details, a.lat, a.lon, a.alt, a.score::float AS score,
+        a.model_version, a.detected_at,
         COALESCE(s.ship_name, v.name) as ship_name,
         COALESCE(s.ship_type::text, v.vessel_type) as ship_type,
         v.flag, v.callsign, v.imo

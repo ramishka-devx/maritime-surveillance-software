@@ -1,18 +1,31 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
+import time
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
-import httpx
 import pandas as pd
 from confluent_kafka import Consumer, KafkaError
-from sklearn.ensemble import IsolationForest
 
-from app.modules.detection.speed_anomalies import detect_speed_anomalies
+from app.modules.detection.loitering import LoiteringDetector
+from app.modules.detection.meta_client import MetaClient
+from app.modules.detection.payloads import loitering_payload, speed_payload
+from app.modules.detection.settings import SettingsStore
+from app.modules.detection.speed_anomalies import load_dataset
+from app.modules.detection.speed_model import SpeedModel, evaluate, fit_speed_model
+
+logger = logging.getLogger(__name__)
+
+SERVICE_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_MODEL_PATH = SERVICE_ROOT / "models" / "speed_model.joblib"
+DEFAULT_TRAINING_CSV = SERVICE_ROOT.parent / "AI" / "ais_dataset.csv"
 
 
 @dataclass
@@ -20,50 +33,70 @@ class ConsumerStats:
     messages_seen: int = 0
     static_seen: int = 0
     position_seen: int = 0
+    speed_candidates: int = 0
+    speed_alerts: int = 0
+    speed_warnings: int = 0
+    speed_no_threshold: int = 0
+    loitering_flagged: int = 0
     anomalies_sent: int = 0
-    anomalies_flagged: int = 0
-    skipped_no_static: int = 0
-    skipped_no_dimensions: int = 0
-    skipped_min_samples: int = 0
+    anomalies_failed: int = 0
     errors: int = 0
     last_message_at: str | None = None
+    model_version: str | None = None
+    model_fitted_at: str | None = None
+    model_samples: int = 0
+    last_fit_error: str | None = None
 
 
 @dataclass
 class SpeedAnomalyConsumer:
+    """Kafka consumer running the speed (p99 gate + IsolationForest score) and loitering detectors."""
+
     brokers: list[str]
     topic: str
     group_id: str
     auto_offset_reset: str
-    meta_service_url: str
-    meta_service_token: str | None
-    contamination: float
+    client: MetaClient
+    settings: SettingsStore
+    model_path: Path
+    training_csv: Path | None
     n_estimators: int
-    window_size: int
-    min_samples: int
-    timeout_s: float
+    train_window: int
+    min_train_samples: int
+    model: SpeedModel | None = field(default=None, init=False)
+    stats: ConsumerStats = field(default_factory=ConsumerStats, init=False)
+    loitering: LoiteringDetector = field(default_factory=LoiteringDetector, init=False)
     _thread: threading.Thread | None = field(default=None, init=False)
     _stop_event: threading.Event = field(default_factory=threading.Event, init=False)
     _consumer: Consumer | None = field(default=None, init=False)
-    stats: ConsumerStats = field(default_factory=ConsumerStats, init=False)
     _static_cache: dict[int, dict[str, Any]] = field(default_factory=dict, init=False)
-    _buffers: dict[tuple[Any, ...], list[dict[str, Any]]] = field(default_factory=dict, init=False)
+    _training: deque = field(init=False)
+    _fitting: bool = field(default=False, init=False)
+    _last_fit: float = field(default=0.0, init=False)
+
+    def __post_init__(self) -> None:
+        self._training = deque(maxlen=self.train_window)
+
+    # -- lifecycle -----------------------------------------------------------------------
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
             return
         self._stop_event.clear()
-        self._thread = threading.Thread(target=self._run, daemon=True)
+        self.settings.start()
+        self._thread = threading.Thread(target=self._run, daemon=True, name="detection-consumer")
         self._thread.start()
 
     def stop(self) -> None:
         self._stop_event.set()
-        if self._consumer is not None:
-            self._consumer.close()
+        self.settings.stop()
         if self._thread:
             self._thread.join(timeout=5)
+        if self._consumer is not None:
+            self._consumer.close()
 
     def _run(self) -> None:
+        self._load_initial_model()
         self._consumer = Consumer(
             {
                 "bootstrap.servers": ",".join(self.brokers),
@@ -76,6 +109,7 @@ class SpeedAnomalyConsumer:
 
         while not self._stop_event.is_set():
             message = self._consumer.poll(1.0)
+            self._maybe_refit()
             if message is None:
                 continue
             if message.error():
@@ -89,6 +123,67 @@ class SpeedAnomalyConsumer:
                 self._process_message(payload)
             except Exception:
                 self.stats.errors += 1
+                logger.exception("Processing AIS message failed")
+            if self.stats.messages_seen % 10_000 == 0:
+                self.loitering.prune(datetime.now(timezone.utc))
+
+    # -- model ---------------------------------------------------------------------------
+
+    def _use_model(self, model: SpeedModel) -> None:
+        self.model = model
+        self.stats.model_version = model.version
+        self.stats.model_fitted_at = model.fitted_at
+        self.stats.model_samples = model.n_samples
+        self.client.report_thresholds(model.computed_thresholds(), model.version)
+
+    def _load_initial_model(self) -> None:
+        """Saved model, else bootstrap from the training CSV, so restarts don't start cold."""
+        model = SpeedModel.load(self.model_path)
+        if model is None and self.training_csv is not None and self.training_csv.exists():
+            try:
+                model = fit_speed_model(
+                    load_dataset(str(self.training_csv)),
+                    self.n_estimators,
+                    source="training_csv",
+                    min_group_samples=int(self.settings.get("speed.min_group_samples")),
+                )
+                model.save(self.model_path)
+            except Exception as exc:
+                self.stats.last_fit_error = str(exc)
+                logger.exception("Bootstrapping the speed model from %s failed", self.training_csv)
+        if model is None:
+            logger.warning("No speed model yet; alerting on the p99 gate alone until the first refit")
+            return
+        self._use_model(model)
+        self._last_fit = time.monotonic()
+        logger.info("Speed model %s loaded (%s samples)", model.version, model.n_samples)
+
+    def _maybe_refit(self) -> None:
+        refit_s = float(self.settings.get("speed.refit_minutes")) * 60
+        due = time.monotonic() - self._last_fit >= refit_s
+        if self._fitting or not due or len(self._training) < self.min_train_samples:
+            return
+        self._fitting = True
+        self._last_fit = time.monotonic()
+        snapshot = pd.DataFrame(list(self._training))
+        threading.Thread(target=self._refit, args=(snapshot,), daemon=True, name="speed-refit").start()
+
+    def _refit(self, snapshot: pd.DataFrame) -> None:
+        try:
+            model = fit_speed_model(
+                snapshot, self.n_estimators, min_group_samples=int(self.settings.get("speed.min_group_samples"))
+            )
+            model.save(self.model_path)
+            self._use_model(model)
+            self.stats.last_fit_error = None
+            logger.info("Speed model refitted: %s", model.version)
+        except Exception as exc:
+            self.stats.last_fit_error = str(exc)
+            logger.exception("Refitting the speed model failed")
+        finally:
+            self._fitting = False
+
+    # -- messages ------------------------------------------------------------------------
 
     def _process_message(self, msg: dict[str, Any]) -> None:
         parsed = parse_ais_message(msg)
@@ -104,94 +199,69 @@ class SpeedAnomalyConsumer:
             return
 
         self.stats.position_seen += 1
-
         mmsi = parsed["mmsi"]
-        static = self._static_cache.get(mmsi)
-
+        static = self._static_cache.get(mmsi) or {}
         record = {
             "mmsi": mmsi,
+            "time": parsed["time"],
             "sog": parsed.get("sog"),
             "cog": parsed.get("cog"),
             "heading": parsed.get("heading"),
             "nav_status": parsed.get("nav_status"),
-            "lon": parsed.get("lon"),
-            "lat": parsed.get("lat"),
-            "width": static.get("width") if static else None,
-            "length": static.get("length") if static else None,
-            "ship_type": static.get("ship_type") if static else None,
+            "lat": parsed["lat"],
+            "lon": parsed["lon"],
+            "width": static.get("width"),
+            "length": static.get("length"),
+            "ship_type": static.get("ship_type"),
         }
 
-        use_static_group = not any(record[key] is None for key in ("width", "length", "ship_type"))
-        if not use_static_group and static is None:
-            self.stats.skipped_no_static += 1
+        # The model only learns from positions whose vessel type is known.
+        if record["ship_type"] is not None and record["sog"] is not None:
+            self._training.append({"sog": record["sog"], "ship_type": record["ship_type"]})
 
-        if use_static_group:
-            key = ("group", int(record["width"]), int(record["length"]), int(record["ship_type"]))
-        else:
-            self.stats.skipped_no_dimensions += 1 if static is not None else 0
-            key = ("mmsi", int(record["mmsi"]))
-        buffer = self._buffers.setdefault(key, [])
-        buffer.append(record)
-        if len(buffer) > self.window_size:
-            buffer.pop(0)
+        self._check_speed(record)
+        self._check_loitering(record)
 
-        if len(buffer) < self.min_samples:
-            self.stats.skipped_min_samples += 1
+    def _check_speed(self, record: dict[str, Any]) -> None:
+        verdict = evaluate(record, self.model, self.settings)
+        if verdict.outcome == "no_threshold":
+            self.stats.speed_no_threshold += 1
+            return
+        if verdict.outcome == "normal":
+            if verdict.score is not None:
+                self.stats.speed_candidates += 1
             return
 
-        df = pd.DataFrame(buffer)
-        if use_static_group:
-            df = detect_speed_anomalies(
-                df,
-                contamination=self.contamination,
-                n_estimators=self.n_estimators,
+        self.stats.speed_candidates += 1
+        if verdict.outcome == "warning":
+            # Below the alert threshold: logged for analyst review only (UC-004.AC.2).
+            self.stats.speed_warnings += 1
+            logger.info(
+                "Low-confidence speed anomaly MMSI %s: %.1f kn over p99 %.1f kn, score %.3f",
+                record["mmsi"], record["sog"], verdict.threshold, verdict.score,
             )
+            return
+
+        self.stats.speed_alerts += 1
+        self._send(speed_payload(record, verdict, self.model.version if self.model else None))
+
+    def _check_loitering(self, record: dict[str, Any]) -> None:
+        try:
+            t = datetime.fromisoformat(record["time"])
+        except (TypeError, ValueError):
+            return
+        found = self.loitering.update(
+            record["mmsi"], t, record["lat"], record["lon"], record["sog"], record["nav_status"], self.settings
+        )
+        if found:
+            self.stats.loitering_flagged += 1
+            self._send(loitering_payload(record, found))
+
+    def _send(self, payload: dict[str, Any]) -> None:
+        if self.client.post_anomaly(payload):
+            self.stats.anomalies_sent += 1
         else:
-            df = detect_speed_anomalies_minimal(
-                df,
-                contamination=self.contamination,
-                n_estimators=self.n_estimators,
-            )
-
-        latest = df.iloc[-1]
-        if not bool(latest.get("speed_anomaly")):
-            return
-
-        self.stats.anomalies_flagged += 1
-        self._post_anomaly(latest)
-
-    def _post_anomaly(self, row: pd.Series) -> None:
-        detected_at = datetime.now(timezone.utc).isoformat()
-        payload = {
-            "mmsi": int(row.get("mmsi")),
-            "anomaly_type": "speed",
-            "sog": float(row.get("sog")) if row.get("sog") is not None else None,
-            "cog": float(row.get("cog")) if row.get("cog") is not None else None,
-            "heading": int(row.get("heading")) if row.get("heading") is not None else None,
-            "nav_status": int(row.get("nav_status")) if row.get("nav_status") is not None else None,
-            "p99_speed": float(row.get("p99_speed")) if row.get("p99_speed") is not None else None,
-            "details": {
-                "iso_anomaly": bool(row.get("iso_anomaly")),
-                "p99_anomaly": bool(row.get("p99_anomaly")),
-                "speed_anomaly": bool(row.get("speed_anomaly")),
-                "lat": float(row.get("lat")) if row.get("lat") is not None else None,
-            },
-            "lon": float(row.get("lon")) if row.get("lon") is not None else None,
-            "alt": None,
-            "detected_at": detected_at,
-        }
-
-        headers = {"content-type": "application/json"}
-        if self.meta_service_token:
-            headers["Authorization"] = f"Bearer {self.meta_service_token}"
-
-        with httpx.Client(timeout=self.timeout_s) as client:
-            response = client.post(f"{self.meta_service_url}/api/anomalies", json=payload, headers=headers)
-
-        if response.status_code >= 400:
-            self.stats.errors += 1
-            return
-        self.stats.anomalies_sent += 1
+            self.stats.anomalies_failed += 1
 
 
 def _normalize_number(value: Any) -> float | None:
@@ -229,37 +299,6 @@ def _normalize_timestamp(value: Any) -> str | None:
     except ValueError:
         return None
     return parsed.astimezone(timezone.utc).isoformat()
-
-
-def _coerce_feature_frame(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    features = df[columns].copy()
-    for column in columns:
-        features[column] = pd.to_numeric(features[column], errors="coerce")
-    return features.fillna(features.median(numeric_only=True))
-
-
-def detect_speed_anomalies_minimal(
-    df: pd.DataFrame,
-    contamination: float,
-    n_estimators: int,
-) -> pd.DataFrame:
-    df = df.copy()
-    df["p99_speed"] = df["sog"].quantile(0.99)
-
-    feature_cols = ["sog", "cog", "heading"]
-    features = _coerce_feature_frame(df, feature_cols)
-
-    iso = IsolationForest(
-        n_estimators=n_estimators,
-        contamination=contamination,
-        random_state=42,
-    )
-    df["iso_flag"] = iso.fit_predict(features)
-    df["iso_anomaly"] = df["iso_flag"] == -1
-    df["p99_anomaly"] = df["sog"] > df["p99_speed"]
-    df["speed_anomaly"] = df["iso_anomaly"] | df["p99_anomaly"]
-
-    return df
 
 
 def _parse_dimensions(raw: dict[str, Any] | None) -> tuple[int | None, int | None]:
@@ -332,21 +371,35 @@ def parse_ais_message(msg: dict[str, Any]) -> dict[str, Any] | None:
 _consumer_instance: SpeedAnomalyConsumer | None = None
 
 
+def _env_path(name: str, default: Path) -> Path | None:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return Path(value) if value.strip() else None
+
+
 def get_speed_anomaly_consumer() -> SpeedAnomalyConsumer:
     global _consumer_instance
     if _consumer_instance is None:
         brokers = [broker.strip() for broker in os.getenv("KAFKA_BROKERS", "localhost:9092").split(",") if broker.strip()]
+        client = MetaClient(
+            base_url=os.getenv("META_SERVICE_URL", "http://localhost:5000"),
+            email=os.getenv("META_SERVICE_EMAIL"),
+            password=os.getenv("META_SERVICE_PASSWORD"),
+            token=os.getenv("META_SERVICE_TOKEN"),
+            timeout_s=float(os.getenv("ANOMALY_HTTP_TIMEOUT", "10")),
+        )
         _consumer_instance = SpeedAnomalyConsumer(
             brokers=brokers,
             topic=os.getenv("KAFKA_TOPIC", "ais.raw.messages"),
             group_id=os.getenv("KAFKA_GROUP_ID", "analytic-speed-anomalies"),
             auto_offset_reset=os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest"),
-            meta_service_url=os.getenv("META_SERVICE_URL", "http://localhost:5000"),
-            meta_service_token=os.getenv("META_SERVICE_TOKEN"),
-            contamination=float(os.getenv("ANOMALY_CONTAMINATION", "0.01")),
+            client=client,
+            settings=SettingsStore(client, poll_s=float(os.getenv("SETTINGS_POLL_S", "60"))),
+            model_path=_env_path("SPEED_MODEL_PATH", DEFAULT_MODEL_PATH) or DEFAULT_MODEL_PATH,
+            training_csv=_env_path("SPEED_TRAINING_CSV", DEFAULT_TRAINING_CSV),
             n_estimators=int(os.getenv("ANOMALY_N_ESTIMATORS", "100")),
-            window_size=int(os.getenv("ANOMALY_WINDOW_SIZE", "100000")),
-            min_samples=int(os.getenv("ANOMALY_MIN_SAMPLES", "8000")),
-            timeout_s=float(os.getenv("ANOMALY_HTTP_TIMEOUT", "10")),
+            train_window=int(os.getenv("SPEED_TRAIN_WINDOW", "50000")),
+            min_train_samples=int(os.getenv("SPEED_MIN_TRAIN_SAMPLES", "2000")),
         )
     return _consumer_instance

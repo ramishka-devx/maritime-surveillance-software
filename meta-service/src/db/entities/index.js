@@ -16,3 +16,5 @@ export { AisPosition } from './ais-position.entity.js';
 export { RestrictedArea } from './restricted-area.entity.js';
 export { Sector } from './sector.entity.js';
 export { AlertEvent } from './alert-event.entity.js';
+export { DetectionSetting } from './detection-setting.entity.js';
+export { SpeedThreshold } from './speed-threshold.entity.js';

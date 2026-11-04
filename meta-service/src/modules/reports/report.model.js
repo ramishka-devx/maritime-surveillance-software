@@ -60,8 +60,8 @@ export const ReportModel = {
   },
 
   // One row per alert raised in [from, to] (inclusive UTC days). Acknowledgement comes from
-  // the latest status event that moved the alert to 'acknowledged'. Nothing produces a
-  // confidence score yet (SER-7), so that column is empty.
+  // the latest status event that moved the alert to 'acknowledged'. confidence_score is the
+  // anomaly score of model-based alerts (empty for geofence, loitering and manual alerts).
   alertHistory: {
     columns: [
       'alert_id',
@@ -83,7 +83,7 @@ export const ReportModel = {
         COALESCE(s.ship_name, v.name) AS vessel_name,
         to_char(a.created_at, ${ISO_UTC}) AS detected_at,
         a.severity,
-        NULL AS confidence_score,
+        a.confidence_score,
         a.status,
         ack.acknowledged_by,
         to_char(ack.at, ${ISO_UTC}) AS acknowledged_at

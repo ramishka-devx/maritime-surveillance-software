@@ -27,8 +27,11 @@ export const createSchema = Joi.object({
     nav_status: Joi.number().integer().min(0).max(255).allow(null),
     p99_speed: Joi.number().min(0).max(200).allow(null),
     details: Joi.object().unknown(true).allow(null),
+    lat: Joi.number().min(-90).max(90).allow(null),
     lon: Joi.number().min(-180).max(180).allow(null),
     alt: Joi.number().allow(null),
+    score: Joi.number().min(0).max(1).allow(null),
+    model_version: Joi.string().max(100).allow(null),
     detected_at: Joi.date().iso().allow(null)
   })
 });
@@ -46,8 +49,11 @@ export const updateSchema = Joi.object({
     nav_status: Joi.number().integer().min(0).max(255).allow(null),
     p99_speed: Joi.number().min(0).max(200).allow(null),
     details: Joi.object().unknown(true).allow(null),
+    lat: Joi.number().min(-90).max(90).allow(null),
     lon: Joi.number().min(-180).max(180).allow(null),
     alt: Joi.number().allow(null),
+    score: Joi.number().min(0).max(1).allow(null),
+    model_version: Joi.string().max(100).allow(null),
     detected_at: Joi.date().iso().allow(null)
   })
 });

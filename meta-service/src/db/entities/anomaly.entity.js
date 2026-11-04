@@ -21,8 +21,12 @@ export const Anomaly = new EntitySchema({
     nav_status: { type: 'smallint', nullable: true },
     p99_speed: { type: 'numeric', precision: 6, scale: 2, nullable: true },
     details: { type: 'jsonb', nullable: true },
+    lat: { type: 'double precision', nullable: true },
     lon: { type: 'double precision', nullable: true },
     alt: { type: 'double precision', nullable: true },
+    // IsolationForest anomaly score, 0-1 (~0.5 normal); null for rule-based detectors.
+    score: { type: 'numeric', precision: 4, scale: 3, nullable: true },
+    model_version: { type: 'text', nullable: true },
     detected_at: { type: 'timestamptz', default: () => 'now()' }
   },
   indices: [
