@@ -25,6 +25,7 @@ export const Alert = new EntitySchema({
       nullable: true,
       foreignKey: { target: 'RestrictedArea', name: 'alerts_restricted_area_id_fkey', onDelete: 'SET NULL' }
     },
+    sts_encounter_id: { type: 'bigint', nullable: true },
     type: { type: 'varchar', length: 30, default: 'manual' },
     severity: { type: 'varchar', length: 20, default: 'medium' },
     status: { type: 'varchar', length: 20, default: 'open' },
@@ -57,7 +58,7 @@ export const Alert = new EntitySchema({
     {
       name: 'chk_alerts_type',
       expression:
-        "type IN ('geofence', 'speed', 'collision_risk', 'dark_vessel', 'manual', 'loitering', 'route_deviation')"
+        "type IN ('geofence', 'speed', 'collision_risk', 'dark_vessel', 'manual', 'loitering', 'route_deviation', 'sts_transfer')"
     },
     {
       name: 'chk_alerts_severity',

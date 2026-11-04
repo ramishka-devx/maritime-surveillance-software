@@ -13,7 +13,7 @@ export const Anomaly = new EntitySchema({
     anomaly_type: {
       type: 'enum',
       enumName: 'anomaly_type_enum',
-      enum: ['speed', 'route', 'behavoir', 'loitering']
+      enum: ['speed', 'route', 'behavoir', 'loitering', 'sts_transfer']
     },
     sog: { type: 'numeric', precision: 6, scale: 2, nullable: true },
     cog: { type: 'numeric', precision: 6, scale: 2, nullable: true },

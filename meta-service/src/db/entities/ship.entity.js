@@ -17,6 +17,7 @@ export const Ship = new EntitySchema({
     imo: { type: 'varchar', length: 10, nullable: true },
     callsign: { type: 'varchar', length: 20, nullable: true },
     destination: { type: 'text', nullable: true },
+    draught: { type: 'real', nullable: true },
     created_at: { type: 'timestamp', nullable: true, default: () => 'now()' },
     updated_at: { type: 'timestamp', nullable: true, default: () => 'now()' },
     // Latest position, kept current by ingest-service so the map needn't scan ais_positions.
@@ -26,8 +27,12 @@ export const Ship = new EntitySchema({
     cog: { type: 'real', nullable: true },
     heading: { type: 'real', nullable: true },
     nav_status: { type: 'smallint', nullable: true },
-    last_position_at: { type: 'timestamp', nullable: true }
+    last_position_at: { type: 'timestamp', nullable: true },
+    position: { type: 'geography', spatialFeatureType: 'Point', srid: 4326, nullable: true }
   },
   // DESC is set in the migration; TypeORM indices don't carry sort order.
-  indices: [{ name: 'idx_ships_last_position_at', columns: ['last_position_at'] }]
+  indices: [
+    { name: 'idx_ships_last_position_at', columns: ['last_position_at'] },
+    { name: 'idx_ships_position_gist', columns: ['position'], spatial: true }
+  ]
 });

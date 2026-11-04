@@ -6,7 +6,10 @@ import cron from 'node-cron';
 import { sendDailyMaintenanceNotifications } from './cron/maintenanceNotifications.js';
 import { runGeofenceDetector } from './cron/geofenceDetector.js';
 import { runDarkVesselDetector } from './cron/darkVesselDetector.js';
+import { runStsEncounterDetector } from './cron/stsEncounterDetector.js';
 import '../cron/partition-cron.js';
+import { createServer } from 'node:http';
+import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
 
 (async () => {
   try {
@@ -28,7 +31,8 @@ import '../cron/partition-cron.js';
   for (let attempt = 1; attempt <= maxPortAttempts; attempt++) {
     try {
       server = await new Promise((resolve, reject) => {
-        const s = app.listen(port, () => resolve(s));
+        const s = createServer(app);
+        s.listen(port, () => resolve(s));
         s.once('error', reject);
       });
 
@@ -48,6 +52,8 @@ import '../cron/partition-cron.js';
       process.exit(1);
     }
   }
+
+  const closeGeofenceSocket = attachGeofenceSocket(server);
 
   // CRON_ENABLED=false runs the API only, e.g. a local server sharing the hosted DB, so the
   // detectors (in-memory watermarks) don't raise every alert twice.
@@ -77,12 +83,17 @@ import '../cron/partition-cron.js';
     cron.schedule('*/5 * * * *', () => {
       runDarkVesselDetector();
     });
+
+    cron.schedule('* * * * *', () => {
+      runStsEncounterDetector();
+    });
   } else {
     logger.warn('CRON_ENABLED=false: maintenance, geofence and dark-vessel jobs are off.');
   }
 
   function shutdown() {
     logger.info('Shutting down...');
+    closeGeofenceSocket();
     server.close(() => process.exit(0));
   }
 

@@ -9,6 +9,9 @@ import { flagFromMmsi } from '../../lib/mid.js';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { useVesselContext } from '../../context/VesselContext.jsx';
 import Skeleton from '../../components/ui/Skeleton.jsx';
+import { CircleMarker, MapContainer, Polyline, TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const TYPE_LABEL = {
   dark_vessel: 'Dark activity',
@@ -17,12 +20,14 @@ const TYPE_LABEL = {
   loitering: 'Loitering',
   route_deviation: 'Route deviation',
   collision_risk: 'Collision risk',
+  sts_transfer: 'STS transfer',
   manual: 'Manual report',
 };
 const FILTERS = [
   { name: 'All', types: null },
   { name: 'Dark activity', types: ['dark_vessel'] },
   { name: 'Restricted area', types: ['geofence'] },
+  { name: 'STS transfer', types: ['sts_transfer'] },
   { name: 'Behaviour', types: ['loitering', 'speed', 'route_deviation'] },
 ];
 // AIS navigational status codes (ITU-R M.1371).
@@ -110,13 +115,14 @@ function cropBounds(points) {
 // restricted zone (geofence alerts) and a marker at the detection position.
 function ChartCrop({ alert, detail, onOpenMap }) {
   const track = (detail?.track || []).filter((p) => p.lat != null && p.lon != null);
+  const trackB = (detail?.trackB || []).filter((p) => p.lat != null && p.lon != null);
   const atDetection = alert.lat != null && alert.lon != null;
   const latest = atDetection
     ? [Number(alert.lat), Number(alert.lon)]
     : detail?.vessel?.lat != null
     ? [Number(detail.vessel.lat), Number(detail.vessel.lon)]
-    : track[0]
-    ? [track[0].lat, track[0].lon]
+    : track[0] || trackB[0]
+    ? [(track[0] || trackB[0]).lat, (track[0] || trackB[0]).lon]
     : null;
   const ring = detail?.area?.type === 'Polygon' ? detail.area.coordinates[0] : null;
   const expired = detail?.trackExpired;
@@ -130,7 +136,7 @@ function ChartCrop({ alert, detail, onOpenMap }) {
     );
   }
 
-  const b = cropBounds([latest, ...track.map((p) => [p.lat, p.lon]), ...(ring || []).map(([lon, lat]) => [lat, lon])]);
+  const b = cropBounds([latest, ...track.map((p) => [p.lat, p.lon]), ...trackB.map((p) => [p.lat, p.lon]), ...(ring || []).map(([lon, lat]) => [lat, lon])]);
   const pct = ([lat, lon]) => ({ left: `${((lon - b.w) / (b.e - b.w)) * 100}%`, top: `${((b.n - lat) / (b.n - b.s)) * 100}%` });
   // Course at detection: the track point closest to the alert time, else the latest report.
   const detectedMs = new Date(alert.created_at).getTime();
@@ -155,13 +161,8 @@ function ChartCrop({ alert, detail, onOpenMap }) {
             strokeWidth="1" strokeDasharray="4 3" vectorEffect="non-scaling-stroke"
           />
         )}
-        {track.length > 1 && (
-          <polyline
-            points={track.map((p) => `${p.lon},${-p.lat}`).join(' ')}
-            fill="none" stroke={`rgb(var(--bs-${markInk}))`} strokeWidth="1.6" strokeDasharray="1 4"
-            strokeLinecap="round" vectorEffect="non-scaling-stroke"
-          />
-        )}
+        {track.length > 1 && <polyline points={track.map((p) => `${p.lon},${-p.lat}`).join(' ')} fill="none" stroke="rgb(var(--bs-accent))" strokeWidth="1.6" strokeDasharray="1 4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />}
+        {trackB.length > 1 && <polyline points={trackB.map((p) => `${p.lon},${-p.lat}`).join(' ')} fill="none" stroke="rgb(var(--bs-accent-2))" strokeWidth="1.6" strokeDasharray="1 4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />}
       </svg>
       <span className="absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 grid place-items-center" style={pct(latest)}>
         <span className="absolute inset-0 border border-dashed" style={{ borderColor: `rgb(var(--bs-${markInk}))` }} />
@@ -170,8 +171,8 @@ function ChartCrop({ alert, detail, onOpenMap }) {
         </svg>
       </span>
       <span className="absolute left-3 bottom-2.5 text-[12px] italic text-bs-neutral-800 bg-bs-bg/80 px-1.5">
-        {track.length > 1
-          ? `Track ${utc(track[track.length - 1].time_utc)}–${utc(track[0].time_utc)} UTC`
+        {track.length > 1 || trackB.length > 1
+          ? `Two-vessel tracks · ${utc((track[0] || trackB[0]).time_utc)}–${utc((track[track.length - 1] || trackB[trackB.length - 1]).time_utc)} UTC`
           : expired
           ? 'Track no longer kept (positions are stored for 2 days)'
           : 'No positions around the detection time'}
@@ -184,6 +185,36 @@ function ChartCrop({ alert, detail, onOpenMap }) {
         <MapIcon size={16} />
         Open on map
       </button>
+    </div>
+  );
+}
+
+function EncounterBounds({ points }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [24, 24], maxZoom: 14 });
+  }, [map, points]);
+  return null;
+}
+
+function StsEncounterMap({ detail }) {
+  const trackA = (detail?.track || []).filter((p) => p.lat != null && p.lon != null);
+  const trackB = (detail?.trackB || []).filter((p) => p.lat != null && p.lon != null);
+  const points = [...trackA, ...trackB].map((p) => [Number(p.lat), Number(p.lon)]);
+  const centroid = detail?.encounter?.centroid_lat != null
+    ? [Number(detail.encounter.centroid_lat), Number(detail.encounter.centroid_lon)]
+    : points[0];
+  if (!centroid) return null;
+
+  return (
+    <div className="mt-5 h-64 overflow-hidden rounded-sm border border-bs-ink/[.12]">
+      <MapContainer center={centroid} zoom={11} scrollWheelZoom={false} style={{ width: '100%', height: '100%' }}>
+        <EncounterBounds points={[...points, centroid]} />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+        {trackA.length > 1 && <Polyline positions={trackA.map((p) => [Number(p.lat), Number(p.lon)])} pathOptions={{ color: '#0891b2', weight: 3 }} />}
+        {trackB.length > 1 && <Polyline positions={trackB.map((p) => [Number(p.lat), Number(p.lon)])} pathOptions={{ color: '#dc2626', weight: 3 }} />}
+        <CircleMarker center={centroid} radius={8} pathOptions={{ color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.75 }} />
+      </MapContainer>
     </div>
   );
 }
@@ -229,6 +260,9 @@ export default function AlertsPage() {
 
   const sel = queue.find((a) => a.alert_id === selId) || queue[0] || null;
   const [caseId, caseMmsi, caseArea, caseAt] = [sel?.alert_id, sel?.mmsi, sel?.restricted_area_id, sel?.created_at];
+  const caseMmsiB = sel?.sts_mmsi_b || null;
+  const caseTrackFrom = sel?.sts_started_at || caseAt;
+  const caseTrackTo = sel?.sts_ended_at || sel?.sts_last_seen_together_at || caseAt;
 
   // Case file: AIS vessel, track around detection, alert history, timeline, restricted zone.
   useEffect(() => {
@@ -240,30 +274,49 @@ export default function AlertsPage() {
       caseMmsi
         ? get(
             `/api/ais/positions/${caseMmsi}?limit=500` +
-              `&from=${new Date(new Date(caseAt).getTime() - TRACK_BEFORE_MS).toISOString()}` +
-              `&to=${new Date(new Date(caseAt).getTime() + TRACK_AFTER_MS).toISOString()}`
+              `&from=${new Date(new Date(caseTrackFrom).getTime() - TRACK_BEFORE_MS).toISOString()}` +
+              `&to=${new Date(new Date(caseTrackTo).getTime() + TRACK_AFTER_MS).toISOString()}`
+          )
+        : null,
+      caseMmsiB
+        ? get(
+            `/api/ais/positions/${caseMmsiB}?limit=5000` +
+              `&from=${new Date(new Date(caseTrackFrom).getTime() - TRACK_BEFORE_MS).toISOString()}` +
+              `&to=${new Date(new Date(caseTrackTo).getTime() + TRACK_AFTER_MS).toISOString()}`
           )
         : null,
       caseMmsi ? get(`/api/alerts?mmsi=${caseMmsi}&limit=1`) : null,
       get(`/api/alerts/${caseId}/events`),
       caseArea ? get(`/api/restricted-areas/${caseArea}`) : null,
-    ]).then(([vessel, track, history, events, area]) => {
+    ]).then(([vessel, track, trackB, history, events, area]) => {
       if (stale) return;
       const ok = (r) => (r.status === 'fulfilled' ? r.value : null);
       setDetail({
         id: caseId,
         vessel: (ok(vessel) || []).find((v) => String(v.mmsi) === String(caseMmsi)) || null,
         track: ok(track) || [],
+        trackB: ok(trackB) || [],
         priorAlerts: ok(history)?.total != null ? Math.max(0, ok(history).total - 1) : null,
         events: ok(events) || [],
         trackExpired: Date.now() - new Date(caseAt).getTime() > POSITION_RETENTION_MS,
         area: ok(area)?.geometry ?? null,
+        encounter: sel?.sts_mmsi_b ? {
+          mmsi_a: sel.sts_mmsi_a,
+          mmsi_b: sel.sts_mmsi_b,
+          started_at: sel.sts_started_at,
+          ended_at: sel.sts_ended_at,
+          min_distance_m: sel.sts_min_distance_m,
+          centroid_lat: sel.sts_centroid_lat,
+          centroid_lon: sel.sts_centroid_lon,
+        } : null,
       });
     });
     return () => {
       stale = true;
     };
-  }, [token, caseId, caseMmsi, caseArea, caseAt, refresh]);
+  }, [token, caseId, caseMmsi, caseMmsiB, caseArea, caseAt, caseTrackFrom, caseTrackTo, refresh,
+    sel?.sts_mmsi_a, sel?.sts_started_at, sel?.sts_ended_at, sel?.sts_last_seen_together_at,
+    sel?.sts_min_distance_m, sel?.sts_centroid_lat, sel?.sts_centroid_lon]);
 
   const caseDetail = detail?.id === caseId ? detail : null;
 
@@ -423,6 +476,16 @@ export default function AlertsPage() {
               </div>
 
               <ChartCrop alert={sel} detail={caseDetail} onOpenMap={openOnMap} />
+              {sel.type === 'sts_transfer' && caseDetail && (
+                <>
+                  <StsEncounterMap detail={caseDetail} />
+                  <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[13px]">
+                    <span><span className="text-bs-neutral-700">Vessel A</span> <b className="font-mono">MMSI {sel.sts_mmsi_a || sel.mmsi}</b></span>
+                    <span><span className="text-bs-neutral-700">Vessel B</span> <b className="font-mono">MMSI {sel.sts_mmsi_b}</b></span>
+                    <span><span className="text-bs-neutral-700">Minimum distance</span> <b>{Math.round(Number(sel.sts_min_distance_m || 0))} m</b></span>
+                  </div>
+                </>
+              )}
 
               <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-10 mt-6">
                 <div>

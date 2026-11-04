@@ -76,7 +76,6 @@ function toArea(row) {
     }
   }
   const ring = geo?.type === 'Polygon' ? geo.coordinates[0] : geo?.type === 'MultiPolygon' ? geo.coordinates[0][0] : [];
-  // GeoJSON rings repeat the first point at the end; drop it for display and counting.
   const coords = ring.map(([lon, lat]) => ({ lat: Number(lat), lon: Number(lon) }));
   if (coords.length > 1 && coords[0].lat === coords.at(-1).lat && coords[0].lon === coords.at(-1).lon) coords.pop();
   return { id: row.id, name: row.name || `Area #${row.id}`, type: row.type, coordinates: coords };
@@ -89,7 +88,6 @@ function ago(iso) {
   return `${Math.round(min / 1440)} d ago`;
 }
 
-// Name + type for one or more polygons (a drawn area, or the polygons in a GeoJSON file).
 function AreaDetailsModal({ drafts, onChange, onCancel, onSave, saving, error, source }) {
   const firstInput = useRef(null);
   useEffect(() => {
@@ -102,26 +100,9 @@ function AreaDetailsModal({ drafts, onChange, onCancel, onSave, saving, error, s
   const included = drafts.filter((d) => d.include);
   const valid = included.length > 0 && included.every((d) => d.name.trim() && d.type);
 
-  // Portal to <body> so the backdrop also covers the app's sidebar and header.
   return createPortal(
     <div className="fixed inset-0 z-[1000] grid place-items-center p-5 bg-bs-neutral-800/50" onMouseDown={(e) => e.target === e.currentTarget && !saving && onCancel()}>
       <div role="dialog" aria-modal="true" aria-labelledby="area-modal-title" className="w-[min(560px,100%)] max-h-[85vh] flex flex-col bg-bs-bg text-bs-ink shadow-bs-lg rounded-[4px]">
-        <div className="px-6 pt-5 pb-3 flex items-start gap-3">
-          <div className="flex-1">
-            <h2 id="area-modal-title" className="text-[20px] font-semibold">
-              {source === 'draw' ? 'New restricted area' : `Import ${drafts.length} area${drafts.length > 1 ? 's' : ''}`}
-            </h2>
-            <p className="text-[13px] italic text-bs-neutral-700">
-              {source === 'draw'
-                ? 'Name it and choose its type. Vessels entering it raise alerts within about 30 s.'
-                : 'Check the names and types read from the file; untick any you don’t want.'}
-            </p>
-          </div>
-          <button onClick={onCancel} disabled={saving} aria-label="Close" className={`w-8 h-8 grid place-items-center rounded-sm text-bs-neutral-700 hover:bg-bs-ink/[.07] ${focusRing}`}>
-            <X size={18} />
-          </button>
-        </div>
-
         <div className="px-6 pb-2 overflow-y-auto flex flex-col gap-4">
           {drafts.map((d, i) => (
             <div key={d.key} className={`flex flex-col gap-2.5 ${drafts.length > 1 ? 'pb-4 border-b border-bs-ink/[.08] last:border-b-0' : ''}`}>
