@@ -15,7 +15,8 @@ export function VesselProvider({ children }) {
   useEffect(() => {
     if (!token) return undefined;
     const apiBase = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'http://127.0.0.1:5000' : window.location.origin);
-    const socketUrl = new URL('/ws/incursions', apiBase);
+    // apiBase can be relative (the Docker build uses "/"), so resolve it against the page first.
+    const socketUrl = new URL('/ws/incursions', new URL(apiBase, window.location.origin));
     socketUrl.protocol = socketUrl.protocol === 'https:' ? 'wss:' : 'ws:';
     socketUrl.searchParams.set('token', token);
     const socket = new WebSocket(socketUrl);
