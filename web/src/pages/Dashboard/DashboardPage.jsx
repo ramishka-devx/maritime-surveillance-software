@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ArrowRight, Bell, Download, Pentagon, Ship, TriangleAlert } from 'lucide-react';
+import { Activity, ArrowRight, Bell, Download, Pentagon, Ship, TriangleAlert, X } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext.jsx';
+import { usePermission } from '../../auth/usePermission.js';
 import { useVesselContext } from '../../context/VesselContext.jsx';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { searchVessels, toUiVessel } from '../../lib/vessels.js';
 import { esriMapImage } from '../../lib/esriMap.js';
+import { presetRange, shiftDay } from '../../lib/dateRange.js';
 import Skeleton from '../../components/ui/Skeleton.jsx';
+import AlertHistoryExport from '../../components/reports/AlertHistoryExport.jsx';
 
 const ink = (name) => `rgb(var(--bs-${name}))`;
 
@@ -120,13 +123,25 @@ const range = (n) => Array.from({ length: n }, (_, i) => i);
 
 const fmtDeg = (v, pos, neg) => `${Math.abs(v).toFixed(1)}°${v < 0 ? neg : pos}`;
 
+// Starting range for the alert export: the UTC days the dashboard range covers.
+function exportRangeFor(timeRange) {
+  if (timeRange === '7d') return presetRange('7d');
+  if (timeRange === '30d') return presetRange('30d');
+  const { to } = presetRange('today');
+  return { from: shiftDay(to, -1), to }; // last 24 h spans yesterday and today
+}
+
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, isSuperAdmin } = useAuth();
+  const { can } = usePermission();
   const { focusVessel } = useVesselContext();
   const [timeRange, setTimeRange] = useState('24h');
   const [sectorId, setSectorId] = useState(null);
+  const [alertExportOpen, setAlertExportOpen] = useState(false);
+  // Super admins hold every permission server-side but hasPermission() reports false for them.
+  const canExportAlerts = can('report.download') || isSuperAdmin();
 
   const { data, error } = useDashboardData(timeRange, sectorId);
   // Skeletons only on first load; a range change keeps the old figures until the new ones land.
@@ -260,12 +275,52 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={handleExport}
+          title="The figures on this dashboard for the selected range"
           className={`inline-flex items-center gap-1.5 px-[18px] py-1.5 rounded-sm border border-bs-ink/[.16] text-[13px] font-semibold hover:bg-bs-ink/[.07] ${focusRing}`}
         >
           <Download size={16} />
-          Export report
+          Export summary
         </button>
+        {canExportAlerts && (
+          <button
+            onClick={() => setAlertExportOpen((o) => !o)}
+            aria-expanded={alertExportOpen}
+            aria-controls="alert-export-panel"
+            className={`inline-flex items-center gap-1.5 px-[18px] py-1.5 rounded-sm border text-[13px] font-semibold ${focusRing} ${
+              alertExportOpen ? 'bg-bs-ink text-bs-bg border-bs-ink' : 'border-bs-ink/[.16] hover:bg-bs-ink/[.07]'
+            }`}
+          >
+            <TriangleAlert size={16} />
+            Export alerts…
+          </button>
+        )}
       </div>
+
+      {alertExportOpen && (
+        <section
+          id="alert-export-panel"
+          aria-label="Export alerts"
+          onKeyDown={(e) => e.key === 'Escape' && setAlertExportOpen(false)}
+          className="mt-4 p-5 rounded-sm border border-bs-ink/[.16] bg-white max-w-[760px] ml-auto"
+        >
+          <div className="flex items-start gap-4 mb-4">
+            <div>
+              <h2 className="m-0 text-[15px] font-semibold">Export alerts</h2>
+              <p className="m-0 mt-0.5 text-[12px] text-bs-neutral-700">
+                Every alert raised in the chosen range as CSV, optionally only some types, severities or statuses.
+              </p>
+            </div>
+            <button
+              onClick={() => setAlertExportOpen(false)}
+              aria-label="Close alert export"
+              className={`ml-auto p-1 rounded-sm hover:bg-bs-ink/[.07] ${focusRing}`}
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <AlertHistoryExport initialRange={exportRangeFor(timeRange)} />
+        </section>
+      )}
 
       {/* Headline figures */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-8 mt-10">

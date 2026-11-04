@@ -38,7 +38,7 @@ router.get(
  * @openapi
  * /api/reports/alert-history.csv:
  *   get:
- *     summary: Alert History CSV (REQ-F-061) - one row per alert raised between two UTC days (inclusive, at most 31 days) with type, MMSI, vessel, severity, status and who acknowledged it when. confidence_score is empty until the model sends one. 503 if the report doesn't start within 5 s.
+ *     summary: Alert History CSV (REQ-F-061) - one row per alert raised between two UTC days (inclusive, at most 92 days) with type, MMSI, vessel, severity, confidence score, status and who acknowledged it when. Optionally only some types, severities or statuses (comma-separated). 503 if the report doesn't start within 5 s.
  *     tags: [Reports]
  *     parameters:
  *       - in: query
@@ -49,6 +49,18 @@ router.get(
  *         name: to
  *         required: true
  *         schema: { type: string, format: date, example: '2026-11-04' }
+ *       - in: query
+ *         name: type
+ *         schema: { type: string, example: 'speed,loitering' }
+ *         description: geofence, speed, collision_risk, dark_vessel, manual, loitering, route_deviation
+ *       - in: query
+ *         name: severity
+ *         schema: { type: string, example: 'high,critical' }
+ *         description: low, medium, high, critical
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, example: 'open,acknowledged' }
+ *         description: open, acknowledged, escalated, resolved, dismissed
  *     responses:
  *       200:
  *         description: CSV file download
@@ -60,7 +72,10 @@ router.get(
   authMiddleware,
   permissionMiddleware('report.download'),
   activityLogger('report.download', {
-    details: (req) => ({ report: 'alert_history', from: req.query.from, to: req.query.to })
+    details: (req) => {
+      const { from, to, type, severity, status } = req.query;
+      return { report: 'alert_history', from, to, type, severity, status };
+    }
   }),
   validate(alertHistorySchema),
   ReportController.alertHistory

@@ -20,8 +20,8 @@ export const ReportController = {
 
   async alertHistory(req, res, next) {
     try {
-      const { from, to } = req.query;
-      await ReportService.alertHistory(res, from, to);
+      const { from, to, type, severity, status } = req.query;
+      await ReportService.alertHistory(res, { from, to, type, severity, status });
     } catch (e) {
       failed(res, next, e);
     }
