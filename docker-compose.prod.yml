@@ -1,5 +1,7 @@
-# Production overlay: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-# Secrets come from ./.env on the server (see .env.prod.example).
+# Production overlay. Secrets come from ./.env on the server (see .env.prod.example).
+# CI (.github/workflows/deploy.yml) builds the app images, pushes them to GHCR and runs
+#   IMAGE_REPO=ghcr.io/<owner>/<repo> IMAGE_TAG=<sha> docker compose -f docker-compose.yml -f docker-compose.prod.yml pull && ... up -d --no-build
+# A manual deploy can still build on the VM: docker compose -f ... -f ... up -d --build
 services:
   postgres:
     # Loopback only: not reachable from the internet; local dev connects through an SSH tunnel.
@@ -13,6 +15,7 @@ services:
       KAFKA_HEAP_OPTS: -Xmx256m -Xms256m
 
   meta-service:
+    image: ${IMAGE_REPO:-serenguard}/meta-service:${IMAGE_TAG:-latest}
     build: { context: ., dockerfile: meta-service/Dockerfile }
     restart: unless-stopped
     depends_on:
@@ -32,6 +35,7 @@ services:
       RATE_LIMIT_MAX: 2000
 
   ingest-service:
+    image: ${IMAGE_REPO:-serenguard}/ingest-service:${IMAGE_TAG:-latest}
     build: { context: ., dockerfile: ingest-service/Dockerfile }
     restart: unless-stopped
     depends_on:
@@ -49,6 +53,7 @@ services:
       KAFKA_BROKERS: kafka:19092
 
   analytic-service:
+    image: ${IMAGE_REPO:-serenguard}/analytic-service:${IMAGE_TAG:-latest}
     build: { context: ., dockerfile: analytic-service/Dockerfile }
     restart: unless-stopped
     depends_on:
@@ -65,6 +70,7 @@ services:
       ANOMALY_MIN_SAMPLES: "100"
 
   web:
+    image: ${IMAGE_REPO:-serenguard}/web:${IMAGE_TAG:-latest}
     build: { context: ., dockerfile: web/Dockerfile }
     restart: unless-stopped
     depends_on: [meta-service]
