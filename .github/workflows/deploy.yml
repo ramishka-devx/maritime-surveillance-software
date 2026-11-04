@@ -1,33 +1,71 @@
 name: Deploy to Lightsail
 
-# Copies the repo to the VM and rebuilds the stack there with docker-compose.prod.yml
-# (same as the manual deploy in README.md). Secrets live only in ~/serenguard/.env on the VM.
+# 1. build: the four app images are built on GitHub's runners (with layer cache) and pushed
+#    to GHCR, tagged with the commit SHA.
+# 2. deploy: the VM gets only the compose files, pulls the new images and restarts. Nothing is
+#    built on the VM. Secrets live only in ~/serenguard/.env on the VM.
 #
 # Repository secret: LIGHTSAIL_SSH_KEY = private key whose public half is in the VM's
-# ~/.ssh/authorized_keys for the ubuntu user.
+# ~/.ssh/authorized_keys for the ubuntu user (who is in the docker group).
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-# One deploy at a time; a newer push waits instead of interrupting a build mid-way.
+# One run at a time; a newer push waits instead of interrupting a deploy.
 concurrency:
   group: deploy-lightsail
   cancel-in-progress: false
 
 env:
+  # GHCR names must be lowercase; github.repository already is for this repo.
+  IMAGE_REPO: ghcr.io/${{ github.repository }}
+  IMAGE_TAG: ${{ github.sha }}
+  SERVICES: meta-service ingest-service analytic-service web
   HOST: 54.206.214.6
   # Pinned host key (ssh-keyscan -t ed25519 54.206.214.6). Update if the VM is replaced.
   HOST_KEY: 54.206.214.6 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPRwVtuZ9M6mvCqHlsOEK+aG0XwBf3yF7LqSBRiV1uKa
   APP_DIR: serenguard
-  COMPOSE: sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [meta-service, ingest-service, analytic-service, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_REPO }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+            ${{ env.IMAGE_REPO }}/${{ matrix.service }}:latest
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: production
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
 
@@ -55,19 +93,24 @@ jobs:
             ServerAliveCountMax 8
           EOF
 
-      - name: Copy code
-        # .env files are excluded, so --delete never touches the VM's secrets.
-        run: |
-          rsync -az --delete \
-            --exclude .git --exclude node_modules --exclude '.env' --exclude '.env.*' \
-            --exclude venv-AI --exclude AI --exclude test --exclude dist \
-            --exclude __pycache__ --exclude .pytest_cache --exclude .claude \
-            ./ lightsail:~/$APP_DIR/
+      - name: Copy compose files
+        run: rsync -az docker-compose.yml docker-compose.prod.yml "lightsail:~/$APP_DIR/"
 
-      - name: Build and restart
-        # Unchanged services keep running; meta-service runs migrations on start.
+      - name: Pull images and restart
+        # The run's GITHUB_TOKEN (packages: read) is piped in on stdin, used for the pull and
+        # logged out again. meta-service runs migrations on start.
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ssh lightsail "cd ~/$APP_DIR && test -f .env && $COMPOSE up -d --build --remove-orphans && sudo docker image prune -f"
+          # shellcheck disable=SC2029
+          # (IMAGE_*, SERVICES and APP_DIR are meant to expand on the runner.)
+          echo "$TOKEN" | ssh lightsail "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+          # shellcheck disable=SC2029
+          ssh lightsail "cd ~/$APP_DIR && test -f .env \
+            && export IMAGE_REPO=$IMAGE_REPO IMAGE_TAG=$IMAGE_TAG \
+            && C='docker compose -f docker-compose.yml -f docker-compose.prod.yml' \
+            && \$C pull --quiet $SERVICES && \$C up -d --no-build --remove-orphans; \
+            s=\$?; docker logout ghcr.io >/dev/null; docker image prune -af --filter until=24h >/dev/null; exit \$s"
 
       - name: Check the site
         run: |
@@ -81,4 +124,6 @@ jobs:
 
       - name: Show status
         if: always()
-        run: ssh lightsail "cd ~/$APP_DIR && $COMPOSE ps --format '{{.Service}} {{.Status}}'" || true
+        run: |
+          # shellcheck disable=SC2029
+          ssh lightsail "cd ~/$APP_DIR && docker compose -f docker-compose.yml -f docker-compose.prod.yml ps --format '{{.Service}} {{.Status}}'" || true
