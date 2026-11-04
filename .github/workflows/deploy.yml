@@ -1,0 +1,76 @@
+name: Deploy to Lightsail
+
+# Copies the repo to the VM and rebuilds the stack there with docker-compose.prod.yml
+# (same as the manual deploy in README.md). Secrets live only in ~/serenguard/.env on the VM.
+#
+# Repository secret: LIGHTSAIL_SSH_KEY = private key whose public half is in the VM's
+# ~/.ssh/authorized_keys for the ubuntu user.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits instead of interrupting a build mid-way.
+concurrency:
+  group: deploy-lightsail
+  cancel-in-progress: false
+
+env:
+  HOST: 54.206.214.6
+  # Pinned host key (ssh-keyscan -t ed25519 54.206.214.6). Update if the VM is replaced.
+  HOST_KEY: 54.206.214.6 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPRwVtuZ9M6mvCqHlsOEK+aG0XwBf3yF7LqSBRiV1uKa
+  APP_DIR: serenguard
+  COMPOSE: sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "$HOST_KEY" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host lightsail
+            HostName $HOST
+            User ubuntu
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            ServerAliveInterval 15
+            ServerAliveCountMax 8
+          EOF
+
+      - name: Copy code
+        # .env files are excluded, so --delete never touches the VM's secrets.
+        run: |
+          rsync -az --delete \
+            --exclude .git --exclude node_modules --exclude '.env' --exclude '.env.*' \
+            --exclude venv-AI --exclude AI --exclude test --exclude dist \
+            --exclude __pycache__ --exclude .pytest_cache --exclude .claude \
+            ./ lightsail:~/$APP_DIR/
+
+      - name: Build and restart
+        # Unchanged services keep running; meta-service runs migrations on start.
+        run: |
+          ssh lightsail "cd ~/$APP_DIR && test -f .env && $COMPOSE up -d --build --remove-orphans && sudo docker image prune -f"
+
+      - name: Check the site
+        run: |
+          ssh lightsail 'for i in $(seq 1 30); do
+              web=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/)
+              api=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/users/me)
+              [ "$web" = 200 ] && [ "$api" = 401 ] && { echo "web $web, api $api (auth required): up"; exit 0; }
+              sleep 5
+            done
+            echo "web $web, api $api: not healthy after 150 s"; exit 1'
+
+      - name: Show status
+        if: always()
+        run: ssh lightsail "cd ~/$APP_DIR && $COMPOSE ps --format '{{.Service}} {{.Status}}'" || true
