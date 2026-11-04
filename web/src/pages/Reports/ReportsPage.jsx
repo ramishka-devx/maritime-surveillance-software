@@ -2,22 +2,16 @@ import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { usePermission } from '../../auth/usePermission.js';
-import { apiDownload } from '../../lib/api.js';
+import { apiDownload, saveBlob } from '../../lib/api.js';
+import { shiftDay, todayUtc } from '../../lib/dateRange.js';
+import AlertHistoryExport from '../../components/reports/AlertHistoryExport.jsx';
 
 const kicker = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700';
 const focusRing = 'outline-none focus-visible:outline-bs-accent';
 const inputClass = `px-2.5 py-1.5 rounded-sm border border-bs-ink/[.16] bg-white text-[14px] tabular-nums ${focusRing}`;
 
-// Match meta-service: ais_positions keeps 7 days (partition-cron.js), alert history is
-// capped at 31 days (report.validation.js).
+// Match meta-service: ais_positions keeps 7 days (partition-cron.js).
 const POSITION_RETENTION_DAYS = 7;
-const MAX_RANGE_DAYS = 31;
-const DAY_MS = 24 * 3600 * 1000;
-
-// Report days are UTC days, as YYYY-MM-DD strings.
-const isoDay = (ms) => new Date(ms).toISOString().slice(0, 10);
-const shiftDay = (day, n) => isoDay(Date.parse(day) + n * DAY_MS);
-const spanDays = (from, to) => (Date.parse(to) - Date.parse(from)) / DAY_MS + 1;
 
 const REPORTS = {
   daily: {
@@ -28,93 +22,34 @@ const REPORTS = {
   alerts: {
     label: 'Alert history',
     blurb:
-      'One row per alert raised in the chosen range: type, vessel, detection time, severity, status, and who acknowledged it and when.',
+      'One row per alert raised in the chosen range: type, vessel, detection time, severity, confidence score, status, and who acknowledged it and when.',
   },
 };
 
-function saveBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function DateField({ label, value, onChange, max }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className={kicker}>{label}</span>
-      <input type="date" value={value} max={max} onChange={(e) => onChange(e.target.value)} className={inputClass} />
-    </label>
-  );
-}
-
-export default function ReportsPage() {
+function DailyActivityExport({ canDownload }) {
   const { token } = useAuth();
-  const { can } = usePermission();
-  const today = isoDay(Date.now());
+  const today = todayUtc();
   const oldestPositions = shiftDay(today, -(POSITION_RETENTION_DAYS - 1));
-
-  const [type, setType] = useState('daily');
   const [date, setDate] = useState(shiftDay(today, -1));
-  const [from, setFrom] = useState(shiftDay(today, -6));
-  const [to, setTo] = useState(today);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-
-  if (!can('reports.view')) {
-    return (
-      <div className="w-full h-full bg-slate-100 text-bs-ink font-sans pt-3 px-4">
-        <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Reports</h1>
-        <p className="mt-4 text-[14px] text-bs-neutral-700">You don't have access to reports. Ask an administrator for the reports.view permission.</p>
-      </div>
-    );
-  }
-
-  const canDownload = can('report.download');
-  const problem =
-    type === 'daily'
-      ? !date
-        ? 'Choose a date.'
-        : null
-      : !from || !to
-      ? 'Choose both dates.'
-      : from > to
-      ? 'The start date must be on or before the end date.'
-      : spanDays(from, to) > MAX_RANGE_DAYS
-      ? `Choose a range of ${MAX_RANGE_DAYS} days or less.`
-      : null;
-
-  const chooseType = (t) => {
-    setType(t);
-    setError('');
-    setNotice('');
-  };
 
   const download = async () => {
     setBusy(true);
     setError('');
     setNotice('');
-    const [path, filename] =
-      type === 'daily'
-        ? [`/api/reports/daily-activity.csv?date=${date}`, `daily-activity-${date}.csv`]
-        : [`/api/reports/alert-history.csv?from=${from}&to=${to}`, `alert-history-${from}_to_${to}.csv`];
+    const filename = `daily-activity-${date}.csv`;
     try {
-      const blob = await apiDownload(path, { token });
+      const blob = await apiDownload(`/api/reports/daily-activity.csv?date=${date}`, { token });
       saveBlob(blob, filename);
       const rows = (await blob.text()).split('\n').filter((line) => line.trim()).length - 1;
-      if (rows > 0) {
-        setNotice(`Downloaded ${filename}: ${rows} row${rows === 1 ? '' : 's'}.`);
-      } else if (type === 'daily') {
-        setNotice(
-          `No vessel activity was recorded on ${date}, so the file has only the header row.` +
-            (date < oldestPositions ? ` Positions are only kept for ${POSITION_RETENTION_DAYS} days.` : '')
-        );
-      } else {
-        setNotice(`No alerts were raised between ${from} and ${to}, so the file has only the header row.`);
-      }
+      setNotice(
+        rows > 0
+          ? `Downloaded ${filename}: ${rows} vessel${rows === 1 ? '' : 's'}.`
+          : `No vessel activity was recorded on ${date}, so the file has only the header row.` +
+              (date < oldestPositions ? ` Positions are only kept for ${POSITION_RETENTION_DAYS} days.` : '')
+      );
     } catch (e) {
       setError(e.message || 'Download failed');
     } finally {
@@ -123,18 +58,74 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12" aria-busy={busy}>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <label className="flex flex-col gap-1.5">
+          <span className={kicker}>Date</span>
+          <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={`${inputClass} self-start`} />
+        </label>
+        <span className="text-[12px] italic text-bs-neutral-700">
+          UTC day. Vessel positions are kept for {POSITION_RETENTION_DAYS} days (from {oldestPositions}).
+        </span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={download}
+          disabled={busy || !date || !canDownload}
+          title={canDownload ? undefined : 'Requires the report.download permission'}
+          className={`inline-flex items-center gap-1.5 px-[18px] py-1.5 rounded-sm bg-bs-accent text-bs-bg text-[13px] font-semibold hover:bg-bs-accent-700 disabled:opacity-50 disabled:cursor-not-allowed ${focusRing}`}
+        >
+          <Download size={16} />
+          {busy ? 'Preparing…' : 'Download CSV'}
+        </button>
+        {!canDownload && <span className="text-[13px] text-bs-neutral-700">You can view reports but not download them.</span>}
+      </div>
+
+      {error && (
+        <p role="alert" className="m-0 text-[13px] italic text-bs-accent-2-700">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="m-0 text-[13px] text-bs-ink">
+          {notice}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function ReportsPage() {
+  const { isSuperAdmin } = useAuth();
+  const { can } = usePermission();
+  const [type, setType] = useState('daily');
+
+  // Super admins have every permission server-side; hasPermission() deliberately reports
+  // false for them in the UI, so let them through explicitly.
+  if (!can('reports.view') && !isSuperAdmin()) {
+    return (
+      <div className="w-full h-full bg-slate-100 text-bs-ink font-sans pt-3 px-4">
+        <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Reports</h1>
+        <p className="mt-4 text-[14px] text-bs-neutral-700">You don't have access to reports. Ask an administrator for the reports.view permission.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12">
       <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Reports</h1>
       <p className="mt-1 text-[13px] text-bs-neutral-700">CSV exports for offline analysis and shift handover. Dates are UTC days.</p>
 
-      <div className="mt-8 max-w-[640px] flex flex-col gap-6">
+      <div className="mt-8 max-w-[720px] flex flex-col gap-6">
         <div role="radiogroup" aria-label="Report type" className="inline-flex self-start border border-bs-ink/[.16] rounded-sm overflow-hidden">
           {Object.entries(REPORTS).map(([key, r]) => (
             <button
               key={key}
               role="radio"
               aria-checked={type === key}
-              onClick={() => chooseType(key)}
+              onClick={() => setType(key)}
               className={`px-4 py-1.5 text-[13px] uppercase border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
                 type === key ? 'bg-bs-accent text-bs-bg' : 'hover:bg-bs-ink/[.07]'
               }`}
@@ -147,45 +138,9 @@ export default function ReportsPage() {
         <p className="text-[14px] leading-relaxed m-0">{REPORTS[type].blurb}</p>
 
         {type === 'daily' ? (
-          <div className="flex flex-col gap-1.5">
-            <DateField label="Date" value={date} onChange={setDate} max={today} />
-            <span className="text-[12px] italic text-bs-neutral-700">
-              Vessel positions are kept for {POSITION_RETENTION_DAYS} days (from {oldestPositions}).
-            </span>
-          </div>
+          <DailyActivityExport canDownload={can('report.download') || isSuperAdmin()} />
         ) : (
-          <div className="flex flex-col gap-1.5">
-            <div className="flex flex-wrap gap-4">
-              <DateField label="From" value={from} onChange={setFrom} max={today} />
-              <DateField label="To" value={to} onChange={setTo} max={today} />
-            </div>
-            <span className="text-[12px] italic text-bs-neutral-700">Up to {MAX_RANGE_DAYS} days, both dates included.</span>
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-4">
-          <button
-            onClick={download}
-            disabled={busy || !!problem || !canDownload}
-            title={canDownload ? undefined : 'Requires the report.download permission'}
-            className={`inline-flex items-center gap-1.5 px-[18px] py-1.5 rounded-sm bg-bs-accent text-bs-bg text-[13px] font-semibold hover:bg-bs-accent-700 disabled:opacity-50 disabled:cursor-not-allowed ${focusRing}`}
-          >
-            <Download size={16} />
-            {busy ? 'Preparing…' : 'Download CSV'}
-          </button>
-          {problem && <span className="text-[13px] text-bs-neutral-700">{problem}</span>}
-          {!canDownload && <span className="text-[13px] text-bs-neutral-700">You can view reports but not download them.</span>}
-        </div>
-
-        {error && (
-          <p role="alert" className="m-0 text-[13px] italic text-bs-accent-2-700">
-            {error}
-          </p>
-        )}
-        {notice && (
-          <p role="status" className="m-0 text-[13px] text-bs-ink">
-            {notice}
-          </p>
+          <AlertHistoryExport />
         )}
       </div>
     </div>

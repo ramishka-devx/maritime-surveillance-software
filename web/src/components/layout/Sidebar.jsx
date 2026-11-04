@@ -16,7 +16,7 @@ import {
 import { useBadgeCounts } from '../../hooks/useBadgeCounts';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { usePermission } from '../../auth/usePermission.js';
-import { isAnalyst, isMaintenance, isOperator } from '../../auth/roles.js';
+import { isAnalyst, isMaintenance, isOperator, isSuperAdmin } from '../../auth/roles.js';
 
 const sectionLabel = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700 mb-2.5';
 
@@ -84,7 +84,8 @@ export default function Sidebar() {
     { id: 'alerts', label: 'Alerts', icon: TriangleAlert, badge: alertCount, alert: true, path: '/Alerts' },
     { id: 'anomalies', label: 'Anomalies', icon: Activity, badge: anomalyCount, alert: true, path: '/Anomalies' },
     { id: 'restricted-areas', label: 'Restricted areas', icon: Pentagon, badge: restrictedAreaCount, path: '/RestrictedAreas' },
-    ...(can('reports.view') ? [{ id: 'reports', label: 'Reports', icon: FileText, path: '/Reports' }] : []),
+    // Super admins hold every permission server-side but can() reports false for them.
+    ...(can('reports.view') || isSuperAdmin(user) ? [{ id: 'reports', label: 'Reports', icon: FileText, path: '/Reports' }] : []),
     { id: 'my-profile', label: 'My profile', icon: CircleUser, path: '/Profile' },
   ];
 

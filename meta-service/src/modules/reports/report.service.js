@@ -95,15 +95,19 @@ async function streamCsv(res, { sql, columns, params, filename }) {
   return Promise.race([work, deadline]);
 }
 
+// A filter list, or null for "no filter" (an empty list would match nothing).
+const orAll = (list) => (list && list.length ? list : null);
+
 export const ReportService = {
   dailyActivity(res, date) {
     return streamCsv(res, { ...ReportModel.dailyActivity, params: [date], filename: `daily-activity-${date}.csv` });
   },
 
-  alertHistory(res, from, to) {
+  // type / severity / status: arrays of allowed values, or undefined for all.
+  alertHistory(res, { from, to, type, severity, status }) {
     return streamCsv(res, {
       ...ReportModel.alertHistory,
-      params: [from, to],
+      params: [from, to, orAll(type), orAll(severity), orAll(status)],
       filename: `alert-history-${from}_to_${to}.csv`
     });
   }

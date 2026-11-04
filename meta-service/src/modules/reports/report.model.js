@@ -59,7 +59,8 @@ export const ReportModel = {
     `
   },
 
-  // One row per alert raised in [from, to] (inclusive UTC days). Acknowledgement comes from
+  // One row per alert raised in [from, to] (inclusive UTC days), optionally only the given
+  // types / severities / statuses ($3-$5, null = all). Acknowledgement comes from
   // the latest status event that moved the alert to 'acknowledged'. confidence_score is the
   // anomaly score of model-based alerts (empty for geofence, loitering and manual alerts).
   alertHistory: {
@@ -101,6 +102,9 @@ export const ReportModel = {
         LIMIT 1
       ) ack ON true
       WHERE a.created_at >= $1::date AND a.created_at < $2::date + 1
+        AND ($3::text[] IS NULL OR a.type = ANY($3::text[]))
+        AND ($4::text[] IS NULL OR a.severity = ANY($4::text[]))
+        AND ($5::text[] IS NULL OR a.status = ANY($5::text[]))
       ORDER BY a.created_at, a.alert_id
     `
   }
