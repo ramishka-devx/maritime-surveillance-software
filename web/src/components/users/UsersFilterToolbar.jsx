@@ -1,8 +1,14 @@
 import React from 'react';
+import { Search } from 'lucide-react';
+import { field, focusRing, linkBtn } from '../ui/bs.js';
+import { roleLabel } from '../../auth/roles.js';
+
+const STATUSES = ['all', 'active', 'pending', 'deactivated'];
 
 export default function UsersFilterToolbar({
   searchQuery,
   onSearchChange,
+  roles = [],
   roleFilter,
   onRoleFilterChange,
   statusFilter,
@@ -11,85 +17,61 @@ export default function UsersFilterToolbar({
   showingCount,
   totalCount,
 }) {
+  const filtered = searchQuery || roleFilter !== 'all' || statusFilter !== 'all';
   return (
-    <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3 select-none font-sans">
-      {/* Search Input */}
-      <div className="flex flex-1 items-center gap-2 min-w-[280px] max-w-xl">
-        <div className="relative w-full">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search user by name, callsign, or official email..."
-            className="w-full bg-slate-50 rounded-sm pl-3.5 pr-10 py-1.5 text-slate-900 font-mono text-xs placeholder:text-slate-400 border border-slate-200 focus:outline-none focus:bg-white focus:border-[#0891b2] transition-colors"
-          />
+    <div className="mt-10 flex flex-wrap items-center gap-3">
+      <div className="relative w-[320px] max-w-full">
+        <Search size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-bs-neutral-700 pointer-events-none" />
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search name, username or email"
+          aria-label="Search users"
+          className={`${field} pl-8`}
+        />
+      </div>
+
+      <select
+        value={roleFilter}
+        onChange={(e) => onRoleFilterChange(e.target.value)}
+        aria-label="Filter by role"
+        className={`${field} w-auto pr-8 cursor-pointer`}
+      >
+        <option value="all">All roles</option>
+        {roles.map((r) => (
+          <option key={r} value={r}>
+            {roleLabel(r)}
+          </option>
+        ))}
+      </select>
+
+      <div role="radiogroup" aria-label="Status" className="inline-flex border border-bs-ink/[.16] rounded-sm overflow-hidden text-[12px]">
+        {STATUSES.map((st) => (
           <button
+            key={st}
             type="button"
-            onClick={() => onSearchChange(searchQuery)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0891b2] p-1 rounded-sm transition-colors flex items-center justify-center cursor-pointer"
-            title="Search"
+            role="radio"
+            aria-checked={statusFilter === st}
+            onClick={() => onStatusFilterChange(st)}
+            className={`px-3 py-2 capitalize border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
+              statusFilter === st ? 'bg-bs-accent text-bs-bg' : 'hover:bg-bs-ink/[.07]'
+            }`}
           >
-            <span className="material-symbols-outlined text-[18px]">search</span>
+            {st}
           </button>
-        </div>
+        ))}
       </div>
 
-      {/* Filter Controls */}
-      <div className="flex items-center gap-3 flex-wrap font-mono text-xs">
-        {/* Role Filter */}
-        <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-sm border border-slate-200">
-          <span className="text-[11px] text-slate-500 uppercase">Role:</span>
-          <select
-            value={roleFilter}
-            onChange={(e) => onRoleFilterChange(e.target.value)}
-            className="bg-transparent text-slate-900 text-xs focus:outline-none cursor-pointer"
-          >
-            <option className="bg-white text-slate-900" value="all">
-              All Roles
-            </option>
-            <option className="bg-white text-slate-900" value="super_admin">
-              Super Admin
-            </option>
-            <option className="bg-white text-slate-900" value="operator">
-              Operator
-            </option>
-            <option className="bg-white text-slate-900" value="analyst">
-              Maintenace
-            </option>
-          </select>
-        </div>
-
-        {/* Status Toggle Pills */}
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-sm border border-slate-200">
-          {['all', 'active', 'pending', 'deactivated'].map((st) => (
-            <button
-              key={st}
-              onClick={() => onStatusFilterChange(st)}
-              className={`px-2.5 py-1 rounded-sm text-xs uppercase transition-all cursor-pointer ${
-                statusFilter === st
-                  ? 'bg-white text-[#0891b2] font-bold shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {st === 'all' ? 'All' : st}
-            </button>
-          ))}
-        </div>
-
-        {/* Clear Filters */}
-        <button
-          onClick={onClearFilters}
-          className="flex items-center gap-1 px-2 py-1 text-slate-500 hover:text-slate-900 transition-colors font-mono text-[11px] uppercase cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[14px]">filter_alt_off</span>
-          <span>Clear</span>
+      {filtered && (
+        <button type="button" onClick={onClearFilters} className={linkBtn}>
+          Clear filters
         </button>
+      )}
 
-        {/* Counter */}
-        <span className="text-slate-500 pl-1">
-          Showing {showingCount} of {totalCount} users
-        </span>
-      </div>
+      <span className="ml-auto text-[13px] italic text-bs-neutral-700">
+        Showing {showingCount} of {totalCount}
+      </span>
     </div>
   );
 }

@@ -298,7 +298,7 @@ export default function AlertsPage() {
   const flag = flagFromMmsi(sel?.mmsi);
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-slate-100 text-bs-ink font-sans pt-3 pl-8 pr-6 pb-12 overflow-hidden">
       {/* Title + filters */}
       <div className="flex flex-wrap items-end gap-5">
         <div>

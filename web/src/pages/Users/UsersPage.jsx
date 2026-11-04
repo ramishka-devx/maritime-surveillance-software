@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { X } from 'lucide-react';
 import UsersHeaderBar from '../../components/users/UsersHeaderBar.jsx';
 import UsersMetricsRow from '../../components/users/UsersMetricsRow.jsx';
 import UsersFilterToolbar from '../../components/users/UsersFilterToolbar.jsx';
@@ -6,48 +7,25 @@ import UsersTable from '../../components/users/UsersTable.jsx';
 import UsersDrawer from '../../components/users/UsersDrawer.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { apiRequest } from '../../lib/api.js';
+import { focusRing, pageShell } from '../../components/ui/bs.js';
+
+const PAGE_SIZE = 50;
 
 function normalizeUser(u) {
-  const rawStatus = String(u.status || '').toLowerCase();
-  let status = 'ACTIVE';
-  if (rawStatus === 'disabled' || rawStatus === 'deactivated') {
-    status = 'DEACTIVATED';
-  } else if (rawStatus === 'pending') {
-    status = 'PENDING';
-  } else {
-    status = 'ACTIVE';
-  }
-
-  const name =
-    u.name ||
-    [u.first_name, u.last_name].filter(Boolean).join(' ') ||
-    u.username ||
-    `User #${u.user_id || u.id}`;
-
-  const lastLogin =
-    u.lastLogin ||
-    (u.updated_at
-      ? `${new Date(u.updated_at).toUTCString().slice(17, 22)} UTC`
-      : 'Active Session');
-
-  const provisioned =
-    u.provisioned ||
-    (u.created_at ? new Date(u.created_at).toISOString().split('T')[0] : '—');
-
+  const raw = String(u.status || '').toLowerCase();
+  const status = raw === 'disabled' || raw === 'deactivated' ? 'DEACTIVATED' : raw === 'pending' ? 'PENDING' : 'ACTIVE';
   return {
     ...u,
-    id: u.id || `usr-${u.user_id}`,
-    user_id: u.user_id || (typeof u.id === 'string' ? Number(u.id.replace('usr-', '')) : u.id),
-    name,
-    email: u.email || 'N/A',
+    id: u.user_id ?? u.id,
+    name: [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || `User #${u.user_id}`,
+    email: u.email || '—',
     username: u.username || '',
-    role: u.role || 'Operator',
+    role: u.role || 'operator',
     status,
-    rawStatus: u.status,
-    lastLogin,
-    provisioned,
   };
 }
+
+const csvCell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 
 export default function UsersPage() {
   const { token } = useAuth();
@@ -60,25 +38,24 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [busyUserId, setBusyUserId] = useState(null);
+  const [notice, setNotice] = useState(null);
 
-  const triggerToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 3500);
+  const showNotice = (text, isError = false) => {
+    setNotice({ text, isError });
+    setTimeout(() => setNotice((n) => (n?.text === text ? null : n)), 4000);
   };
 
   const loadUsers = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const res = await apiRequest(`/api/users?page=${currentPage}&limit=50`, { token });
-      const rawList = Array.isArray(res) ? res : res?.rows || [];
-      const total = typeof res?.total === 'number' ? res.total : rawList.length;
-      setUsers(rawList.map(normalizeUser));
-      setTotalRecords(total);
+      const res = await apiRequest(`/api/users?page=${currentPage}&limit=${PAGE_SIZE}`, { token });
+      const rows = Array.isArray(res) ? res : res?.rows || [];
+      setUsers(rows.map(normalizeUser));
+      setTotalRecords(typeof res?.total === 'number' ? res.total : rows.length);
     } catch (err) {
-      console.error('Failed to load users roster:', err);
-      triggerToast('Error loading live users roster');
+      showNotice(err.message || 'Could not load users.', true);
     } finally {
       setIsLoading(false);
     }
@@ -88,191 +65,108 @@ export default function UsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-  const handleCreateUser = async (newUser) => {
-    try {
-      const fullName = String(newUser.name || '').trim();
-      const nameParts = fullName.split(' ');
-      const first_name = nameParts[0] || 'User';
-      const last_name = nameParts.slice(1).join(' ') || 'Surveillance';
-      const email = newUser.email.trim();
-      const username =
-        newUser.username ||
-        email.split('@')[0].toLowerCase().replace(/[^a-zA-Z0-9._-]/g, '') ||
-        `user${Date.now().toString().slice(-4)}`;
-      const password = newUser.tempKey || 'SG-9kR#4vB7@pX9';
-
-      await apiRequest('/api/users/register', {
-        token,
-        method: 'POST',
-        body: {
-          first_name,
-          last_name,
-          username,
-          email,
-          password,
-        },
-      });
-
-      triggerToast(`User "${fullName}" provisioned and invite beacon dispatched.`);
-      await loadUsers();
-    } catch (err) {
-      console.error('Failed to create user:', err);
-      triggerToast(err.message || 'Failed to provision user');
-    }
+  // Throws on failure so the dialog can show the error and stay open.
+  const handleCreateUser = async (body) => {
+    await apiRequest('/api/users/register', { token, method: 'POST', body });
+    showNotice(`${body.first_name} ${body.last_name} added as an operator.`);
+    await loadUsers();
   };
 
   const handleToggleDeactivate = async (user) => {
-    const rawId =
-      user.user_id ||
-      (typeof user.id === 'string' && user.id.startsWith('usr-')
-        ? user.id.replace('usr-', '')
-        : user.id);
-    const isCurrentlyActive = user.status === 'ACTIVE';
-    const nextDbStatus = isCurrentlyActive ? 'disabled' : 'verified';
-
+    const next = user.status === 'ACTIVE' ? 'disabled' : 'verified';
+    setBusyUserId(user.id);
     try {
-      await apiRequest(`/api/users/${rawId}/status`, {
-        token,
-        method: 'PUT',
-        body: { status: nextDbStatus },
-      });
-      triggerToast(
-        `User ${user.name} marked as ${nextDbStatus === 'verified' ? 'ACTIVE' : 'DEACTIVATED'}.`
-      );
+      await apiRequest(`/api/users/${user.id}/status`, { token, method: 'PUT', body: { status: next } });
+      showNotice(`${user.name} ${next === 'verified' ? 'reactivated' : 'deactivated'}.`);
       await loadUsers();
     } catch (err) {
-      console.error('Failed to update user status:', err);
-      triggerToast(err.message || 'Failed to update user status');
+      showNotice(err.message || 'Could not change the user status.', true);
+    } finally {
+      setBusyUserId(null);
     }
   };
 
-  const handleResetPassword = (user) => {
-    triggerToast(`Temporary authentication key reset dispatched to ${user.email}.`);
-  };
-
-  const handleEditUser = (user) => {
-    triggerToast(`Opening credentials inspector for ${user.name}.`);
-  };
-
   const handleExport = () => {
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      ['Name,Email,Role,Status,LastLogin,Provisioned']
-        .concat(
-          users.map(
-            (u) =>
-              `"${u.name}","${u.email}","${u.role}","${u.status}","${u.lastLogin}","${u.provisioned}"`
-          )
-        )
-        .join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const lines = [['Name', 'Username', 'Email', 'Role', 'Status', 'Updated', 'Created']]
+      .concat(users.map((u) => [u.name, u.username, u.email, u.role, u.status, u.updated_at, u.created_at]))
+      .map((row) => row.map(csvCell).join(','));
+    const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'serenguard_users_roster.csv');
-    document.body.appendChild(link);
+    link.href = url;
+    link.download = 'serenguard_users.csv';
     link.click();
-    document.body.removeChild(link);
-    triggerToast('User roster exported to serenguard_users_roster.csv');
+    URL.revokeObjectURL(url);
   };
 
-  // Filtered List
+  const roles = useMemo(() => [...new Set(users.map((u) => u.role))].sort(), [users]);
+
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matches =
-          (u.name && u.name.toLowerCase().includes(q)) ||
-          (u.email && u.email.toLowerCase().includes(q)) ||
-          (u.username && u.username.toLowerCase().includes(q)) ||
-          (u.role && u.role.toLowerCase().includes(q));
-        if (!matches) return false;
-      }
-      if (roleFilter !== 'all') {
-        const r = String(u.role || '').toLowerCase();
-        if (roleFilter === 'super_admin' && !r.includes('super')) return false;
-        if (roleFilter === 'admin' && !r.includes('admin')) return false;
-        if (roleFilter === 'operator' && !r.includes('operator')) return false;
-        if (roleFilter === 'analyst' && !r.includes('analyst')) return false;
-        if (roleFilter === 'viewer' && !r.includes('viewer')) return false;
-      }
-      if (statusFilter !== 'all') {
-        if (statusFilter === 'active' && u.status !== 'ACTIVE') return false;
-        if (statusFilter === 'pending' && u.status !== 'PENDING') return false;
-        if (statusFilter === 'deactivated' && u.status !== 'DEACTIVATED') return false;
-      }
-      return true;
-    });
+    const q = searchQuery.trim().toLowerCase();
+    return users.filter(
+      (u) =>
+        (!q || [u.name, u.email, u.username, u.role].some((v) => String(v).toLowerCase().includes(q))) &&
+        (roleFilter === 'all' || u.role === roleFilter) &&
+        (statusFilter === 'all' || u.status === statusFilter.toUpperCase())
+    );
   }, [users, searchQuery, roleFilter, statusFilter]);
 
-  const activeCount = users.filter((u) => u.status === 'ACTIVE').length;
-  const deactivatedCount = users.filter((u) => u.status === 'DEACTIVATED').length;
-  const pendingCount = users.filter((u) => u.status === 'PENDING').length;
-  const totalPages = Math.max(1, Math.ceil((totalRecords || users.length) / 50));
+  const count = (s) => users.filter((u) => u.status === s).length;
+  const total = totalRecords || users.length;
 
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 pb-16 font-sans">
-      <div className="flex flex-col w-full max-w-[1920px] mx-auto min-w-0">
-        {/* Floating Toast Notification */}
-        {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-950 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
-            <span className="material-symbols-outlined text-[#0891b2] text-base">check_circle</span>
-            <span>{toastMessage}</span>
-          </div>
-        )}
+    <div className={pageShell} aria-busy={isLoading}>
+      <UsersHeaderBar
+        totalUsers={total}
+        activeUsers={count('ACTIVE')}
+        isLoading={isLoading}
+        onExport={handleExport}
+        onOpenCreateDrawer={() => setIsDrawerOpen(true)}
+      />
 
-        {/* 1. Top Header Bar */}
-        <UsersHeaderBar
-          totalUsers={totalRecords || users.length}
-          activeUsers={activeCount}
-          onExport={handleExport}
-          onOpenCreateDrawer={() => setIsDrawerOpen(true)}
-        />
+      <UsersMetricsRow
+        totalCount={total}
+        activeCount={count('ACTIVE')}
+        deactivatedCount={count('DEACTIVATED')}
+        pendingCount={count('PENDING')}
+      />
 
-        {/* 2. Metric Badges Row */}
-        <UsersMetricsRow
-          totalCount={totalRecords || users.length}
-          activeCount={activeCount}
-          deactivatedCount={deactivatedCount}
-          pendingCount={pendingCount}
-        />
+      <UsersFilterToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        roles={roles}
+        roleFilter={roleFilter}
+        onRoleFilterChange={setRoleFilter}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        onClearFilters={() => {
+          setSearchQuery('');
+          setRoleFilter('all');
+          setStatusFilter('all');
+        }}
+        showingCount={filteredUsers.length}
+        totalCount={total}
+      />
 
-        {/* 3. Operational Filter Toolbar */}
-        <UsersFilterToolbar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          roleFilter={roleFilter}
-          onRoleFilterChange={setRoleFilter}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          onClearFilters={() => {
-            setSearchQuery('');
-            setRoleFilter('all');
-            setStatusFilter('all');
-          }}
-          showingCount={filteredUsers.length}
-          totalCount={totalRecords || users.length}
-        />
+      <UsersTable
+        users={filteredUsers}
+        isLoading={isLoading}
+        onToggleDeactivate={handleToggleDeactivate}
+        busyUserId={busyUserId}
+        currentPage={currentPage}
+        totalPages={Math.max(1, Math.ceil(total / PAGE_SIZE))}
+        onPageChange={setCurrentPage}
+      />
 
-        {/* 4. Primary Users Table */}
-        <UsersTable
-          users={filteredUsers}
-          isLoading={isLoading}
-          onEditUser={handleEditUser}
-          onResetPassword={handleResetPassword}
-          onToggleDeactivate={handleToggleDeactivate}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          totalRecords={totalRecords || users.length}
-        />
+      {isDrawerOpen && <UsersDrawer onClose={() => setIsDrawerOpen(false)} onCreateUser={handleCreateUser} />}
 
-        {/* 5. Slide-Over Invite Drawer */}
-        <UsersDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onCreateUser={handleCreateUser}
-        />
-      </div>
+      {notice && (
+        <div role="status" className="fixed left-1/2 -translate-x-1/2 bottom-6 z-[900] max-w-[80%] px-4 py-2.5 bg-bs-bg shadow-bs-lg text-[13px] flex items-center gap-3">
+          <span className={notice.isError ? 'italic text-bs-accent-2-700' : 'italic'}>{notice.text}</span>
+          <button type="button" onClick={() => setNotice(null)} aria-label="Dismiss" className={`text-bs-neutral-700 ${focusRing}`}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

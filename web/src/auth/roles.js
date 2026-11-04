@@ -241,3 +241,6 @@ export function getUserRoles(user) {
   return [];
 }
 
+
+/** "super_admin" -> "Super admin", for display. */
+export const roleLabel = (role) => String(role || '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());

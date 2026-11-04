@@ -66,7 +66,7 @@ export default function ReportsPage() {
 
   if (!can('reports.view')) {
     return (
-      <div className="w-full h-full bg-slate-100 text-bs-ink font-sans pt-3 px-4">
+      <div className="w-full h-full bg-slate-100 text-bs-ink font-sans pt-3 pl-8 pr-6">
         <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Reports</h1>
         <p className="mt-4 text-[14px] text-bs-neutral-700">You don't have access to reports. Ask an administrator for the reports.view permission.</p>
       </div>
@@ -123,7 +123,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12" aria-busy={busy}>
+    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 pl-8 pr-6 pb-12" aria-busy={busy}>
       <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Reports</h1>
       <p className="mt-1 text-[13px] text-bs-neutral-700">CSV exports for offline analysis and shift handover. Dates are UTC days.</p>
 

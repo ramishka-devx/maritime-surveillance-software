@@ -232,7 +232,7 @@ export default function DashboardPage() {
   const todayUtc = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12" aria-busy={loading}>
+    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 pl-8 pr-6 pb-12" aria-busy={loading}>
       {/* Title row */}
       <div className="flex flex-wrap items-end gap-4">
         <div>

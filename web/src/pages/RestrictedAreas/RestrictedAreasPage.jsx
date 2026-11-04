@@ -374,7 +374,7 @@ export default function RestrictedAreasPage() {
   const selectedIncursions = selected ? incursionsOf(selected.id) : [];
 
   return (
-    <div className="w-full h-full flex bg-slate-100 text-bs-ink font-sans px-4">
+    <div className="w-full h-full flex bg-slate-100 text-bs-ink font-sans pl-8 pr-6">
       {/* Area list + detail */}
       <aside className="w-[360px] shrink-0 flex flex-col min-h-0 pr-6 pt-3">
         <div className="">
