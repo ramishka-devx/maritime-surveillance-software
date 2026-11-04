@@ -88,7 +88,7 @@ const eventText = (e) => {
 
 const TRACK_BEFORE_MS = 2 * 3600 * 1000;
 const TRACK_AFTER_MS = 30 * 60 * 1000;
-const POSITION_RETENTION_MS = 7 * 24 * 3600 * 1000; // ais_positions keeps 7 days
+const POSITION_RETENTION_MS = 2 * 24 * 3600 * 1000; // ais_positions keeps 2 days
 
 const ASPECT = 3.5; // chart crop width / height
 // Box around the track, area and position, padded and widened to the crop's aspect.
@@ -173,7 +173,7 @@ function ChartCrop({ alert, detail, onOpenMap }) {
         {track.length > 1
           ? `Track ${utc(track[track.length - 1].time_utc)}–${utc(track[0].time_utc)} UTC`
           : expired
-          ? 'Track no longer kept (positions are stored for 7 days)'
+          ? 'Track no longer kept (positions are stored for 2 days)'
           : 'No positions around the detection time'}
         {atDetection ? ' · marker at detection' : ' · marker at last report'}
       </span>
@@ -298,7 +298,7 @@ export default function AlertsPage() {
   const flag = flagFromMmsi(sel?.mmsi);
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-slate-100 text-bs-ink font-sans pt-3 pl-8 pr-6 pb-12 overflow-hidden">
       {/* Title + filters */}
       <div className="flex flex-wrap items-end gap-5">
         <div>

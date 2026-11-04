@@ -28,7 +28,7 @@ export const DashboardModel = {
     );
   },
 
-  // Distinct vessels reporting per bin, from the position history (7-day retention).
+  // Distinct vessels reporting per bin, from the position history (2-day retention).
   async vesselBins(start, end, stepSec) {
     return query(
       `SELECT floor(extract(epoch FROM time_utc - (?::timestamptz AT TIME ZONE 'UTC')) / ?)::int AS bin,

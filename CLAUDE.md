@@ -128,7 +128,7 @@ Rules when changing the schema:
   TypeORM can't express partitioning or the function, so review any generated migration
   that touches this table. The entity's `idx_ais_positions_mmsi_time` has no `DESC`;
   the migration has it. `partition-cron.js` runs at startup and nightly: it creates today +
-  2 days of partitions and calls `drop_old_ais_partitions(7)` (**7-day retention**).
+  2 days of partitions and calls `drop_old_ais_partitions(2)` (**2-day retention**: today plus the two previous UTC days).
 - `ships` also holds each vessel's **latest position** (`lat`, `lon`, `sog`, `cog`, `heading`,
   `nav_status`, `last_position_at`), updated by `ingest-service/insert.js` right after each
   `ais_positions` insert. The map endpoints (`/api/ais/positions/latest`, `/api/ais/vessels`)

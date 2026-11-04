@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Activity,
   CircleUser,
   FileText,
   HeartPulse,
@@ -49,15 +48,13 @@ export default function Sidebar() {
   const { user } = useAuth();
   const { can } = usePermission();
   const maintenance = isMaintenance(user);
-  const { alertCount, anomalyCount, restrictedAreaCount } = useBadgeCounts();
+  const { alertCount, restrictedAreaCount } = useBadgeCounts();
 
   // Determine active tab based on current URL path
   const pathname = location.pathname.toLowerCase();
   const currentActiveTab =
     pathname.startsWith('/alerts')
       ? 'alerts'
-      : pathname.startsWith('/anomalies')
-      ? 'anomalies'
       : pathname.startsWith('/restricted')
       ? 'restricted-areas'
       : pathname.startsWith('/dashboard')
@@ -82,7 +79,6 @@ export default function Sidebar() {
     { id: 'map', label: 'Map', icon: MapIcon, path: '/' },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/Dashboard' },
     { id: 'alerts', label: 'Alerts', icon: TriangleAlert, badge: alertCount, alert: true, path: '/Alerts' },
-    { id: 'anomalies', label: 'Anomalies', icon: Activity, badge: anomalyCount, alert: true, path: '/Anomalies' },
     { id: 'restricted-areas', label: 'Restricted areas', icon: Pentagon, badge: restrictedAreaCount, path: '/RestrictedAreas' },
     // Super admins hold every permission server-side but can() reports false for them.
     ...(can('reports.view') || isSuperAdmin(user) ? [{ id: 'reports', label: 'Reports', icon: FileText, path: '/Reports' }] : []),

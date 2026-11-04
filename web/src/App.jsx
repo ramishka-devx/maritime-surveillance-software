@@ -5,7 +5,6 @@ import LoginPage from './pages/Auth/LoginPage.jsx';
 import AppLayout from './components/layout/AppLayout.jsx';
 import MapPage from './pages/Map/MapPage.jsx';
 import AlertsPage from './pages/Alerts/AlertsPage.jsx';
-import AnomaliesPage from './pages/Anomalies/AnomaliesPage.jsx';
 import RestrictedAreasPage from './pages/RestrictedAreas/RestrictedAreasPage.jsx';
 import DashboardPage from './pages/Dashboard/DashboardPage.jsx';
 import ReportsPage from './pages/Reports/ReportsPage.jsx';
@@ -77,9 +76,6 @@ export default function App() {
         {/* Dedicated Alerts Queue Route */}
         <Route path="/Alerts" element={<AlertsPage />} />
 
-        {/* Dedicated Anomalies Explorer Route */}
-        <Route path="/Anomalies" element={<AnomaliesPage />} />
-
         {/* Dedicated Restricted Areas Route */}
         <Route path="/RestrictedAreas" element={<RestrictedAreasPage />} />
 
@@ -110,7 +106,6 @@ export default function App() {
 
       {/* Lowercase alias redirects */}
       <Route path="/alerts" element={<Navigate to="/Alerts" replace />} />
-      <Route path="/anomalies" element={<Navigate to="/Anomalies" replace />} />
       <Route path="/restricted-areas" element={<Navigate to="/RestrictedAreas" replace />} />
       <Route path="/restricted" element={<Navigate to="/RestrictedAreas" replace />} />
       <Route path="/dashboard" element={<Navigate to="/Dashboard" replace />} />

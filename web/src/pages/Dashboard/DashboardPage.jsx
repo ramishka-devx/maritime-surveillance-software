@@ -199,7 +199,7 @@ export default function DashboardPage() {
       value: kpis.active_vessels.toLocaleString(),
       note: 'Reporting in the last hour',
       accent: true,
-      // null = before the 7-day position history
+      // null = before the 2-day position history
       spark: buckets.map((b) => b.active_vessels).filter((v) => v !== null),
       stroke: ink('accent'),
     },
@@ -247,7 +247,7 @@ export default function DashboardPage() {
   const todayUtc = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 px-4 pb-12" aria-busy={loading}>
+    <div className="w-full h-full overflow-y-auto bg-slate-100 text-bs-ink font-sans pt-3 pl-8 pr-6 pb-12" aria-busy={loading}>
       {/* Title row */}
       <div className="flex flex-wrap items-end gap-4">
         <div>

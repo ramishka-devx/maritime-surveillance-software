@@ -101,7 +101,7 @@ export const AisService = {
   },
 
   // Newest positions first, optionally within [from, to] (ISO). ponytail: ais_positions keeps
-  // 7 days (partition-cron.js), so older windows come back empty; snapshot tracks onto alerts
+  // 2 days (partition-cron.js), so older windows come back empty; snapshot tracks onto alerts
   // if case files must outlive that.
   async positionsByMmsi(mmsi, { limit, from, to } = {}) {
     const safeMmsi = normalizeMmsi(mmsi);

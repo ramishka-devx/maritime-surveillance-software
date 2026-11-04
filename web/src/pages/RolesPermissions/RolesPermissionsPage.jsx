@@ -2,9 +2,11 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import RolesHeaderBar from '../../components/roles/RolesHeaderBar.jsx';
 import RolesRosterList from '../../components/roles/RolesRosterList.jsx';
 import RolesPermissionsMatrix from '../../components/roles/RolesPermissionsMatrix.jsx';
+import Modal from '../../components/ui/Modal.jsx';
+import { X } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { apiRequest } from '../../lib/api.js';
-
+import { btn, btnNeutral, btnPrimary, field, focusRing, label, pageShell } from '../../components/ui/bs.js';
 function normalizeRole(r) {
   const roleId = r.role_id ?? r.id;
   const isSuperAdmin = r.name === 'super_admin';
@@ -15,14 +17,11 @@ function normalizeRole(r) {
     role_id: roleId,
     name: r.name,
     is_system: isSystem ? 1 : 0,
-    dotColor: isSuperAdmin ? 'bg-amber-400' : isSystem ? 'bg-purple-400' : 'bg-cyan-400',
     usersCount: r.user_count ?? r.users_count ?? r.usersCount ?? 0,
     isLocked: isSuperAdmin,
     description: r.description || '',
   };
 }
-
-
 
 export default function RolesPermissionsPage() {
   const { token } = useAuth();
@@ -36,27 +35,19 @@ export default function RolesPermissionsPage() {
   const [baselinePermissionIds, setBaselinePermissionIds] = useState(new Set());
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
 
-  // Live Role Assigned Users State
-  const [roleUsers, setRoleUsers] = useState([]);
-  const [roleUsersTotal, setRoleUsersTotal] = useState(null);
-  const [isLoadingRoleUsers, setIsLoadingRoleUsers] = useState(false);
-
   // New Role Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [newRoleForm, setNewRoleForm] = useState({
-    name: '',
-    tier: 'Specialist // L-2',
-    description: '',
-  });
+  const [newRoleForm, setNewRoleForm] = useState({ name: '', description: '' });
+  const [createError, setCreateError] = useState(null);
 
-  // Toast feedback
-  const [toastMessage, setToastMessage] = useState(null);
+  // Status notice at the bottom of the page.
+  const [notice, setNotice] = useState(null);
 
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3800);
+  const showToast = (text, isError = false) => {
+    setNotice({ text, isError });
+    setTimeout(() => setNotice((n) => (n?.text === text ? null : n)), 4000);
   };
 
   // 1. Fetch all live roles (including real user counts from stats endpoint)
@@ -95,7 +86,7 @@ export default function RolesPermissionsPage() {
         }
       } catch (err) {
         console.error('Failed to fetch live roles:', err);
-        showToast(err.message || 'Error loading live roles from backend');
+        showToast(err.message || 'Could not load roles.', true);
       } finally {
         setIsLoadingRoles(false);
       }
@@ -126,7 +117,7 @@ export default function RolesPermissionsPage() {
       setBaselinePermissionIds(new Set(assignedIds));
     } catch (err) {
       console.error('Failed to fetch role permissions:', err);
-      showToast(err.message || 'Error loading role permissions from backend');
+      showToast(err.message || 'Could not load permissions.', true);
     } finally {
       setIsLoadingPermissions(false);
     }
@@ -135,29 +126,6 @@ export default function RolesPermissionsPage() {
   useEffect(() => {
     fetchPermissions();
   }, [fetchPermissions]);
-
-  // 3. Fetch live users assigned to active role
-  const fetchRoleUsers = useCallback(async () => {
-    if (!token || !selectedRoleId) return;
-    setIsLoadingRoleUsers(true);
-    try {
-      const data = await apiRequest(`/api/roles/${selectedRoleId}/users?limit=10`, { token });
-      const rows = Array.isArray(data?.rows) ? data.rows : (Array.isArray(data) ? data : []);
-      const total = typeof data?.total === 'number' ? data.total : rows.length;
-      setRoleUsers(rows);
-      setRoleUsersTotal(total);
-    } catch {
-      // Non-critical fallback if user lacks permissions or endpoint unavailable
-      setRoleUsers([]);
-      setRoleUsersTotal(null);
-    } finally {
-      setIsLoadingRoleUsers(false);
-    }
-  }, [token, selectedRoleId]);
-
-  useEffect(() => {
-    fetchRoleUsers();
-  }, [fetchRoleUsers]);
 
   const activeRole = useMemo(() => {
     return (
@@ -180,7 +148,7 @@ export default function RolesPermissionsPage() {
   const handleTogglePermissionId = useCallback(
     (permissionId) => {
       if (activeRole?.isLocked) {
-        showToast('System Root roles cannot have permissions altered.');
+        showToast('Super admin permissions can’t be changed.', true);
         return;
       }
 
@@ -197,115 +165,14 @@ export default function RolesPermissionsPage() {
     [activeRole]
   );
 
-  // Matrix view representation derived from live permissions
-  const currentMatrix = useMemo(() => {
-    const mat = {};
-    for (const p of permissionsList) {
-      const mod = (p.module || 'general').toLowerCase();
-      if (!mat[mod]) {
-        mat[mod] = { view: false, create: false, update: false, delete: false };
-      }
-      const isAssigned = activePermissionIds.has(p.permission_id);
-      const pNameLower = p.name.toLowerCase();
-      if (pNameLower.includes('view') || pNameLower.includes('list')) {
-        if (isAssigned) mat[mod].view = true;
-      } else if (pNameLower.includes('create') || pNameLower.includes('add')) {
-        if (isAssigned) mat[mod].create = true;
-      } else if (
-        pNameLower.includes('update') ||
-        pNameLower.includes('edit') ||
-        pNameLower.includes('status')
-      ) {
-        if (isAssigned) mat[mod].update = true;
-      } else if (
-        pNameLower.includes('delete') ||
-        pNameLower.includes('remove') ||
-        pNameLower.includes('revoke')
-      ) {
-        if (isAssigned) mat[mod].delete = true;
-      } else {
-        if (isAssigned) mat[mod].view = true;
-      }
-    }
-    return mat;
-  }, [permissionsList, activePermissionIds]);
-
-  // Compatibility handler for legacy module/action toggle
-  const handleTogglePermission = (moduleId, action) => {
-    if (activeRole?.isLocked) {
-      showToast('System Root roles cannot have permissions altered.');
-      return;
-    }
-
-    const matchingPerm = permissionsList.find((p) => {
-      const mod = (p.module || '').toLowerCase();
-      const pName = p.name.toLowerCase();
-      const modMatch = mod === moduleId.toLowerCase() || pName.startsWith(moduleId.toLowerCase());
-      if (!modMatch) return false;
-      if (action === 'view') return pName.includes('view') || pName.includes('list');
-      if (action === 'create') return pName.includes('create') || pName.includes('add');
-      if (action === 'update') {
-        return pName.includes('update') || pName.includes('edit') || pName.includes('status');
-      }
-      if (action === 'delete') return pName.includes('delete') || pName.includes('remove');
-      return false;
-    });
-
-    if (matchingPerm) {
-      handleTogglePermissionId(matchingPerm.permission_id);
-    } else {
-      showToast(`No corresponding backend permission found for ${moduleId}.${action}`);
-    }
-  };
-
-  const handleSelectAllView = () => {
-    if (activeRole?.isLocked) return;
-
-    setActivePermissionIds((prev) => {
-      const next = new Set(prev);
-      permissionsList.forEach((p) => {
-        const pNameLower = p.name.toLowerCase();
-        if (pNameLower.includes('view') || pNameLower.includes('list')) {
-          next.add(p.permission_id);
-        }
-      });
-      return next;
-    });
-
-    showToast(`Enabled VIEW capability across accessible permissions for ${activeRole?.name || 'role'}.`);
-  };
-
-  const handleClearDeletes = () => {
-    if (activeRole?.isLocked) return;
-
-    setActivePermissionIds((prev) => {
-      const next = new Set(prev);
-      permissionsList.forEach((p) => {
-        const pNameLower = p.name.toLowerCase();
-        if (pNameLower.includes('delete') || pNameLower.includes('remove') || pNameLower.includes('revoke')) {
-          next.delete(p.permission_id);
-        }
-      });
-      return next;
-    });
-
-    showToast(`Revoked DELETE capability across all permissions for ${activeRole?.name || 'role'}.`);
-  };
-
-  const handleResetBaseline = () => {
-    setActivePermissionIds(new Set(baselinePermissionIds));
-    showToast(`Restored baseline access profile for "${activeRole?.name || 'role'}".`);
-  };
-
   const handleDiscard = () => {
     setActivePermissionIds(new Set(baselinePermissionIds));
-    showToast('Reset selections back to server baseline.');
   };
 
   const handleSave = async () => {
     if (!token || !selectedRoleId) return;
     if (activeRole?.isLocked) {
-      showToast('System Root roles cannot have permissions altered.');
+      showToast('Super admin permissions can’t be changed.', true);
       return;
     }
 
@@ -321,11 +188,11 @@ export default function RolesPermissionsPage() {
       });
 
       setBaselinePermissionIds(new Set(activePermissionIds));
-      showToast(`Role permissions successfully synchronized for "${activeRole?.name || 'role'}".`);
+      showToast(`Permissions saved for ${activeRole?.name || 'the role'}.`);
       fetchPermissions();
     } catch (err) {
       console.error('Failed to sync role permissions:', err);
-      showToast(err.message || 'Error saving role permissions');
+      showToast(err.message || 'Could not save the permissions.', true);
     } finally {
       setIsSaving(false);
     }
@@ -337,6 +204,7 @@ export default function RolesPermissionsPage() {
     if (!roleName) return;
 
     setIsCreatingRole(true);
+    setCreateError(null);
     try {
       const payload = {
         name: roleName,
@@ -352,9 +220,9 @@ export default function RolesPermissionsPage() {
       const newRoleData = result?.data || result;
       const createdRoleId = newRoleData?.role_id || newRoleData?.id;
 
-      showToast(`Role "${roleName}" successfully created.`);
+      showToast(`Role ${roleName} created.`);
       setIsModalOpen(false);
-      setNewRoleForm({ name: '', tier: 'Specialist // L-2', description: '' });
+      setNewRoleForm({ name: '', description: '' });
 
       // Reload live roles list from backend and select new role
       await fetchRoles(createdRoleId);
@@ -362,146 +230,102 @@ export default function RolesPermissionsPage() {
         setSelectedRoleId(createdRoleId);
       }
     } catch (err) {
-      console.error('Failed to create role:', err);
-      showToast(err.message || 'Error creating role');
+      setCreateError(err.message || 'Could not create the role.');
     } finally {
       setIsCreatingRole(false);
     }
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCreateError(null);
+  };
   return (
-    <div className="w-full h-full overflow-y-auto select-none bg-slate-100 text-slate-900 pb-16 font-sans">
-      <div className="flex flex-col w-full max-w-[1920px] mx-auto min-w-0 p-4 pt-3 gap-6">
-        {/* Floating Toast Notification */}
-        {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 bg-cyan-50 border border-cyan-300 text-cyan-950 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 animate-bounce font-mono text-xs">
-            <span className="material-symbols-outlined text-[#0891b2] text-base">verified_user</span>
-            <span>{toastMessage}</span>
-          </div>
-        )}
+    <div className={pageShell}>
+      <RolesHeaderBar onDiscard={handleDiscard} onSave={handleSave} hasChanges={hasChanges} isSaving={isSaving} />
 
-        {/* 1. Top Header Bar */}
-        <RolesHeaderBar
-          onDiscard={handleDiscard}
-          onSave={handleSave}
-          hasChanges={hasChanges}
-          isSaving={isSaving}
-          affectedUsersCount={activeRole?.usersCount ?? 0}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-x-12 gap-y-8 items-start">
+        <RolesRosterList
+          roles={roles}
+          isLoading={isLoadingRoles}
+          selectedRoleId={selectedRoleId}
+          onSelectRole={setSelectedRoleId}
+          onNewRole={() => setIsModalOpen(true)}
         />
-
-        {/* 2. Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Roles Roster & Diagnostics */}
-          <div className="xl:col-span-4 2xl:col-span-3">
-            <RolesRosterList
-              roles={roles}
-              selectedRoleId={selectedRoleId}
-              onSelectRole={setSelectedRoleId}
-              onNewRole={() => setIsModalOpen(true)}
-              assignedUsers={roleUsers}
-              assignedUsersCount={roleUsersTotal}
-              isLoadingUsers={isLoadingRoleUsers}
-            />
-          </div>
-
-          {/* Right Column: Interactive Permissions Matrix */}
-          <div className="xl:col-span-8 2xl:col-span-9">
-            <RolesPermissionsMatrix
-              role={activeRole}
-              matrix={currentMatrix}
-              permissionsList={permissionsList}
-              activePermissionIds={activePermissionIds}
-              isLoadingPermissions={isLoadingPermissions}
-              onTogglePermissionId={handleTogglePermissionId}
-              onTogglePermission={handleTogglePermission}
-              onSelectAllView={handleSelectAllView}
-              onClearDeletes={handleClearDeletes}
-              onResetBaseline={handleResetBaseline}
-            />
-          </div>
-        </div>
-
-        {/* 3. New Role Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in font-sans">
-            <div className="bg-white border border-slate-200 rounded-lg max-w-md w-full shadow-2xl overflow-hidden">
-              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#0891b2] text-lg">admin_panel_settings</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 m-0 font-mono">
-                    Provision New Access Role
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-lg">close</span>
-                </button>
-              </div>
-
-              <form onSubmit={handleCreateRole} className="p-5 flex flex-col gap-4 font-mono text-xs">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600 font-semibold uppercase text-[11px]">Role Title</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Hydrographic Specialist"
-                    value={newRoleForm.name}
-                    onChange={(e) => setNewRoleForm({ ...newRoleForm, name: e.target.value })}
-                    className="px-3 py-2 rounded bg-slate-50 border border-slate-200 focus:border-[#0891b2] focus:bg-white text-slate-900 placeholder:text-slate-400 text-xs outline-none transition-colors"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600 font-semibold uppercase text-[11px]">Security Tier</label>
-                  <select
-                    value={newRoleForm.tier}
-                    onChange={(e) => setNewRoleForm({ ...newRoleForm, tier: e.target.value })}
-                    className="px-3 py-2 rounded bg-slate-50 border border-slate-200 focus:border-[#0891b2] focus:bg-white text-slate-900 text-xs outline-none cursor-pointer transition-colors"
-                  >
-                    <option value="Operational // L-1" className="bg-white text-slate-900">Operational // L-1</option>
-                    <option value="Specialist // L-2" className="bg-white text-slate-900">Specialist // L-2</option>
-                    <option value="Senior Command // L-3" className="bg-white text-slate-900">Senior Command // L-3</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600 font-semibold uppercase text-[11px]">Scope &amp; Responsibilities</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Specify operational clearance remit and authority boundaries..."
-                    value={newRoleForm.description}
-                    onChange={(e) => setNewRoleForm({ ...newRoleForm, description: e.target.value })}
-                    className="px-3 py-2 rounded bg-slate-50 border border-slate-200 focus:border-[#0891b2] focus:bg-white text-slate-900 placeholder:text-slate-400 text-xs outline-none resize-none font-sans transition-colors"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-3.5 py-1.5 rounded bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold cursor-pointer shadow-xs transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isCreatingRole}
-                    className="px-4 py-1.5 rounded bg-[#0891b2] text-white font-bold uppercase text-xs tracking-wider shadow-sm hover:bg-[#0e7490] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
-                  >
-                    {isCreatingRole && (
-                      <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
-                    )}
-                    <span>{isCreatingRole ? 'Registering...' : 'Register Role'}</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <RolesPermissionsMatrix
+          role={activeRole}
+          permissionsList={permissionsList}
+          activePermissionIds={activePermissionIds}
+          isLoadingPermissions={isLoadingPermissions}
+          onTogglePermissionId={handleTogglePermissionId}
+        />
       </div>
+
+      {isModalOpen && (
+        <Modal
+          title="New role"
+          subtitle="Starts with no permissions."
+          onClose={closeModal}
+          busy={isCreatingRole}
+          footer={
+            <>
+              {createError && (
+                <span role="alert" className="text-[13px] italic text-bs-accent-2-700 mr-auto">
+                  {createError}
+                </span>
+              )}
+              <button type="button" onClick={closeModal} disabled={isCreatingRole} className={`${btn} ${btnNeutral} ml-auto`}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="new-role-form"
+                disabled={isCreatingRole || newRoleForm.name.trim().length < 2}
+                className={`${btn} ${btnPrimary}`}
+              >
+                {isCreatingRole ? 'Creating…' : 'Create role'}
+              </button>
+            </>
+          }
+        >
+          <form id="new-role-form" onSubmit={handleCreateRole} className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="role-name" className={label}>Name</label>
+              <input
+                id="role-name"
+                autoFocus
+                required
+                minLength={2}
+                maxLength={50}
+                placeholder="e.g. analyst"
+                value={newRoleForm.name}
+                onChange={(e) => setNewRoleForm({ ...newRoleForm, name: e.target.value })}
+                className={field}
+              />
+            </div>
+            <div>
+              <label htmlFor="role-description" className={label}>Description</label>
+              <textarea
+                id="role-description"
+                rows={3}
+                placeholder="What this role is for"
+                value={newRoleForm.description}
+                onChange={(e) => setNewRoleForm({ ...newRoleForm, description: e.target.value })}
+                className={`${field} h-auto py-2 resize-none`}
+              />
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {notice && (
+        <div role="status" className="fixed left-1/2 -translate-x-1/2 bottom-6 z-[900] max-w-[80%] px-4 py-2.5 bg-bs-bg shadow-bs-lg text-[13px] flex items-center gap-3">
+          <span className={notice.isError ? 'italic text-bs-accent-2-700' : 'italic'}>{notice.text}</span>
+          <button type="button" onClick={() => setNotice(null)} aria-label="Dismiss" className={`text-bs-neutral-700 ${focusRing}`}>
+            <X size={15} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

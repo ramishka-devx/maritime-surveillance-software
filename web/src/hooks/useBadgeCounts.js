@@ -8,27 +8,20 @@ export function useBadgeCounts(pollInterval = 10000) {
   const token = isMaintenance(user) ? null : authToken;
   const [counts, setCounts] = useState({
     alertCount: 0,
-    anomalyCount: 0,
     restrictedAreaCount: 0,
   });
 
   const fetchCounts = useCallback(async () => {
     if (!token) return;
 
-    const [alertsRes, anomaliesRes, detectionsRes] = await Promise.allSettled([
+    const [alertsRes, detectionsRes] = await Promise.allSettled([
       apiRequest('/api/alerts?status=open&limit=1', { token }),
-      apiRequest('/api/anomalies?limit=1', { token }),
       apiRequest('/api/restricted-areas/detections?limit=1', { token }),
     ]);
 
     const alertCount =
       alertsRes.status === 'fulfilled'
         ? alertsRes.value?.total ?? 0
-        : 0;
-
-    const anomalyCount =
-      anomaliesRes.status === 'fulfilled'
-        ? anomaliesRes.value?.total ?? 0
         : 0;
 
     const restrictedAreaCount =
@@ -41,12 +34,11 @@ export function useBadgeCounts(pollInterval = 10000) {
     setCounts((prev) => {
       if (
         prev.alertCount === alertCount &&
-        prev.anomalyCount === anomalyCount &&
         prev.restrictedAreaCount === restrictedAreaCount
       ) {
         return prev;
       }
-      return { alertCount, anomalyCount, restrictedAreaCount };
+      return { alertCount, restrictedAreaCount };
     });
   }, [token]);
 
