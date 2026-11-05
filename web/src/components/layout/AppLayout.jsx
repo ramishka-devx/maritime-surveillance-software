@@ -16,9 +16,8 @@ export default function AppLayout() {
           {/* Global Persistent Header */}
           <Header />
 
-          {/* 3. Page Body (Outlet). Dark until each page moves to the Broadsheet look; the
-              map page paints its own paper background. */}
-          <main className="relative flex-1 w-full h-[calc(100vh-4rem)] mt-16 overflow-hidden bg-surface-container-lowest text-on-surface">
+          {/* 3. Page Body (Outlet). Each page paints its own light background. */}
+          <main className="relative flex-1 w-full h-[calc(100vh-4rem)] mt-16 overflow-hidden bg-bs-bg text-bs-ink">
             <Outlet />
           </main>
         </div>
