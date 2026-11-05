@@ -23,6 +23,16 @@ function apiUrl(path) {
   return joinUrl(apiBaseUrl, path);
 }
 
+// Hand a Blob to the browser as a file download.
+export function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 // GET a file endpoint (e.g. a CSV report) and return it as a Blob. Failures still come back
 // as the JSON envelope, so their message is thrown like apiRequest's.
 export async function apiDownload(path, { token, timeoutMs = 60000 } = {}) {

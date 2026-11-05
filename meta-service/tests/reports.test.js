@@ -38,9 +38,23 @@ test('daily activity: needs a real, non-future YYYY-MM-DD date', () => {
   assert.match(check(dailyActivitySchema, { date: isoDay(2) }), /future/);
 });
 
-test('alert history: from <= to, at most 31 days inclusive', () => {
-  assert.equal(check(alertHistorySchema, { from: '2026-10-01', to: '2026-10-31' }), undefined);
+test('alert history: from <= to, at most 92 days inclusive', () => {
+  assert.equal(check(alertHistorySchema, { from: '2026-08-01', to: '2026-10-31' }), undefined);
   assert.equal(check(alertHistorySchema, { from: '2026-10-05', to: '2026-10-05' }), undefined);
-  assert.match(check(alertHistorySchema, { from: '2026-10-01', to: '2026-11-01' }), /limited to 31 days/);
+  assert.match(check(alertHistorySchema, { from: '2026-08-01', to: '2026-11-01' }), /limited to 92 days/);
   assert.match(check(alertHistorySchema, { from: '2026-10-10', to: '2026-10-09' }), /on or before/);
+});
+
+test('alert history: type, severity and status filters take comma-separated known values', () => {
+  const range = { from: '2026-10-01', to: '2026-10-31' };
+  const { value, error } = alertHistorySchema.validate({
+    query: { ...range, type: 'speed, loitering,speed', severity: 'high,critical', status: 'open' }
+  });
+  assert.equal(error, undefined);
+  assert.deepEqual(value.query.type, ['speed', 'loitering']);
+  assert.deepEqual(value.query.severity, ['high', 'critical']);
+  assert.deepEqual(value.query.status, ['open']);
+  assert.equal(alertHistorySchema.validate({ query: { ...range, type: '' } }).value.query.type, undefined);
+  assert.match(check(alertHistorySchema, { ...range, severity: 'urgent' }), /unknown value "urgent"/);
+  assert.match(check(alertHistorySchema, { ...range, status: 'open,closed' }), /unknown value "closed"/);
 });

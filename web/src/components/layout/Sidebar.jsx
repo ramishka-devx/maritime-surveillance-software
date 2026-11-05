@@ -15,7 +15,7 @@ import {
 import { useBadgeCounts } from '../../hooks/useBadgeCounts';
 import { useAuth } from '../../auth/AuthContext.jsx';
 import { usePermission } from '../../auth/usePermission.js';
-import { isAnalyst, isMaintenance, isOperator } from '../../auth/roles.js';
+import { isAnalyst, isMaintenance, isOperator, isSuperAdmin } from '../../auth/roles.js';
 
 const sectionLabel = 'text-[11px] tracking-[0.1em] uppercase text-bs-neutral-700 mb-2.5';
 
@@ -80,7 +80,8 @@ export default function Sidebar() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/Dashboard' },
     { id: 'alerts', label: 'Alerts', icon: TriangleAlert, badge: alertCount, alert: true, path: '/Alerts' },
     { id: 'restricted-areas', label: 'Restricted areas', icon: Pentagon, badge: restrictedAreaCount, path: '/RestrictedAreas' },
-    ...(can('reports.view') ? [{ id: 'reports', label: 'Reports', icon: FileText, path: '/Reports' }] : []),
+    // Super admins hold every permission server-side but can() reports false for them.
+    ...(can('reports.view') || isSuperAdmin(user) ? [{ id: 'reports', label: 'Reports', icon: FileText, path: '/Reports' }] : []),
     { id: 'my-profile', label: 'My profile', icon: CircleUser, path: '/Profile' },
   ];
 
@@ -96,10 +97,14 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 h-full w-60 z-50 flex flex-col p-5 bg-bs-bg text-bs-ink select-none font-sans">
       <button
         onClick={() => navigate(maintenance ? '/SystemHealth' : '/')}
-        className="text-left outline-none focus-visible:outline-bs-accent"
+        className="flex items-center gap-3 text-left outline-none focus-visible:outline-bs-accent"
       >
-        <div className="font-semibold text-[22px] leading-[1.05] tracking-[-0.02em]">SerenGuard</div>
-        <div className="italic text-[12px] text-bs-neutral-700 mt-1">Maritime surveillance</div>
+        {/* Same mark as the favicon (index.html). */}
+        <img src="/SerenGuard.svg" alt="" width="40" height="40" className="w-10 h-10 shrink-0 rounded-[6px]" />
+        <span>
+          <span className="block font-semibold text-[22px] leading-[1.05] tracking-[-0.02em]">SerenGuard</span>
+          <span className="block italic text-[12px] text-bs-neutral-700 mt-1">Maritime surveillance</span>
+        </span>
       </button>
 
       {operationsNav.length > 0 && (
