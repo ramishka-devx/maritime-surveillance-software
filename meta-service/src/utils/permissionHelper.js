@@ -9,6 +9,27 @@
 import { query } from '../config/db.config.js';
 import { isMaintenanceRole, isHealthPermission } from './maintenanceAccess.js';
 
+// Every authenticated request re-checks roles/permissions (4-5 queries), so cache the
+// results briefly. Concurrent identical lookups share one query.
+// ponytail: role/permission changes take up to CACHE_TTL_MS to apply; call clearPermissionCache() to force.
+const CACHE_TTL_MS = 30_000;
+const cache = new Map();
+
+export function cachedQuery(sql, params = []) {
+  const key = sql + JSON.stringify(params);
+  const hit = cache.get(key);
+  if (hit && hit.expires > Date.now()) return hit.promise;
+  const promise = query(sql, params);
+  cache.set(key, { promise, expires: Date.now() + CACHE_TTL_MS });
+  promise.catch(() => cache.delete(key));
+  if (cache.size > 5000) cache.clear();
+  return promise;
+}
+
+export function clearPermissionCache() {
+  cache.clear();
+}
+
 export async function isMaintenance(userId) {
   return (await getUserRoles(userId)).some(isMaintenanceRole);
 }
@@ -52,7 +73,7 @@ export async function getUserPermissions(userId) {
     ORDER BY p.name
   `;
   
-  const rows = await query(sql, [userId, userId, userId]);
+  const rows = await cachedQuery(sql, [userId, userId, userId]);
   return rows.map(row => row.name).filter(name => !isHealthPermission(name));
 }
 
@@ -82,7 +103,7 @@ export async function getUserRoles(userId) {
     ORDER BY r.name
   `;
   
-  const rows = await query(sql, [userId, userId]);
+  const rows = await cachedQuery(sql, [userId, userId]);
   return rows;
 }
 
@@ -125,7 +146,7 @@ export async function userHasPermission(userId, permissionName) {
     LIMIT 1
   `;
   
-  const rows = await query(sql, [permissionName, userId, userId, userId]);
+  const rows = await cachedQuery(sql, [permissionName, userId, userId, userId]);
   return rows.length > 0;
 }
 
@@ -168,7 +189,7 @@ export async function userHasAnyPermission(userId, permissionNames) {
     LIMIT 1
   `;
   
-  const rows = await query(sql, [...permissionNames, userId, userId, userId]);
+  const rows = await cachedQuery(sql, [...permissionNames, userId, userId, userId]);
   return rows.length > 0;
 }
 
@@ -211,7 +232,7 @@ export async function userHasRole(userId, roleName) {
     LIMIT 1
   `;
   
-  const rows = await query(sql, [roleName, userId, userId]);
+  const rows = await cachedQuery(sql, [roleName, userId, userId]);
   return rows.length > 0;
 }
 

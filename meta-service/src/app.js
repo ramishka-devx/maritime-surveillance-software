@@ -23,6 +23,7 @@ import anomalyRoutes from './modules/anomalies/anomaly.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 import reportRoutes from './modules/reports/report.routes.js';
 import detectionSettingsRoutes from './modules/detection-settings/detection-settings.routes.js';
+import { clearPermissionCache } from './utils/permissionHelper.js';
 
 const app = express();
 
@@ -36,6 +37,11 @@ app.use(rateLimit({ windowMs: env.rateLimit.windowMs, max: env.rateLimit.max }))
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // Mount routes
+// Role/permission edits must apply at once, not after the permission cache TTL.
+app.use(['/api/users', '/api/roles', '/api/permissions'], (req, res, next) => {
+  if (req.method !== 'GET') res.on('finish', clearPermissionCache);
+  next();
+});
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/permissions', permissionRoutes);

@@ -1,4 +1,5 @@
 import { query } from '../config/db.config.js';
+import { cachedQuery } from '../utils/permissionHelper.js';
 import { NotificationService } from '../modules/notifications/notification.service.js';
 
 function pick(obj, keys) {
@@ -52,7 +53,7 @@ export function activityLogger(requiredPermissionName, options = {}) {
         }
 
         // Resolve permission id by name
-        const perms = await query('SELECT permission_id FROM permissions WHERE name = ? LIMIT 1', [requiredPermissionName]);
+        const perms = await cachedQuery('SELECT permission_id FROM permissions WHERE name = ? LIMIT 1', [requiredPermissionName]);
         const permission_id = perms[0]?.permission_id || null;
 
         // Insert with details if schema supports it; fall back silently to legacy insert.

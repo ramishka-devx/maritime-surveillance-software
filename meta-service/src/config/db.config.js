@@ -151,7 +151,7 @@ export const pool = new Pool({
   user: env.db.user,
   password: env.db.password,
   database: env.db.database,
-  max: 10,
+  max: env.db.poolMax,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: env.db.connectTimeoutMs,
 });

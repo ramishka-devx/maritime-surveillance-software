@@ -24,6 +24,7 @@ export const env = {
     connectRetries: Number(process.env.DB_CONNECT_RETRIES || 10),
     connectRetryDelayMs: Number(process.env.DB_CONNECT_RETRY_DELAY_MS || 2000),
     connectTimeoutMs: Number(process.env.DB_CONNECT_TIMEOUT_MS || 10_000),
+    poolMax: Number(process.env.DB_POOL_MAX || 20),
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'dev-secret',

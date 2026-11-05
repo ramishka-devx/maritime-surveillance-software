@@ -4,8 +4,8 @@
 # A manual deploy can still build on the VM: docker compose -f ... -f ... up -d --build
 services:
   postgres:
-    # Loopback only: not reachable from the internet; local dev connects through an SSH tunnel.
-    ports: !override ["127.0.0.1:5432:5432"]
+    # Public so local dev can connect directly. Lock 5432 to known IPs in the Lightsail firewall.
+    ports: !override ["5432:5432"]
     restart: unless-stopped
 
   kafka:

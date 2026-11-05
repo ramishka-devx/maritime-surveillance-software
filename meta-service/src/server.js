@@ -59,7 +59,7 @@ import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
   // detectors (in-memory watermarks) don't raise every alert twice.
   if (env.cronEnabled) {
     // Schedule daily maintenance notifications
-    const interval = '* 6 * * *';
+    const interval = '0 6 * * *';
     // const interval = '*/10 * * * * *';
 
     cron.schedule(
