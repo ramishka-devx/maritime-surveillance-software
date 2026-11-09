@@ -3,7 +3,8 @@ import { query } from '../../config/db.config.js';
 // ships.last_position_at and ais_positions.time_utc are TIMESTAMP holding UTC, so window
 // bounds are converted with AT TIME ZONE 'UTC' rather than relying on the session time zone.
 const UTC_NOW = "(now() AT TIME ZONE 'UTC')";
-const SHIP_POINT = 'ST_SetSRID(ST_MakePoint(sh.lon, sh.lat), 4326)::geography';
+// ships.position (GiST-indexed, written by ingest with lat/lon), not a point rebuilt from
+// lon/lat per row, which can't use the index.
 
 export const DashboardModel = {
   // Alert counts per bin, severity and type inside [start, end).
@@ -29,13 +30,17 @@ export const DashboardModel = {
   },
 
   // Distinct vessels reporting per bin, from the position history (2-day retention).
+  // DISTINCT (bin, mmsi) first, then count: COUNT(DISTINCT) can't hash and sorted ~2M rows
+  // per call (136 s on the 2-vCPU VM).
   async vesselBins(start, end, stepSec) {
     return query(
-      `SELECT floor(extract(epoch FROM time_utc - (?::timestamptz AT TIME ZONE 'UTC')) / ?)::int AS bin,
-              COUNT(DISTINCT mmsi)::int AS n
-       FROM ais_positions
-       WHERE time_utc >= (?::timestamptz AT TIME ZONE 'UTC') AND time_utc < (?::timestamptz AT TIME ZONE 'UTC')
-       GROUP BY 1`,
+      `SELECT bin, COUNT(*)::int AS n
+       FROM (
+         SELECT DISTINCT floor(extract(epoch FROM time_utc - (?::timestamptz AT TIME ZONE 'UTC')) / ?)::int AS bin, mmsi
+         FROM ais_positions
+         WHERE time_utc >= (?::timestamptz AT TIME ZONE 'UTC') AND time_utc < (?::timestamptz AT TIME ZONE 'UTC')
+       ) x
+       GROUP BY bin`,
       [start, stepSec, start, end]
     );
   },
@@ -113,7 +118,7 @@ export const DashboardModel = {
        LEFT JOIN ships sh
          ON sh.last_position_at > ${UTC_NOW} - make_interval(hours => ?)
         AND sh.lat IS NOT NULL AND sh.lon IS NOT NULL
-        AND ST_Intersects(sc.geom, ${SHIP_POINT})
+        AND ST_Intersects(sc.geom, sh.position)
        GROUP BY sc.id, sc.name
        ORDER BY vessels DESC, sc.id`,
       [hours]
@@ -139,7 +144,7 @@ export const DashboardModel = {
        JOIN ships sh
          ON sh.last_position_at > ${UTC_NOW} - make_interval(hours => ?)
         AND sh.lat IS NOT NULL AND sh.lon IS NOT NULL
-        AND ST_Intersects(sc.geom, ${SHIP_POINT})
+        AND ST_Intersects(sc.geom, sh.position)
        WHERE sc.id = ?
        GROUP BY 1, 2`,
       [cols, rows, hours, sectorId]

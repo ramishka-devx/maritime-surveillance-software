@@ -37,8 +37,11 @@ export const DashboardService = {
     const hit = cache.get(key);
     if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
 
-    const data = await this.build(range, sector_id);
+    // Cache the promise so tabs opening the dashboard together share one build instead of
+    // each starting its own 10 queries.
+    const data = this.build(range, sector_id);
     cache.set(key, { at: Date.now(), data });
+    data.catch(() => cache.delete(key));
     return data;
   },
 

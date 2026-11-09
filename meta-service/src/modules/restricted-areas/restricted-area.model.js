@@ -86,7 +86,9 @@ export const RestrictedAreaModel = {
   },
 
   async detectEntries({ restricted_area_id, mmsi, limit = 200 } = {}) {
-    const where = [];
+    // Last hour only: unbounded, this intersected the whole position history with every zone
+    // and ran for minutes.
+    const where = ["s.time_utc >= (now() AT TIME ZONE 'UTC') - INTERVAL '1 hour'"];
     const params = [];
 
     if (restricted_area_id !== undefined) {

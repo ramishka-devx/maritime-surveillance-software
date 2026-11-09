@@ -14,9 +14,10 @@ export function useBadgeCounts(pollInterval = 10000) {
   const fetchCounts = useCallback(async () => {
     if (!token) return;
 
-    const [alertsRes, detectionsRes] = await Promise.allSettled([
+    // Open geofence alerts, not /restricted-areas/detections: that scans the position history.
+    const [alertsRes, geofenceRes] = await Promise.allSettled([
       apiRequest('/api/alerts?status=open&limit=1', { token }),
-      apiRequest('/api/restricted-areas/detections?limit=1', { token }),
+      apiRequest('/api/alerts?status=open&type=geofence&limit=1', { token }),
     ]);
 
     const alertCount =
@@ -25,10 +26,8 @@ export function useBadgeCounts(pollInterval = 10000) {
         : 0;
 
     const restrictedAreaCount =
-      detectionsRes.status === 'fulfilled'
-        ? Array.isArray(detectionsRes.value)
-          ? detectionsRes.value.length
-          : 0
+      geofenceRes.status === 'fulfilled'
+        ? geofenceRes.value?.total ?? 0
         : 0;
 
     setCounts((prev) => {
