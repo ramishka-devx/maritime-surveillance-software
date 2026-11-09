@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Map as MapIcon, Siren, UserPlus } from 'lucide-react';
 import { apiRequest } from '../../lib/api.js';
@@ -30,6 +30,7 @@ const FILTERS = [
   { name: 'STS transfer', types: ['sts_transfer'] },
   { name: 'Behaviour', types: ['loitering', 'speed', 'route_deviation'] },
 ];
+const PAGE_SIZE = 25;
 // AIS navigational status codes (ITU-R M.1371).
 const NAV_STATUS = {
   0: 'Underway using engine',
@@ -231,32 +232,49 @@ export default function AlertsPage() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState(null);
 
-  // Triage queue: everything still open or acknowledged.
+  // Triage queue: everything still open or acknowledged, one page at a time, filtered and
+  // sorted (most severe, then newest) by the server. There are thousands of active alerts.
   useEffect(() => {
     if (!token) return undefined;
     let stale = false;
-    const load = () =>
-      apiRequest('/api/alerts?status=open,acknowledged,escalated&sort=severity&limit=500', { token })
+    const types = FILTERS.find((f) => f.name === filter)?.types;
+    const url =
+      `/api/alerts?status=open,acknowledged,escalated&sort=severity&limit=${PAGE_SIZE}&page=${page}` +
+      (types ? `&type=${types.join(',')}` : '');
+    const load = () => {
+      apiRequest(url, { token })
         .then((res) => {
           if (stale) return;
+          // The last page emptied (alerts were closed): step back a page.
+          if (!res.rows.length && page > 1) return setPage((p) => p - 1);
           setAlerts(res.rows);
+          setTotal(res.total);
           setLoadError(null);
         })
         .catch((err) => !stale && setLoadError(err.message || 'Failed to load alerts'));
+      apiRequest('/api/alerts/stats', { token })
+        .then((res) => !stale && setStats(res))
+        .catch(() => {});
+    };
     load();
     const timer = setInterval(load, 15000);
     return () => {
       stale = true;
       clearInterval(timer);
     };
-  }, [token, refresh]);
+  }, [token, refresh, filter, page]);
 
-  const queue = useMemo(() => {
-    const types = FILTERS.find((f) => f.name === filter)?.types;
-    // Already most severe first, then newest (sort=severity).
-    return (alerts || []).filter((a) => !types || types.includes(a.type));
-  }, [alerts, filter]);
+  const queue = alerts || [];
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const goTo = (p) => {
+    setPage(p);
+    setAlerts(null);
+    setSelId(null);
+  };
 
   const sel = queue.find((a) => a.alert_id === selId) || queue[0] || null;
   const [caseId, caseMmsi, caseArea, caseAt] = [sel?.alert_id, sel?.mmsi, sel?.restricted_area_id, sel?.created_at];
@@ -341,9 +359,6 @@ export default function AlertsPage() {
     navigate('/');
   };
 
-  const openCount = (alerts || []).filter((a) => a.status === 'open').length;
-  const unowned = (alerts || []).filter((a) => a.status === 'open' && a.assigned_to == null).length;
-  const oldestOpen = (alerts || []).filter((a) => a.status === 'open').reduce((o, a) => (!o || a.created_at < o ? a.created_at : o), null);
   const mine = sel && user && sel.assigned_to === user.user_id;
   const status = sel ? statusOf(sel) : '';
   const v = caseDetail?.vessel;
@@ -357,12 +372,14 @@ export default function AlertsPage() {
         <div>
           <h1 className="text-2xl font-bold uppercase tracking-tight text-slate-900 m-0">Alerts</h1>
           <div className="mt-0.5 text-[14px] italic">
-            {alerts === null ? (
-              loadError ? <span className="text-bs-accent-2-700">Couldn't load alerts ({loadError}). Retrying.</span> : <Skeleton className="h-4 w-72 mt-1" />
+            {loadError ? (
+              <span className="text-bs-accent-2-700">Couldn't load alerts ({loadError}). Retrying.</span>
+            ) : stats === null ? (
+              <Skeleton className="h-4 w-72 mt-1" />
             ) : (
               <>
-                {openCount} open · {unowned} without an owner
-                {oldestOpen && ` · oldest raised ${ago(oldestOpen)}`}
+                {stats.open.toLocaleString()} open · {stats.unassigned.toLocaleString()} without an owner
+                {stats.oldest_open && ` · oldest raised ${ago(stats.oldest_open)}`}
               </>
             )}
           </div>
@@ -373,7 +390,10 @@ export default function AlertsPage() {
               key={f.name}
               role="radio"
               aria-checked={filter === f.name}
-              onClick={() => setFilter(f.name)}
+              onClick={() => {
+                setFilter(f.name);
+                goTo(1);
+              }}
               className={`px-3 py-1.5 text-[13px] border-l border-bs-ink/[.16] first:border-l-0 ${focusRing} focus-visible:-outline-offset-2 ${
                 filter === f.name ? 'bg-bs-accent text-bs-bg' : 'hover:bg-bs-ink/[.07]'
               }`}
@@ -386,7 +406,8 @@ export default function AlertsPage() {
 
       <div className="flex gap-10 mt-7 flex-1 min-h-0">
         {/* Triage queue */}
-        <div className="w-[350px] shrink-0 flex flex-col gap-0.5 overflow-y-auto pb-8" role="listbox" aria-label="Alert queue">
+        <div className="w-[350px] shrink-0 flex flex-col min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col gap-0.5 overflow-y-auto pb-4" role="listbox" aria-label="Alert queue">
           {alerts === null &&
             [0, 1, 2, 3].map((i) => (
               <div key={i} className="flex gap-3.5 px-4 py-3.5">
@@ -431,6 +452,28 @@ export default function AlertsPage() {
               </button>
             );
           })}
+        </div>
+        {total > PAGE_SIZE && (
+          <nav aria-label="Alert pages" className="flex items-center gap-3 pt-3 border-t border-bs-ink/[.16] text-[13px]">
+            <button
+              onClick={() => goTo(page - 1)}
+              disabled={page <= 1}
+              className={`px-3 py-1.5 border border-bs-ink/[.16] rounded-sm ${focusRing} disabled:opacity-40 enabled:hover:bg-bs-ink/[.07]`}
+            >
+              Previous
+            </button>
+            <span className="flex-1 text-center font-mono text-bs-neutral-700">
+              {((page - 1) * PAGE_SIZE + 1).toLocaleString()}–{Math.min(page * PAGE_SIZE, total).toLocaleString()} of {total.toLocaleString()}
+            </span>
+            <button
+              onClick={() => goTo(page + 1)}
+              disabled={page >= pages}
+              className={`px-3 py-1.5 border border-bs-ink/[.16] rounded-sm ${focusRing} disabled:opacity-40 enabled:hover:bg-bs-ink/[.07]`}
+            >
+              Next
+            </button>
+          </nav>
+        )}
         </div>
 
         {/* Case file */}

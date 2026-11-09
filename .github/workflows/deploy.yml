@@ -23,7 +23,7 @@ env:
   IMAGE_REPO: ghcr.io/${{ github.repository }}
   IMAGE_TAG: ${{ github.sha }}
   SERVICES: meta-service ingest-service analytic-service web
-  HOST: 54.206.214.6
+  HOST: 13.237.194.79
   # Pinned host key (ssh-keyscan -t ed25519 54.206.214.6). Update if the VM is replaced.
   HOST_KEY: 54.206.214.6 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPRwVtuZ9M6mvCqHlsOEK+aG0XwBf3yF7LqSBRiV1uKa
   APP_DIR: serenguard

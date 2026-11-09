@@ -82,6 +82,14 @@ export const AlertController = {
     }
   },
 
+  async stats(req, res, next) {
+    try {
+      return success(res, await AlertService.stats());
+    } catch (e) {
+      next(e);
+    }
+  },
+
   async events(req, res, next) {
     try {
       const events = await AlertService.events(Number(req.params.alert_id));

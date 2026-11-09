@@ -27,6 +27,15 @@ router.get('/', authMiddleware, permissionMiddleware('alert.view'), validate(lis
 
 /**
  * @openapi
+ * /api/alerts/stats:
+ *   get:
+ *     summary: Open alert counts for the triage header (open, unassigned, oldest_open)
+ *     tags: [Alerts]
+ */
+router.get('/stats', authMiddleware, permissionMiddleware('alert.view'), AlertController.stats);
+
+/**
+ * @openapi
  * /api/alerts/{alert_id}:
  *   get:
  *     summary: Get alert by ID

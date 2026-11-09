@@ -38,6 +38,10 @@ export const AlertService = {
     return AlertModel.list(params);
   },
 
+  async stats() {
+    return AlertModel.stats();
+  },
+
   async getById(alert_id) {
     const alert = await AlertModel.getById(alert_id);
     if (!alert) throw notFound('Alert not found');

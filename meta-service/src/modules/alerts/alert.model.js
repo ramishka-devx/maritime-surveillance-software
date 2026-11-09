@@ -103,9 +103,11 @@ export const AlertModel = {
       params.push(vessel_id);
     }
 
+    // type: one value or a comma-separated list ("loitering,speed"), validated upstream.
     if (type) {
-      where.push('a.type = ?');
-      params.push(type);
+      const types = String(type).split(',');
+      where.push(`a.type IN (${types.map(() => '?').join(', ')})`);
+      params.push(...types);
     }
 
     if (mmsi) {
@@ -140,6 +142,17 @@ export const AlertModel = {
     );
 
     return { rows, total: count };
+  },
+
+  async stats() {
+    const [row] = await query(
+      `SELECT COUNT(*)::int AS open,
+              COUNT(*) FILTER (WHERE assigned_to IS NULL)::int AS unassigned,
+              MIN(created_at) AS oldest_open
+       FROM alerts
+       WHERE status = 'open'`
+    );
+    return row;
   },
 
   async getById(alert_id) {

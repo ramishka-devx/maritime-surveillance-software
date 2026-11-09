@@ -14,6 +14,7 @@ export const ALERT_TYPES = [
   'route_deviation',
   'sts_transfer'
 ];
+const TYPE_LIST = new RegExp(`^(${ALERT_TYPES.join('|')})(,(${ALERT_TYPES.join('|')}))*$`);
 
 export const listSchema = Joi.object({
   query: Joi.object({
@@ -23,7 +24,7 @@ export const listSchema = Joi.object({
     severity: Joi.string().valid('low', 'medium', 'high', 'critical').allow('', null),
     vessel_id: Joi.number().integer().allow(null),
     sort: Joi.string().valid('newest', 'severity').default('newest'),
-    type: Joi.string().valid(...ALERT_TYPES).allow('', null),
+    type: Joi.string().pattern(TYPE_LIST).allow('', null),
     mmsi: Joi.number().integer().allow(null),
     from: Joi.date().iso().allow('', null),
     to: Joi.date().iso().allow('', null)
