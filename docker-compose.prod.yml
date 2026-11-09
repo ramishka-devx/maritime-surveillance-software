@@ -74,5 +74,6 @@ services:
     build: { context: ., dockerfile: web/Dockerfile }
     restart: unless-stopped
     depends_on: [meta-service]
+    # Host nginx owns 80/443 (TLS for serenguard.online) and proxies to 127.0.0.1:8080.
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
