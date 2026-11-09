@@ -24,8 +24,9 @@ env:
   IMAGE_TAG: ${{ github.sha }}
   SERVICES: meta-service ingest-service analytic-service web
   HOST: 13.237.194.79
-  # Pinned host key (ssh-keyscan -t ed25519 54.206.214.6). Update if the VM is replaced.
-  HOST_KEY: 54.206.214.6 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPRwVtuZ9M6mvCqHlsOEK+aG0XwBf3yF7LqSBRiV1uKa
+  # Pinned host key of HOST (ssh-keyscan -t ed25519 <HOST>). Update it with HOST whenever the
+  # VM is replaced, or every SSH step fails with "Host key verification failed".
+  HOST_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK7G4duGH6sNZd2ll+i+7tyiXFy23io86f0AzIe+yFpH
   APP_DIR: serenguard
 
 jobs:
@@ -82,7 +83,7 @@ jobs:
             echo "::error::LIGHTSAIL_SSH_KEY is not a valid private key ($(wc -l < ~/.ssh/deploy_key) lines). Paste the whole file, from -----BEGIN to -----END OPENSSH PRIVATE KEY-----."
             exit 1
           fi
-          echo "$HOST_KEY" > ~/.ssh/known_hosts
+          echo "$HOST $HOST_KEY" > ~/.ssh/known_hosts
           cat > ~/.ssh/config <<EOF
           Host lightsail
             HostName $HOST
