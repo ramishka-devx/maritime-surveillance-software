@@ -54,12 +54,16 @@ const LATEST_COLUMNS = `mmsi, ship_name, sog, cog, heading, nav_status,
 const LATEST_FROM = 'ships LEFT JOIN ship_types st ON st.ship_type_id = ships.ship_type';
 
 export const AisService = {
-  // Positions stored per second over the last minute (idx_ais_positions_time). time_utc is
-  // the transponder's timestamp, so this approximates the ingest rate.
+  // Positions per second over the minute before the newest stored row (idx_ais_positions_time).
+  // Anchored on the newest row, not now(): the ingest Kafka consumer runs minutes behind, so a
+  // now()-based window was always empty. Rows older than 15 min count as idle (feed stopped).
+  // ponytail: hides the ingest lag; drop the anchor once the consumer keeps up in real time.
   async rate() {
     const [row] = await query(
       `SELECT COUNT(*)::int AS n FROM ais_positions
-       WHERE time_utc > (now() AT TIME ZONE 'UTC') - interval '60 seconds'`
+       WHERE time_utc > (SELECT max(time_utc) FROM ais_positions
+                         WHERE time_utc > (now() AT TIME ZONE 'UTC') - interval '15 minutes')
+                        - interval '60 seconds'`
     );
     return { positions_per_s: Math.round((row.n / 60) * 10) / 10 };
   },
