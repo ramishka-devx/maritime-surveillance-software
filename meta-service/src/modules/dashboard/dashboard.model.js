@@ -29,20 +29,15 @@ export const DashboardModel = {
     );
   },
 
-  // Distinct vessels reporting per bin, from the position history (2-day retention).
-  // DISTINCT (bin, mmsi) first, then count: COUNT(DISTINCT) can't hash and sorted ~2M rows
-  // per call (136 s on the 2-vCPU VM).
-  async vesselBins(start, end, stepSec) {
-    return query(
-      `SELECT bin, COUNT(*)::int AS n
-       FROM (
-         SELECT DISTINCT floor(extract(epoch FROM time_utc - (?::timestamptz AT TIME ZONE 'UTC')) / ?)::int AS bin, mmsi
-         FROM ais_positions
-         WHERE time_utc >= (?::timestamptz AT TIME ZONE 'UTC') AND time_utc < (?::timestamptz AT TIME ZONE 'UTC')
-       ) x
-       GROUP BY bin`,
-      [start, stepSec, start, end]
+  // MMSIs that reported in [start, end). Called one hour at a time (~1 s for ~130k rows);
+  // a whole day is ~3M rows and runs past the 30 s statement_timeout.
+  async vesselsReporting(start, end) {
+    const rows = await query(
+      `SELECT DISTINCT mmsi FROM ais_positions
+       WHERE time_utc >= (?::timestamptz AT TIME ZONE 'UTC') AND time_utc < (?::timestamptz AT TIME ZONE 'UTC')`,
+      [start, end]
     );
+    return rows.map((r) => r.mmsi);
   },
 
   // Totals for the window before the current one, for "vs previous" comparisons.

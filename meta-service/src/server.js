@@ -10,6 +10,7 @@ import { runStsEncounterDetector } from './cron/stsEncounterDetector.js';
 import '../cron/partition-cron.js';
 import { createServer } from 'node:http';
 import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
+import { countVesselBins, rangeWindow } from './modules/dashboard/dashboard.service.js';
 
 (async () => {
   try {
@@ -54,6 +55,11 @@ import { attachGeofenceSocket } from './realtime/geofenceSocket.js';
   }
 
   const closeGeofenceSocket = attachGeofenceSocket(server);
+
+  // Fill the dashboard's per-hour vessel cache in the background so the first load is fast.
+  countVesselBins(rangeWindow('7d'))
+    .then(() => logger.info('Dashboard vessel cache warmed'))
+    .catch((err) => logger.warn({ err }, 'Dashboard vessel cache warm-up failed'));
 
   // CRON_ENABLED=false runs the API only, e.g. a local server sharing the hosted DB, so the
   // detectors (in-memory watermarks) don't raise every alert twice.

@@ -16,8 +16,59 @@ const ACTIVE_HOURS = 1;
 const DENSITY_HOURS = 24;
 const DENSITY_COLS = 30;
 const DENSITY_ROWS = 20;
-// ais_positions keeps 2 days (partition-cron.js); older bins have no position history.
-const POSITION_RETENTION_MS = 7 * DAY;
+// ais_positions keeps today + the 2 previous UTC days (partition-cron.js); older bins have
+// no position history.
+const POSITION_RETENTION_MS = 3 * DAY;
+
+// Finished hours never change, so each hour's set of reporting MMSIs is fetched once and kept
+// (at most ~72 hours x ~20k MMSIs). Only the current hour is queried on every build.
+const hourVessels = new Map();
+
+function vesselsInHour(hourStart) {
+  if (hourStart + HOUR > Date.now()) {
+    return DashboardModel.vesselsReporting(new Date(hourStart), new Date(hourStart + HOUR));
+  }
+  let hit = hourVessels.get(hourStart);
+  if (!hit) {
+    hit = DashboardModel.vesselsReporting(new Date(hourStart), new Date(hourStart + HOUR));
+    hourVessels.set(hourStart, hit);
+    hit.catch(() => hourVessels.delete(hourStart));
+  }
+  return hit;
+}
+
+// Runs fn over items, at most `limit` at a time, keeping order.
+async function mapLimit(items, limit, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
+// Distinct vessels per bin, as the union of that bin's hourly sets.
+export async function countVesselBins(w) {
+  const now = Date.now();
+  const oldest = Math.floor((now - POSITION_RETENTION_MS) / HOUR) * HOUR;
+  for (const h of hourVessels.keys()) if (h < oldest) hourVessels.delete(h);
+
+  const hours = [];
+  for (let h = Math.max(w.start, oldest); h < Math.min(w.end, now); h += HOUR) hours.push(h);
+  const sets = await mapLimit(hours, 3, vesselsInHour);
+
+  const bins = new Map();
+  hours.forEach((h, i) => {
+    const bin = Math.floor((h - w.start) / w.stepMs);
+    if (!bins.has(bin)) bins.set(bin, new Set());
+    for (const mmsi of sets[i]) bins.get(bin).add(mmsi);
+  });
+  return [...bins].map(([bin, set]) => ({ bin, n: set.size }));
+}
 
 // UTC-aligned window ending with the current bin, plus the equal window before it.
 export function rangeWindow(range, now = Date.now()) {
@@ -54,7 +105,7 @@ export const DashboardService = {
       await Promise.all([
         DashboardModel.alertBins(start, end, stepSec),
         DashboardModel.anomalyBins(start, end, stepSec),
-        DashboardModel.vesselBins(start, end, stepSec),
+        countVesselBins(w),
         DashboardModel.previousTotals(prevStart, start),
         DashboardModel.openAlerts(),
         DashboardModel.topZone(start, end),
